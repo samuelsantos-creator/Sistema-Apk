@@ -1,0 +1,16 @@
+{
+  "name": "apontamento-producao",
+  "version": "2.1.1",
+  "private": true,
+  "description": "Apontamento de Produção - PWA chão de fábrica",
+  "scripts": {
+    "build": "echo Static site - no build needed"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/android": "^6.0.0"
+  }
+}
