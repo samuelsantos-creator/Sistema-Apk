@@ -30,17 +30,30 @@
       color: var(--text);
       min-height: 100vh;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       padding: 1rem;
+    }
+
+    @media (orientation: landscape) and (min-height: 600px) {
+      body {
+        align-items: center;
+        padding: .5rem;
+      }
     }
 
     /* ── SCREENS ── */
     .screen {
       display: none;
       width: 100%;
-      max-width: 860px;
+      max-width: 1200px;
       animation: fadeIn 0.25s ease;
+    }
+
+    @media (orientation: landscape) and (min-width: 1024px) {
+      .screen {
+        max-width: 100%;
+      }
     }
 
     .screen.active {
@@ -1226,4 +1239,97 @@
     .header-status-pill.offline .mini-dot {
       background: #ef4444;
       animation: pulseOfflineDot 1.5s infinite;
+    }
+
+    /* ── TABLET LANDSCAPE ── */
+    @media (orientation: landscape) and (min-width: 900px) {
+      .home-cards {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .fields-grid.cols-3 {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      .fields-grid.cols-4 {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+      }
+
+      .fields-grid.cols-5 {
+        grid-template-columns: repeat(5, 1fr);
+      }
+
+      .fields-grid.cols-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .form-card {
+        padding: .7rem .9rem;
+        margin-bottom: .5rem;
+      }
+
+      .field input,
+      .field select {
+        padding: 6px 8px;
+        font-size: .78rem;
+      }
+
+      .field label {
+        font-size: .6rem;
+      }
+
+      .page-header {
+        margin-bottom: 1rem;
+        padding-bottom: .7rem;
+      }
+
+      .page-header h2 {
+        font-size: 1.2rem;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .home-card {
+        padding: 1.5rem 1rem;
+      }
+
+      .home-card .card-icon {
+        font-size: 2rem;
+      }
+
+      .home-logo {
+        font-size: 2.2rem;
+      }
+
+      .logo-img-home {
+        max-width: 180px;
+        margin-bottom: 1rem;
+      }
+
+      .status-bar {
+        margin-bottom: 1.2rem;
+      }
+
+      .modal-box {
+        padding: 1.5rem;
+        width: 500px;
+      }
+    }
+
+    /* ── TABLET RETRATO / TELAS MÉDIAS ── */
+    @media (min-width: 701px) and (max-width: 1023px) {
+      .home-cards {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .fields-grid.cols-3 {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      .fields-grid.cols-4,
+      .fields-grid.cols-5 {
+        grid-template-columns: 1fr 1fr;
+      }
     }
