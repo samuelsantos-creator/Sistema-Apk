@@ -1,0 +1,1229 @@
+    :root {
+      --bg: #ffffff;
+      --surface: #ffffff;
+      --surface2: #f8fafc;
+      --border: #e2e8f0;
+      --border2: #cbd5e1;
+      --accent: #2563eb;
+      --accent2: #1d4ed8;
+      --blue: #3b82f6;
+      --green: #10b981;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --text: #0f172a;
+      --text2: #475569;
+      --text3: #94a3b8;
+      --radius: 12px;
+      --radius-lg: 20px;
+      --shadow-blue: 0 10px 25px -5px rgba(37, 99, 235, 0.1), 0 8px 10px -6px rgba(37, 99, 235, 0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    /* ── SCREENS ── */
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 860px;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .logo-img-home {
+      max-width: 220px;
+      margin-bottom: 1.2rem;
+    }
+
+    .logo-img-header {
+      max-height: 40px;
+      margin-right: 10px;
+    }
+
+    /* ── HOME ── */
+    .home-wrap {
+      text-align: center;
+    }
+
+    .home-logo {
+      font-size: 2.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -1px;
+      margin-bottom: .3rem;
+    }
+
+    .home-logo span {
+      color: var(--text2);
+      font-weight: 400;
+    }
+
+    .home-sub {
+      color: var(--text2);
+      font-size: .95rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .home-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .home-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem 1.2rem;
+      cursor: pointer;
+      transition: .2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .8rem;
+    }
+
+    .home-card:hover {
+      border-color: var(--accent);
+      background: var(--surface2);
+      transform: translateY(-3px);
+    }
+
+    .home-card .card-icon {
+      font-size: 2.4rem;
+    }
+
+    .home-card .card-icon.prod {
+      color: var(--blue);
+    }
+
+    .home-card .card-icon.stop {
+      color: var(--red);
+    }
+
+    .home-card .card-icon.help {
+      color: var(--yellow);
+    }
+
+    .home-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .home-card p {
+      font-size: .78rem;
+      color: var(--text2);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* ── FORM PAGE ── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .page-header .ph-icon {
+      font-size: 1.5rem;
+    }
+
+    .page-header h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    .page-header .badge {
+      font-size: .72rem;
+      font-family: 'IBM Plex Mono';
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 20px;
+      color: var(--text2);
+    }
+
+    /* ── GRID FIELDS ── */
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: .9rem 1.1rem;
+      margin-bottom: .7rem;
+      box-shadow: var(--shadow-blue);
+    }
+
+    .form-card h4 {
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text3);
+      margin-bottom: .5rem;
+      font-weight: 600;
+    }
+
+    .fields-grid {
+      display: grid;
+      gap: .6rem;
+    }
+
+    .fields-grid.cols-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .fields-grid.cols-3 {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    /* Alinhamento dos campos de Hora sob as Datas na grid cols-3 (Turno e Data) */
+    @media (min-width: 701px) {
+      .fields-grid.cols-3 .field:nth-child(4) {
+        grid-column: 2;
+      }
+    }
+
+    .fields-grid.cols-4 {
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+
+    .fields-grid.cols-5 {
+      grid-template-columns: repeat(5, 1fr);
+    }
+
+    .fields-grid.cols-6 {
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+
+    .readonly-field {
+      background-color: var(--surface2) !important;
+      border-color: var(--border) !important;
+      color: var(--text3) !important;
+      cursor: not-allowed !important;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 3px;
+    }
+
+    .field-inner {
+      position: relative;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: .8rem;
+      font-family: 'IBM Plex Sans', sans-serif;
+      color: var(--text);
+      transition: .15s;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+      background-color: #f0f7ff !important;
+      /* Azul clarinho no fundo do campo */
+    }
+
+    /* Indicador de foco no container do campo */
+    .field:focus-within label {
+      color: var(--blue);
+      transform: translateX(12px);
+    }
+
+    .field:focus-within label::before {
+      content: "➤";
+      position: absolute;
+      left: -15px;
+      color: var(--blue);
+      font-size: 0.8rem;
+      animation: pulseArrow 1s infinite;
+    }
+
+    .field label {
+      font-size: .65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--text2);
+      transition: all 0.2s ease;
+      position: relative;
+      display: inline-block;
+    }
+
+    @keyframes pulseArrow {
+      0% {
+        transform: translateX(0);
+        opacity: 0.7;
+      }
+
+      50% {
+        transform: translateX(3px);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateX(0);
+        opacity: 0.7;
+      }
+    }
+
+    .field input[readonly] {
+      color: var(--text2);
+      cursor: default;
+    }
+
+    .field input[disabled],
+    .field select[disabled] {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    .field .help-btn {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      background: var(--surface2);
+      border: none;
+      border-left: 1.5px solid var(--border);
+      border-radius: 0 8px 8px 0;
+      width: 32px;
+      font-size: .75rem;
+      color: var(--accent);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: .1s;
+      z-index: 2;
+    }
+
+    .field .help-btn:hover {
+      background: #e2e8f0;
+      color: var(--accent2);
+    }
+
+    .field input.with-btn {
+      padding-right: 36px;
+    }
+
+    .field-span2 {
+      grid-column: span 2;
+    }
+
+    .field-span3 {
+      grid-column: span 3;
+    }
+
+    /* ── BUTTONS ROW ── */
+    .actions-row {
+      display: flex;
+      gap: .8rem;
+      align-items: center;
+      flex-wrap: wrap;
+      padding-top: .5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: .85rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: .15s;
+      border: 1.5px solid transparent;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent2);
+      border-color: var(--accent2);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text2);
+      border-color: var(--border);
+    }
+
+    .btn-ghost:hover {
+      background: var(--surface2);
+      color: var(--text);
+      border-color: var(--border2);
+    }
+
+    .btn-red {
+      background: transparent;
+      color: var(--red);
+      border-color: var(--red);
+    }
+
+    .btn-red:hover {
+      background: #ef444415;
+    }
+
+    .btn-blue {
+      background: transparent;
+      color: var(--blue);
+      border-color: var(--blue);
+    }
+
+    .btn-blue:hover {
+      background: #3b82f615;
+    }
+
+    .btn-warning {
+      background: transparent;
+      color: var(--yellow);
+      border-color: var(--yellow);
+    }
+
+    .btn-warning:hover {
+      background: #f59e0b15;
+    }
+
+    .btn-sm {
+      padding: 6px 14px;
+      font-size: .78rem;
+    }
+
+    .ml-auto {
+      margin-left: auto;
+    }
+
+    /* ── PARADAS TABLE ── */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin: .8rem 0;
+    }
+
+    table.apt-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .8rem;
+    }
+
+    table.apt-table th {
+      background: var(--surface2);
+      padding: 9px 8px;
+      text-align: left;
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--text2);
+      white-space: nowrap;
+    }
+
+    table.apt-table td {
+      padding: 7px 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    table.apt-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.apt-table input,
+    table.apt-table select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: .78rem;
+      color: var(--text);
+      width: 100%;
+    }
+
+    /* ── ESTADOS DOS CAMPOS (Identidade Visual) ── */
+    input.field-empty,
+    select.field-empty {
+      background-color: #fffde7 !important;
+      border-color: #fdd835 !important;
+    }
+
+    input.field-valid,
+    select.field-valid {
+      background-color: #e8f5e9 !important;
+      border-color: #81c784 !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232e7d32' width='18px' height='18px'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 36px center;
+      /* Move para não sobrepor o botão */
+      background-size: 16px;
+      padding-right: 56px !important;
+    }
+
+    input.field-invalid,
+    select.field-invalid {
+      background-color: #ffebee !important;
+      border-color: #e57373 !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23c62828' width='18px' height='18px'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 36px center;
+      /* Move para não sobrepor o botão */
+      background-size: 16px;
+      padding-right: 56px !important;
+    }
+
+    .field-error-message {
+      color: white;
+      background-color: var(--red);
+      font-size: 0.65rem;
+      font-weight: 700;
+      margin-top: 4px;
+      display: none;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .field-invalid~.field-error-message {
+      display: inline-block;
+    }
+
+    /* ── TIMELINE ── */
+    .timeline-container {
+      margin: 15px 0 5px 0;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .timeline-bar {
+      height: 14px;
+      background: #e2e8f0;
+      border-radius: 50px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      border: 1px solid var(--border);
+    }
+
+    .timeline-segment {
+      height: 100%;
+      position: absolute;
+      transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .segment-prod {
+      background: var(--green);
+    }
+
+    .segment-para {
+      background: var(--red);
+    }
+
+    .segment-isento {
+      height: 60% !important;
+      top: 20%;
+      opacity: 0.9;
+      border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+      z-index: 5;
+    }
+
+    .timeline-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 5px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text2);
+      text-transform: uppercase;
+    }
+
+    /* ── CONFIRM SUMMARY ── */
+    .confirm-summary {
+      background: #f8fafc;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .confirm-summary h4 {
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 5px;
+    }
+
+    .confirm-summary p {
+      margin: 6px 0;
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .confirm-summary b {
+      color: var(--text);
+    }
+
+    .btn-rm {
+      background: none;
+      border: none;
+      color: var(--red);
+      cursor: pointer;
+      font-size: .9rem;
+      padding: 4px;
+    }
+
+    /* ── CONTROLES DE DATA (SETAS) ── */
+    .date-label-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .date-label-wrapper label {
+      margin-bottom: 0;
+    }
+
+    .date-arrows {
+      display: flex;
+      gap: 4px;
+    }
+
+    .date-arrow-btn {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #3b82f6;
+      border-radius: 4px;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.6rem;
+      transition: all 0.2s;
+    }
+
+    .date-arrow-btn:hover {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .7);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-box {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      width: 460px;
+      max-width: 95vw;
+      animation: fadeIn .2s;
+    }
+
+    .modal-box.type-erro {
+      border-color: var(--red);
+    }
+
+    .modal-box.type-aviso {
+      border-color: var(--yellow);
+    }
+
+    .modal-box.type-sucesso {
+      border-color: var(--green);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1rem;
+    }
+
+    .modal-head i {
+      font-size: 1.8rem;
+    }
+
+    .modal-head h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .modal-body {
+      font-size: .88rem;
+      line-height: 1.6;
+      color: var(--text2);
+      max-height: 55vh;
+      overflow-y: auto;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-body ul {
+      padding-left: 1.4rem;
+    }
+
+    .modal-body li {
+      margin-bottom: .4rem;
+    }
+
+    .modal-foot {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* ── MODAL DE ERRO AMIGÁVEL ── */
+    .modal-error-heading {
+      color: #e74c3c;
+      font-size: 1.15rem;
+      font-weight: 800;
+      text-align: center;
+      text-transform: uppercase;
+      margin-bottom: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    .error-highlight-box {
+      background: #ffffff;
+      border: 1px solid #f87171;
+      color: #e74c3c;
+      padding: 0.6rem 0.8rem;
+      border-radius: 6px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.8rem;
+      text-align: center;
+      margin-bottom: 0.8rem;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .action-guide-box {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 0.9rem 1.1rem;
+      text-align: left;
+    }
+
+    .action-guide-title {
+      color: #475569;
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 0.6rem;
+    }
+
+    .action-guide-title i {
+      color: #ef4444;
+      font-size: 1rem;
+    }
+
+    .action-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .action-list li {
+      font-size: 0.85rem;
+      color: #475569;
+      margin-bottom: 0.4rem;
+      line-height: 1.35;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .action-list li b {
+      color: #1e293b;
+    }
+
+    .action-list .action-num {
+      font-weight: 700;
+      color: #64748b;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── HELP ── */
+    .help-section {
+      margin-bottom: 1.2rem;
+    }
+
+    .help-section h4 {
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: .5rem;
+    }
+
+    .help-section p,
+    .help-section li {
+      font-size: .83rem;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+
+    .help-section ul {
+      padding-left: 1.4rem;
+    }
+
+    .rule-tag {
+      display: inline-block;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: .75rem;
+      font-family: 'IBM Plex Mono';
+      color: var(--accent);
+      margin-right: 4px;
+    }
+
+    /* ── SHIFT TABLE ── */
+    .shift-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .82rem;
+    }
+
+    .shift-table th {
+      background: var(--surface2);
+      padding: 8px;
+      text-align: left;
+      color: var(--text2);
+      font-size: .72rem;
+      text-transform: uppercase;
+    }
+
+    .shift-table td {
+      padding: 7px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .shift-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .tag-green {
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    /* ── SUMMARY GRID ── */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .6rem;
+      margin-top: .8rem;
+    }
+
+    .summary-item {
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: .6rem .8rem;
+    }
+
+    .summary-item .s-label {
+      font-size: .7rem;
+      text-transform: uppercase;
+      color: var(--text3);
+      letter-spacing: .5px;
+    }
+
+    .summary-item .s-val {
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono';
+      color: var(--text);
+      margin-top: 2px;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      .home-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .fields-grid.cols-2,
+      .fields-grid.cols-3,
+      .fields-grid.cols-4,
+      .fields-grid.cols-5 {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      /* Faz o campo Turno ocupar toda a largura no mobile para que Datas e Horas fiquem perfeitamente alinhadas */
+      .fields-grid.cols-3 .field:nth-child(1) {
+        grid-column: span 2;
+      }
+
+      .field-span3 {
+        grid-column: span 2;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+
+      .fields-grid.cols-4,
+      .fields-grid.cols-5 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* Ocultando itens temporariamente conforme pedido */
+    #p-timeline-wrap,
+    #s-timeline-wrap,
+    #prod-lista-wrap,
+    #parada-lista-wrap,
+    #sec-debug,
+    button[onclick="testarEnvioAPI()"] {
+      display: none !important;
+    }
+
+    /* Tela de carregamento bloqueante e animada */
+    #fullLoadingOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.85);
+      /* Fundo escuro com leve transparência */
+      backdrop-filter: blur(8px);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 600;
+      font-size: 1.1rem;
+      opacity: 0;
+      pointer-events: none;
+      /* Só bloqueia interações quando opacidade = 1 */
+      transition: opacity 0.3s ease;
+    }
+
+    #fullLoadingOverlay.active {
+      opacity: 1;
+      pointer-events: all;
+      /* Bloqueia clique do usuário na tela por trás */
+    }
+
+    .modern-spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(255, 255, 255, 0.2);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 1s infinite linear;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── VERSÃO + STATUS DE CONEXÃO ── */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      margin-top: 0.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .version-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text3);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 5px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      user-select: none;
+    }
+
+    .version-badge i {
+      font-size: 0.65rem;
+      color: var(--accent);
+    }
+
+    .connection-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      transition: all 0.4s ease;
+      user-select: none;
+      letter-spacing: 0.3px;
+    }
+
+    .connection-status.online {
+      background: #ecfdf5;
+      border: 1.5px solid #10b981;
+      color: #059669;
+    }
+
+    .connection-status.offline {
+      background: #fef2f2;
+      border: 1.5px solid #ef4444;
+      color: #dc2626;
+      animation: pulseOfflineBadge 2s infinite;
+    }
+
+    .connection-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .connection-status.online .connection-dot {
+      background: #10b981;
+      animation: pulseOnlineDot 2s infinite;
+    }
+
+    .connection-status.offline .connection-dot {
+      background: #ef4444;
+      animation: pulseOfflineDot 1.5s infinite;
+    }
+
+    @keyframes pulseOnlineDot {
+      0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6);
+      }
+
+      70% {
+        box-shadow: 0 0 0 7px rgba(16, 185, 129, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
+
+    @keyframes pulseOfflineDot {
+      0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+      }
+
+      70% {
+        box-shadow: 0 0 0 7px rgba(239, 68, 68, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+      }
+    }
+
+    @keyframes pulseOfflineBadge {
+      0% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.65;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    /* Banner fixo de offline — aparece em TODAS as telas */
+    #offlineBanner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 10px 20px;
+      text-align: center;
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      color: white;
+      font-weight: 700;
+      font-size: 0.82rem;
+      font-family: 'IBM Plex Sans', sans-serif;
+      z-index: 11000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+      animation: slideDownBanner 0.4s ease;
+    }
+
+    #offlineBanner.visible {
+      display: flex;
+    }
+
+    @keyframes slideDownBanner {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    #offlineBanner i {
+      font-size: 1.1rem;
+    }
+
+    /* Banner de internet lenta */
+    #slowInternetBanner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 10px 20px;
+      text-align: center;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #000;
+      font-weight: 700;
+      font-size: 0.82rem;
+      font-family: 'IBM Plex Sans', sans-serif;
+      z-index: 10999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+      animation: slideDownBanner 0.4s ease;
+    }
+
+    #slowInternetBanner.visible {
+      display: flex;
+    }
+
+    /* Mini indicador de status nos headers das telas de formulário */
+    .header-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      font-family: 'IBM Plex Mono', monospace;
+      letter-spacing: 0.3px;
+      transition: all 0.3s ease;
+    }
+
+    .header-status-pill.online {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #059669;
+    }
+
+    .header-status-pill.offline {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #dc2626;
+      animation: pulseOfflineBadge 2s infinite;
+    }
+
+    .header-status-pill .mini-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .header-status-pill.online .mini-dot {
+      background: #10b981;
+      animation: pulseOnlineDot 2.5s infinite;
+    }
+
+    .header-status-pill.offline .mini-dot {
+      background: #ef4444;
+      animation: pulseOfflineDot 1.5s infinite;
+    }

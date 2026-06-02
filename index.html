@@ -1,0 +1,1496 @@
+<!--
+ * @file        index.html
+ * @project     Apontamentos de Produção — Progeral
+ * @description Front-end PWA modularizado para registro de apontamentos
+ *              de produção e horas paradas de chão de fábrica.
+ *              Integra-se via HTTP POST com o ERP Protheus (TOTVS) através de
+ *              um proxy PHP local (proxy.php) para evitar Mixed Content e expor IP.
+ *              Opera como single-page application com quatro telas:
+ *              Home, Apontamento de Produção, Apontamento de Parada
+ *              e Guia de Dúvidas.
+ * @author      Marcus Almeida <marcus.almeida@progeral.com.br>
+ * @company     PROGERAL
+ * @created     2025-01-01
+ * @updated     2026-05-07
+ * @version     2.0.0 (Arquitetura LAMP)
+ * @license     MIT
+ *
+ * DEPENDENCIES (CDN):
+ *   - IBM Plex Sans / IBM Plex Mono / Sora / DM Mono (Google Fonts)
+ *   - Font Awesome 6.4.0 (cdnjs)
+ *
+ * DEPENDENCIES (Local Estático):
+ *   - assets/css/main.css      : Estilos Globais
+ *   - assets/css/duvidas.css   : Estilos do FAQ
+ *   - assets/js/app.js         : Lógica central, motor do PWA, validações, chamadas fetch para proxy.php
+ *   - assets/js/duvidas.js     : Eventos do manual
+ *
+ * DEPENDENCIES (Dados DB - Carregados dinamicamente no final do body anti-cache):
+ *   - produtos.js    : window.APP_DB.produtos — catálogo de produtos do ERP
+ *   - recursos.js    : window.APP_DB.recursos — cadastro de máquinas/recursos
+ *   - motivos.js     : window.APP_DB.motivos  — tabela de motivos de parada
+ *   - ops.js         : window.APP_DB.ops      — ordens de produção abertas
+ *   - zink-data.js   : window.ZINK_DATA       — peso unitário por produto (linha ZINK)
+ *   - colaboradores.js: window.COLABORADORES  — mapa matrícula → {nome, usuarioProtheus}
+ *   - sw.js          : Service Worker para cache offline (PWA)
+ *   - manifest.json  : Manifesto PWA para instalação no dispositivo
+ *
+ * MAIN FLOW:
+ *   1. O HTML carrega CSS, Fontes e os dados estáticos embutidos (DB fallback).
+ *   2. O arquivo principal `assets/js/app.js` inicializa mesclando os dados (DB Merge).
+ *   3. O usuário seleciona uma das três ações na tela Home.
+ *   4. Na tela de Produção ou Parada, as validações de input em tempo real garantem:
+ *      - Datas não-fictícias, quantidades sempre inteiras >= 0.
+ *   5. Ao confirmar, o payload é enviado ao `api/proxy.php` que roteia para a Intranet (192.168.8.21).
+ *   6. O monitor de conexão via `app.js` verifica o status a cada 10 s.
+-->
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apontamentos de produção e Horas paradas.
+
+  </title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@300;400;600;700;800&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/jpeg" href="icons/app-icon.jpg">
+
+  <!-- PWA Settings -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Apontamento">
+  <meta name="theme-color" content="#3b82f6">
+
+  <!-- No Cache -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/app-icon.jpg">
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+
+<body>
+  <!-- Banner Offline (fixo no topo, visível em todas as telas quando sem internet) -->
+  <div id="offlineBanner">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>SEM CONEXÃO — Verifique o Wi-Fi. Os registros não serão enviados.</span>
+  </div>
+
+  <!-- Banner Internet Lenta -->
+  <div id="slowInternetBanner">
+    <i class="fas fa-tachometer-alt"></i>
+    <span>CONEXÃO LENTA — O envio pode demorar mais que o normal.</span>
+  </div>
+
+  <!-- Overlay Loading -->
+  <div id="fullLoadingOverlay">
+    <div class="modern-spinner"></div>
+    <div id="loadingText">Sincronizando... Aguarde</div>
+  </div>
+
+  <!-- ════════════════════════════════ HOME ════════════════════════════════ -->
+  <div class="screen active" id="screen-home">
+    <div class="home-wrap">
+      <div style="display:flex; align-items:center; justify-content:center; gap:15px; margin-bottom: 20px;">
+        <img src="icons/logo progeral azul.png" class="logo-img-home" alt="Logo Progeral" style="margin-bottom:0;">
+        <button onclick="testarEnvioAPI()"
+          style="background: var(--yellow); color: #000; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.8rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <i class="fas fa-vial"></i> TESTE API
+        </button>
+      </div>
+      <div class="home-logo">Apontamentos <span>· Produção e Horas paradas.</span></div>
+      <div class="home-sub">Sistema de registro de produção e horas paradas</div>
+
+      <!-- Barra de Status: Versão + Conexão -->
+      <div class="status-bar">
+        <span class="version-badge"><i class="fas fa-code-branch"></i> V1.4.4</span>
+        <div class="connection-status online" id="connectionStatus">
+          <span class="connection-dot"></span>
+          <i class="fas fa-wifi" id="connectionIcon"></i>
+          <span id="connectionText">Online</span>
+        </div>
+      </div>
+
+      <div class="home-cards">
+        <div class="home-card" onclick="goTo('screen-prod')">
+          <i class="fas fa-industry card-icon prod"></i>
+          <h3>Apontar Produção</h3>
+          <p>Registrar OP, produto, recurso, quantidades e período de produção</p>
+        </div>
+        <div class="home-card" onclick="goTo('screen-parada')">
+          <i class="fas fa-pause-circle card-icon stop"></i>
+          <h3>Apontar Parada</h3>
+          <p>Registrar motivo, recurso e período de horas paradas da máquina</p>
+        </div>
+        <div class="home-card" onclick="goTo('screen-duvidas')">
+          <i class="fas fa-question-circle card-icon help"></i>
+          <h3>Dúvidas</h3>
+          <p>Regras de apontamento, turnos, gaps e exemplos práticos</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ PRODUÇÃO ════════════════════════════════ -->
+  <div class="screen" id="screen-prod">
+    <div class="page-header">
+      <img src="icons/logo progeral azul.png" class="logo-img-header" alt="Logo Progeral">
+      <button onclick="testarEnvioAPI()"
+        style="background: var(--yellow); color: #000; border: none; padding: 5px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.7rem; margin-right: 15px;">
+        <i class="fas fa-vial"></i> TESTAR API
+      </button>
+      <i class="fas fa-industry ph-icon" style="color:var(--blue)"></i>
+      <h2>Apontamento de Produção</h2>
+      <button class="btn btn-ghost btn-sm" onclick="goTo('screen-duvidas')">
+        <i class="fas fa-question-circle"></i> Dúvidas
+      </button>
+      <div style="display:flex;gap:.5rem;margin-left:auto;align-items:center;">
+        <div class="header-status-pill online" id="headerStatusProd"><span class="mini-dot"></span><span
+            class="hsp-text">Online</span></div>
+        <button class="btn btn-red btn-sm" onclick="goTo('screen-parada')"><i class="fas fa-pause-circle"></i>
+          Apontar Parada</button>
+        <button class="btn btn-ghost btn-sm" onclick="goTo('screen-home')"><i class="fas fa-home"></i></button>
+      </div>
+    </div>
+
+    <!-- Operador -->
+    <div class="form-card">
+      <h4><i class="fas fa-user" style="margin-right:6px;color:var(--accent)"></i>Operador</h4>
+      <div class="fields-grid cols-2">
+        <div class="field">
+          <label>Operador (Matrícula)</label>
+          <input type="text" id="p-matricula" placeholder="Digite sua matrícula" autocomplete="off" inputmode="numeric" maxlength="6">
+        </div>
+        <div class="field">
+          <label>Nome do Colaborador</label>
+          <input type="text" id="p-nome" readonly placeholder="Preenchimento automático" tabindex="-1">
+        </div>
+      </div>
+    </div>
+
+    <!-- OP / Produto / Recurso -->
+    <div class="form-card">
+      <h4><i class="fas fa-cubes" style="margin-right:6px;color:var(--accent)"></i>Identificação</h4>
+      <div class="fields-grid cols-2">
+        <div class="field field-span2">
+          <label>O.P.</label>
+          <div class="field-inner">
+            <input type="text" id="p-op" placeholder="Nº da Ordem de Produção" class="with-btn" inputmode="numeric">
+            <button class="help-btn search-trigger" onclick="openSearch('ops', 'p-op')"><i
+                class="fas fa-search"></i></button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Produto</label>
+          <div class="field-inner">
+            <input type="text" id="p-produto" placeholder="Código do produto" class="with-btn">
+            <button class="help-btn search-trigger" onclick="openSearch('produtos', 'p-produto')"><i
+                class="fas fa-search"></i></button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Descrição</label>
+          <input type="text" id="p-desc" readonly placeholder="Preenchimento automático" tabindex="-1">
+        </div>
+        <div class="field">
+          <label>Máquinas/Recurso</label>
+          <div class="field-inner">
+            <input type="text" id="p-recurso-cod" placeholder="Código" class="with-btn">
+            <button class="help-btn search-trigger" onclick="openSearch('recursos', 'p-recurso-cod')"><i
+                class="fas fa-search"></i></button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Recurso</label>
+          <input type="text" id="p-recurso" readonly placeholder="Preenchimento automático" tabindex="-1">
+        </div>
+      </div>
+    </div>
+
+    <!-- Turno / Data -->
+    <div class="form-card">
+      <h4><i class="fas fa-calendar-alt" style="margin-right:6px;color:var(--accent)"></i>Turno e Data</h4>
+      <div class="fields-grid cols-3">
+        <div class="field">
+          <label>Turno</label>
+          <select id="p-turno">
+            <option value="1|06:00|14:00">1º Turno (06:00–14:00)</option>
+            <option value="S1|06:00|16:00">Sab. 1º Turno (06:00–16:00)</option>
+            <option value="2|14:00|22:00">2º Turno (14:00–22:00)</option>
+            <option value="S2|09:00|19:00">Sab. 2º Turno (09:00–19:00)</option>
+            <option value="3|22:00|06:00">3º Turno (22:00–06:00)</option>
+            <option value="A|07:00|16:48">Administrativo (07:00–16:48)</option>
+            <option value="121|06:00|18:00">Turno 12h 6~18 (06:00–18:00)</option>
+            <option value="122|18:00|06:00">Turno 12h 18~6 (18:00–06:00)</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="date-label-wrapper">
+            <label>Data Inicial</label>
+            <div class="date-arrows">
+              <button tabindex="-1" type="button" class="date-arrow-btn" onclick="adjustDateByDays('p-data-ini', -1)"><i
+                  class="fas fa-chevron-left"></i></button>
+              <button tabindex="-1" type="button" class="date-arrow-btn" onclick="adjustDateByDays('p-data-ini', 1)"><i
+                  class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+          <div class="field-inner">
+            <input type="text" id="p-data-ini" class="with-btn" placeholder="00/00/0000" maxlength="10">
+            <button class="help-btn" onclick="openDatePicker('p-data-ini')"><i class="fas fa-calendar-alt"></i></button>
+            <input type="date" id="p-data-ini-picker"
+              style="position:absolute; width:0; height:0; opacity:0; pointer-events:none; bottom:0; left:0;">
+          </div>
+        </div>
+        <div class="field">
+          <div class="date-label-wrapper">
+            <label>Data Final</label>
+            <div class="date-arrows">
+              <button tabindex="-1" type="button" class="date-arrow-btn" onclick="adjustDateByDays('p-data-fim', -1)"><i
+                  class="fas fa-chevron-left"></i></button>
+              <button tabindex="-1" type="button" class="date-arrow-btn" onclick="adjustDateByDays('p-data-fim', 1)"><i
+                  class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+          <div class="field-inner">
+            <input type="text" id="p-data-fim" class="with-btn" placeholder="00/00/0000" maxlength="10">
+            <button class="help-btn" onclick="openDatePicker('p-data-fim')"><i class="fas fa-calendar-alt"></i></button>
+            <input type="date" id="p-data-fim-picker"
+              style="position:absolute; width:0; height:0; opacity:0; pointer-events:none; bottom:0; left:0;">
+          </div>
+        </div>
+        <div class="field">
+          <label>Hora Inicial</label>
+          <input type="text" id="p-hora-ini" placeholder="00:00" maxlength="5" autocomplete="off" autocorrect="off"
+            autocapitalize="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label>Hora Final</label>
+          <input type="text" id="p-hora-fim" placeholder="00:00" maxlength="5" autocomplete="off" autocorrect="off"
+            autocapitalize="off" spellcheck="false">
+        </div>
+      </div>
+
+      <!-- TIMELINE VISUAL -->
+      <div class="timeline-container" id="p-timeline-wrap">
+        <div class="timeline-bar" id="p-timeline-bar"></div>
+        <div id="p-timeline-alert"
+          style="display:none; color:var(--red); font-size:10px; font-weight:700; margin-top:5px; text-align:center;">
+          <i class="fas fa-exclamation-triangle"></i> ATENÇÃO: HÁ UM GAP (ESPAÇO VAZIO) ANTES DESTE HORÁRIO
+        </div>
+        <div class="timeline-labels"
+          style="position: relative; display: flex; justify-content: space-between; align-items: center; height: 18px;">
+          <span id="p-timeline-start">06:00</span>
+          <span id="p-timeline-last"
+            style="position: absolute; color: var(--accent); font-weight: 800; transform: translateX(-50%); white-space: nowrap; font-size: 12px; left: 0; line-height: 1;"></span>
+          <span id="p-timeline-end">14:00</span>
+        </div>
+        <div
+          style="text-align: center; color:var(--accent); font-size: 9px; text-transform: uppercase; font-weight: bold; margin-top: 4px;">
+          PREENCHIMENTO DO TURNO
+        </div>
+      </div>
+    </div>
+
+    <!-- Quantidades -->
+    <div class="form-card">
+      <h4><i class="fas fa-sort-numeric-up" style="margin-right:6px;color:var(--accent)"></i>Quantidades</h4>
+      <div class="fields-grid cols-6">
+        <div class="field" id="p-peso-wrap" style="display:none;">
+          <label>Peso (kg)</label>
+          <div class="field-inner">
+            <input type="number" id="p-peso" placeholder="0.000" step="0.001" min="0" class="with-btn"
+              autocomplete="off" inputmode="decimal">
+            <button class="help-btn"
+              onclick="openHelp('Peso', 'Informe o peso total para calcular automaticamente a quantidade produzida com base no peso unitário.')">?</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Qtd. Produzida</label>
+          <div class="field-inner">
+            <input type="number" id="p-qtd" placeholder="0" step="1" min="0" class="with-btn p-ignore-focus"
+              autocomplete="off" inputmode="numeric">
+            <button class="help-btn"
+              onclick="openHelp('Quantidade Produzida', 'Informe o total de peças boas produzidas neste período.')">?</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Qtd. Retrabalhada</label>
+          <div class="field-inner">
+            <input type="number" id="p-qtd-ret" placeholder="0" step="1" min="0" class="with-btn" autocomplete="off"
+              inputmode="numeric">
+            <button class="help-btn"
+              onclick="openHelp('Quantidade Retrabalhada', 'Informe a quantidade de peças que precisaram de retrabalho.')">?</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Peças Setup</label>
+          <div class="field-inner">
+            <input type="number" id="p-setup" placeholder="0" step="1" min="0" class="with-btn" autocomplete="off"
+              inputmode="numeric">
+            <button class="help-btn"
+              onclick="openHelp('Peças de Setup', 'Informe as peças utilizadas para o ajuste da máquina (setup).')">?</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Peças NC (RNC)</label>
+          <div class="field-inner">
+            <input type="number" id="p-rnc" placeholder="0" step="1" min="0" class="with-btn" autocomplete="off"
+              inputmode="numeric">
+            <button class="help-btn"
+              onclick="openHelp('Peças Não Conformes', 'Informe a quantidade de peças rejeitadas ou enviadas para RNC.')">?</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Qtde Cestos</label>
+          <div class="field-inner">
+            <input type="number" id="p-cestos" placeholder="1" min="0" class="with-btn" autocomplete="off"
+              inputmode="numeric">
+            <button class="help-btn"
+              onclick="openHelp('Quantidade de Cestos', 'Informe o total de cestos produzidos.')">?</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <div class="ml-auto" style="display:flex;gap:.8rem; width: 100%; justify-content: flex-end; flex-wrap:wrap;">
+        <button class="btn btn-red" onclick="sairOperadorProd()"><i class="fas fa-door-open"></i> Sair</button>
+        <button class="btn btn-ghost" onclick="limparFormProd()"><i class="fas fa-eraser"></i> Limpar</button>
+        <button class="btn btn-primary" id="p-btn-confirmar" onclick="confirmarProd()"><i
+            class="fas fa-check-circle"></i> Confirmar</button>
+      </div>
+    </div>
+
+    <!-- lista de produções registradas nesta sessão -->
+    <div id="prod-lista-wrap" style="margin-top:1.4rem;display:none;">
+      <div class="form-card">
+        <h4><i class="fas fa-list" style="margin-right:6px;color:var(--accent)"></i>Produções registradas neste
+          turno</h4>
+        <div class="table-wrap">
+          <table class="apt-table" id="prod-lista-table">
+            <thead>
+              <tr>
+                <th>OP</th>
+                <th>Produto</th>
+                <th>Recurso</th>
+                <th>Hr Ini</th>
+                <th>Hr Fim</th>
+                <th>Qtd</th>
+                <th>Ret.</th>
+                <th>Setup</th>
+                <th>RNC</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="prod-lista-body"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ PARADA ════════════════════════════════ -->
+  <div class="screen" id="screen-parada">
+    <div class="page-header">
+      <img src="icons/logo progeral azul.png" class="logo-img-header" alt="Logo Progeral">
+      <button onclick="testarEnvioAPI()"
+        style="background: var(--yellow); color: #000; border: none; padding: 5px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.7rem; margin-right: 15px;">
+        <i class="fas fa-vial"></i> TESTAR API
+      </button>
+      <i class="fas fa-pause-circle ph-icon" style="color:var(--red)"></i>
+      <h2>Apontamento de Horas Paradas</h2>
+      <button class="btn btn-ghost btn-sm" onclick="goTo('screen-duvidas')">
+        <i class="fas fa-question-circle"></i> Dúvidas
+      </button>
+      <div style="display:flex;gap:.5rem;margin-left:auto;align-items:center;">
+        <div class="header-status-pill online" id="headerStatusParada"><span class="mini-dot"></span><span
+            class="hsp-text">Online</span></div>
+        <button class="btn btn-blue btn-sm" onclick="goTo('screen-prod')"><i class="fas fa-industry"></i>
+          Apontar Produção</button>
+        <button class="btn btn-ghost btn-sm" onclick="goTo('screen-home')"><i class="fas fa-home"></i></button>
+      </div>
+    </div>
+
+    <!-- Operador Parada -->
+    <div class="form-card">
+      <h4><i class="fas fa-user" style="margin-right:6px;color:var(--accent)"></i>Operador</h4>
+      <div class="fields-grid cols-2">
+        <div class="field">
+          <label>Operador (Matrícula)</label>
+          <input type="text" id="s-matricula" placeholder="Digite sua matrícula" autocomplete="off" inputmode="numeric" maxlength="6">
+        </div>
+        <div class="field">
+          <label>Nome do Colaborador</label>
+          <input type="text" id="s-nome" readonly placeholder="Preenchimento automático" tabindex="-1">
+        </div>
+      </div>
+    </div>
+
+    <!-- Motivo / OP / Recurso -->
+    <div class="form-card">
+      <h4><i class="fas fa-tag" style="margin-right:6px;color:var(--accent)"></i>Identificação da Parada</h4>
+      <div class="fields-grid cols-2">
+        <div class="field field-span2">
+          <label>O.P.</label>
+          <div class="field-inner">
+            <input type="text" id="s-op" placeholder="Nº da Ordem de Produção" class="with-btn" inputmode="numeric">
+            <button class="help-btn search-trigger" onclick="openSearch('ops', 's-op')"><i
+                class="fas fa-search"></i></button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Produto</label>
+          <div class="field-inner">
+            <input type="text" id="s-produto" placeholder="Código do produto" class="with-btn">
+            <button class="help-btn search-trigger" onclick="openSearch('produtos', 's-produto')"><i
+                class="fas fa-search"></i></button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Descrição</label>
+          <input type="text" id="s-desc" readonly placeholder="Preenchimento automático" tabindex="-1">
+        </div>
+        <div class="field">
+          <label>Cód. Motivo</label>
+          <div class="field-inner">
+            <input type="text" id="s-motivo-cod" placeholder="Digite o código (ex: ST)" class="with-btn">
+            <button class="help-btn search-trigger" onclick="openSearch('motivos', 's-motivo-cod')"><i
+                class="fas fa-search"></i></button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Descrição Motivo</label>
+          <input type="text" id="s-motivo-desc" readonly placeholder="Preenchimento automático" tabindex="-1">
+        </div>
+        <div class="field">
+          <label>Máquinas/Recurso</label>
+          <div class="field-inner">
+            <input type="text" id="s-recurso-cod" placeholder="Código" class="with-btn">
+            <button class="help-btn search-trigger" onclick="openSearch('recursos', 's-recurso-cod')"><i
+                class="fas fa-search"></i></button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Recurso</label>
+          <input type="text" id="s-recurso" readonly placeholder="Preenchimento automático" tabindex="-1">
+        </div>
+      </div>
+    </div>
+
+    <!-- Turno / Data parada -->
+    <div class="form-card">
+      <h4><i class="fas fa-calendar-alt" style="margin-right:6px;color:var(--accent)"></i>Turno e Período</h4>
+      <div class="fields-grid cols-3">
+        <div class="field">
+          <label>Turno</label>
+          <select id="s-turno">
+            <option value="1|06:00|14:00">1º Turno (06:00–14:00)</option>
+            <option value="S1|06:00|16:00">Sab. 1º Turno (06:00–16:00)</option>
+            <option value="2|14:00|22:00">2º Turno (14:00–22:00)</option>
+            <option value="S2|09:00|19:00">Sab. 2º Turno (09:00–19:00)</option>
+            <option value="3|22:00|06:00">3º Turno (22:00–06:00)</option>
+            <option value="A|07:00|16:48">Administrativo (07:00–16:48)</option>
+            <option value="121|06:00|18:00">Turno 12h 6~18 (06:00–18:00)</option>
+            <option value="122|18:00|06:00">Turno 12h 18~6 (18:00–06:00)</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="date-label-wrapper">
+            <label>Data Inicial</label>
+            <div class="date-arrows">
+              <button tabindex="-1" type="button" class="date-arrow-btn" onclick="adjustDateByDays('s-data-ini', -1)"><i
+                  class="fas fa-chevron-left"></i></button>
+              <button tabindex="-1" type="button" class="date-arrow-btn" onclick="adjustDateByDays('s-data-ini', 1)"><i
+                  class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+          <div class="field-inner">
+            <input type="text" id="s-data-ini" class="with-btn" placeholder="00/00/0000" maxlength="10">
+            <button class="help-btn" onclick="openDatePicker('s-data-ini')"><i class="fas fa-calendar-alt"></i></button>
+            <input type="date" id="s-data-ini-picker"
+              style="position:absolute; width:0; height:0; opacity:0; pointer-events:none; bottom:0; left:0;">
+          </div>
+        </div>
+        <div class="field">
+          <div class="date-label-wrapper">
+            <label>Data Final</label>
+            <div class="date-arrows">
+              <button tabindex="-1" type="button" class="date-arrow-btn" onclick="adjustDateByDays('s-data-fim', -1)"><i
+                  class="fas fa-chevron-left"></i></button>
+              <button tabindex="-1" type="button" class="date-arrow-btn" onclick="adjustDateByDays('s-data-fim', 1)"><i
+                  class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+          <div class="field-inner">
+            <input type="text" id="s-data-fim" class="with-btn" placeholder="00/00/0000" maxlength="10">
+            <button class="help-btn" onclick="openDatePicker('s-data-fim')"><i class="fas fa-calendar-alt"></i></button>
+            <input type="date" id="s-data-fim-picker"
+              style="position:absolute; width:0; height:0; opacity:0; pointer-events:none; bottom:0; left:0;">
+          </div>
+        </div>
+        <div class="field">
+          <label>Hora Inicial</label>
+          <input type="text" id="s-hora-ini" placeholder="00:00" maxlength="5" autocomplete="off" autocorrect="off"
+            autocapitalize="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <label>Hora Final</label>
+          <input type="text" id="s-hora-fim" placeholder="00:00" maxlength="5" autocomplete="off" autocorrect="off"
+            autocapitalize="off" spellcheck="false">
+        </div>
+      </div>
+
+      <!-- TIMELINE VISUAL -->
+      <div class="timeline-container" id="s-timeline-wrap">
+        <div class="timeline-bar" id="s-timeline-bar"></div>
+        <div id="s-timeline-alert"
+          style="display:none; color:var(--red); font-size:10px; font-weight:700; margin-top:5px; text-align:center;">
+          <i class="fas fa-exclamation-triangle"></i> ATENÇÃO: HÁ UM GAP (ESPAÇO VAZIO) ANTES DESTE HORÁRIO
+        </div>
+        <div class="timeline-labels"
+          style="position: relative; display: flex; justify-content: space-between; align-items: center; height: 18px;">
+          <span id="s-timeline-start">06:00</span>
+          <span id="s-timeline-last"
+            style="position: absolute; color: var(--accent); font-weight: 800; transform: translateX(-50%); white-space: nowrap; font-size: 12px; left: 0; line-height: 1;"></span>
+          <span id="s-timeline-end">14:00</span>
+        </div>
+        <div
+          style="text-align: center; color:var(--accent); font-size: 9px; text-transform: uppercase; font-weight: bold; margin-top: 4px;">
+          PREENCHIMENTO DO TURNO
+        </div>
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <div class="ml-auto" style="display:flex;gap:.8rem; width: 100%; justify-content: flex-end; flex-wrap:wrap;">
+        <button class="btn btn-red" onclick="sairOperadorParada()"><i class="fas fa-door-open"></i> Sair</button>
+        <button class="btn btn-ghost" onclick="limparFormParadaCompleto()"><i class="fas fa-eraser"></i> Limpar</button>
+        <button class="btn btn-primary" id="s-btn-confirmar" onclick="confirmarParada()"><i
+            class="fas fa-check-circle"></i> Confirmar</button>
+      </div>
+    </div>
+
+    <!-- lista de paradas registradas -->
+    <div id="parada-lista-wrap" style="margin-top:1.4rem;display:none;">
+      <div class="form-card">
+        <h4><i class="fas fa-list" style="margin-right:6px;color:var(--accent)"></i>Paradas registradas neste
+          turno</h4>
+        <div class="table-wrap">
+          <table class="apt-table" id="parada-lista-table">
+            <thead>
+              <tr>
+                <th>Motivo</th>
+                <th>O.P.</th>
+                <th>Recurso</th>
+                <th>Hr Ini</th>
+                <th>Hr Fim</th>
+                <th>Duração</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="parada-lista-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════ DÚVIDAS ════════════════════════════════ -->
+  <div class="screen" id="screen-duvidas">
+    <div class="page-header">
+      <img src="icons/logo progeral azul.png" class="logo-img-header" alt="Logo Progeral">
+      <button onclick="testarEnvioAPI()"
+        style="background: var(--yellow); color: #000; border: none; padding: 5px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.7rem; margin-right: 15px;">
+        <i class="fas fa-vial"></i> TESTAR API
+      </button>
+      <i class="fas fa-question-circle ph-icon" style="color:var(--yellow)"></i>
+      <h2>Dúvidas · Regras de Apontamento</h2>
+      <button class="btn btn-ghost btn-sm ml-auto" onclick="goTo('screen-home')"><i class="fas fa-home"></i>
+        Início</button>
+    </div>
+
+    <!-- ══ GUIA.HTML EMBUTIDO — NÃO EDITAR MANUALMENTE ══ -->
+    <link rel="stylesheet" href="assets/css/duvidas.css">
+
+    <!-- HERO -->
+    <div class="hero" id="top">
+      <div class="hero-badge">📋 Uso Interno · Operadores de Produção</div>
+      <h1>Guia de <span>Apontamento</span><br>de Produção</h1>
+      <p>Tudo o que você precisa saber sobre como registrar corretamente sua produção, evitar erros e o que fazer quando
+        algo der errado.</p>
+      <nav class="nav-pills">
+        <a class="nav-pill" href="#sec-oque">O que é</a>
+        <a class="nav-pill" href="#sec-importancia">Importância</a>
+        <a class="nav-pill" href="#sec-nao-consegue">Não consigo apontar</a>
+        <a class="nav-pill" href="#sec-saldo">Falta de saldo</a>
+        <a class="nav-pill" href="#sec-erros-prod">Erros de produção</a>
+        <a class="nav-pill" href="#sec-erros-parada">Erros de parada</a>
+        <a class="nav-pill" href="#sec-data">Data e turno</a>
+        <a class="nav-pill" href="#sec-boas">Boas práticas</a>
+        <a class="nav-pill" href="#sec-faq">Dúvidas</a>
+      </nav>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-box" id="searchBox" placeholder="Buscar no guia… ex: produto incorreto, parada, turno…"
+        oninput="doSearch(this.value)">
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <button class="btn-sm" onclick="toggleAll(true)">▼ Expandir tudo</button>
+      <button class="btn-sm" onclick="toggleAll(false)">▲ Recolher tudo</button>
+    </div>
+
+    <!-- ════════════════ SECTIONS ════════════════ -->
+    <div class="sections">
+
+      <!-- 1. O QUE É -->
+      <div class="section theme-blue" id="sec-oque">
+        <div class="section-header" onclick="toggle(this)">
+          <div class="section-header-left">
+            <div class="section-icon">📋</div>
+            <div>
+              <div class="section-title">O que é o Apontamento de Produção?</div>
+              <div class="section-subtitle">Conceito, finalidade e impacto dos dados</div>
+            </div>
+          </div>
+          <div class="chevron">▼</div>
+        </div>
+        <div class="section-body">
+          <div class="section-content">
+            <p class="body-text">O apontamento de produção é o <strong>registro das atividades realizadas durante o seu
+                turno</strong>: quanto foi produzido, quando a máquina ficou parada e qual produto foi fabricado.</p>
+            <p class="body-text">Esses dados alimentam os indicadores da fábrica:</p>
+            <div class="impact-grid" style="grid-template-columns:repeat(2,1fr); margin-top:12px;">
+              <div class="impact-card" style="background:#EFF6FF;color:#1E3A8A;">
+                <strong>📈 Produtividade por turno</strong>
+                Mede quanto cada máquina ou linha entregou em relação ao esperado.
+              </div>
+              <div class="impact-card" style="background:#EFF6FF;color:#1E3A8A;">
+                <strong>⚙️ Eficiência (OEE)</strong>
+                Indicador global que combina disponibilidade, desempenho e qualidade.
+              </div>
+              <div class="impact-card" style="background:#EFF6FF;color:#1E3A8A;">
+                <strong>📦 Volume produzido</strong>
+                Base para cálculo de estoque, MRP e planejamento de materiais.
+              </div>
+              <div class="impact-card" style="background:#EFF6FF;color:#1E3A8A;">
+                <strong>🛑 Análise de paradas</strong>
+                Identifica onde e por que a produção perde tempo — base para melhorias.
+              </div>
+            </div>
+            <div class="alert alert-orange">
+              <span class="alert-icon">⚠️</span>
+              <div class="alert-text">
+                <strong>Dados errados = decisões erradas!</strong>
+                <p>Um apontamento incorreto distorce todos os indicadores e prejudica o planejamento da produção —
+                  afetando você e todos os outros setores.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. IMPORTÂNCIA -->
+      <div class="section theme-red" id="sec-importancia">
+        <div class="section-header" onclick="toggle(this)">
+          <div class="section-header-left">
+            <div class="section-icon">⚠️</div>
+            <div>
+              <div class="section-title">Por que o apontamento correto é obrigatório?</div>
+              <div class="section-subtitle">Impactos, fluxo contínuo e consequências disciplinares</div>
+            </div>
+          </div>
+          <div class="chevron">▼</div>
+        </div>
+        <div class="section-body">
+          <div class="section-content">
+            <p class="body-text">O apontamento não é apenas um registro — é a <strong>base de todo o fluxo de trabalho
+                da fábrica</strong>. Quando feito errado ou ignorado, o problema se espalha por todos os setores.</p>
+            <div class="impact-grid">
+              <div class="impact-card bad">
+                <strong>🚫 Apontamento errado gera:</strong>
+                <ul>
+                  <li>Estoque desatualizado</li>
+                  <li>MRP errado</li>
+                  <li>Paradas não analisadas</li>
+                  <li>Relatórios incorretos</li>
+                </ul>
+              </div>
+              <div class="impact-card warn">
+                <strong>⏸ Sem apontamento gera:</strong>
+                <ul>
+                  <li>Setor seguinte sem saldo</li>
+                  <li>Interrupção do fluxo</li>
+                  <li>Atraso na produção</li>
+                  <li>Sanções disciplinares</li>
+                </ul>
+              </div>
+              <div class="impact-card good">
+                <strong>✅ Apontamento correto garante:</strong>
+                <ul>
+                  <li>Fluxo contínuo de trabalho</li>
+                  <li>Dados reais para decisão</li>
+                  <li>Indicadores confiáveis</li>
+                  <li>Planejamento eficiente</li>
+                </ul>
+              </div>
+            </div>
+            <div class="alert alert-red">
+              <span class="alert-icon">🔴</span>
+              <div class="alert-text">
+                <strong>Consequências Disciplinares</strong>
+                <p>Não apontar na data correta, não registrar a quantidade correta ou ignorar o processo impacta o fluxo
+                  contínuo de trabalho — seu e de todos os outros setores. Falhas reiteradas podem resultar em
+                  <strong>sanções disciplinares</strong> conforme as normas internas da empresa.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. NÃO CONSIGO APONTAR -->
+      <div class="section theme-orange" id="sec-nao-consegue">
+        <div class="section-header" onclick="toggle(this)">
+          <div class="section-header-left">
+            <div class="section-icon">🆘</div>
+            <div>
+              <div class="section-title">Não consigo apontar — O que fazer?</div>
+              <div class="section-subtitle">Erro no sistema, tela travada, sem permissão — passo a passo</div>
+            </div>
+          </div>
+          <div class="chevron">▼</div>
+        </div>
+        <div class="section-body">
+          <div class="section-content">
+            <p class="body-text">Se por qualquer motivo você não conseguir realizar o apontamento (erro no sistema, tela
+              travada, sem permissão, sem saldo), siga os passos abaixo <strong>imediatamente</strong>:</p>
+            <div class="steps">
+              <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                  <strong>Pare e registre o erro no papel</strong>
+                  <p>Anote o horário exato, o que estava tentando apontar e a mensagem de erro. Não tente apontar de
+                    forma incorreta para "resolver" — isso piora o problema.</p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                  <strong>Comunique sua liderança imediatamente</strong>
+                  <p>Procure seu supervisor ou líder de imediato — <strong>não espere até o fim do turno</strong>. Passe
+                    todas as informações anotadas para que ele possa resolver ou acionar o suporte.</p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                  <strong>Continue produzindo e registre no papel</strong>
+                  <p>Continue sua produção normalmente. Registre tudo em papel para que o apontamento seja feito depois.
+                    Não pare a produção por causa de erro no sistema.</p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">4</div>
+                <div class="step-body">
+                  <strong>Confirme com a liderança ao final do turno</strong>
+                  <p>Antes de encerrar o turno, confirme que o apontamento pendente foi regularizado. Nunca encerre com
+                    apontamentos em aberto sem comunicar.</p>
+                </div>
+              </div>
+            </div>
+            <div class="alert alert-blue">
+              <span class="alert-icon">💡</span>
+              <div class="alert-text">
+                <strong>Lembre-se</strong>
+                <p>Você NÃO será penalizado por reportar um problema no sistema. Será penalizado por não reportar e
+                  deixar o apontamento errado ou em branco.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. FALTA DE SALDO -->
+      <div class="section theme-orange" id="sec-saldo">
+        <div class="section-header" onclick="toggle(this)">
+          <div class="section-header-left">
+            <div class="section-icon">📦</div>
+            <div>
+              <div class="section-title">Falta de saldo no sistema</div>
+              <div class="section-subtitle">O que fazer quando não há peças disponíveis para apontar</div>
+            </div>
+          </div>
+          <div class="chevron">▼</div>
+        </div>
+        <div class="section-body">
+          <div class="section-content">
+            <p class="body-text">Falta de saldo significa que o sistema não encontra peças disponíveis para o seu setor
+              apontar. Isso geralmente acontece porque o <strong>setor anterior ainda não apontou a produção</strong>.
+            </p>
+            <div class="alert alert-orange">
+              <span class="alert-icon">📌</span>
+              <div class="alert-text">
+                <strong>Regra de Falta de Saldo</strong>
+                <p>O setor <strong>ANTERIOR</strong> ao seu é responsável por realizar o apontamento para que o fluxo
+                  seja contínuo. Sem esse apontamento, você não tem saldo para trabalhar.</p>
+              </div>
+            </div>
+            <div class="label">O que fazer passo a passo:</div>
+            <div class="steps">
+              <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-body">
+                  <strong>Verifique se o setor anterior já apontou</strong>
+                  <p>Confirme se o setor que alimenta o seu já registrou a produção do período atual.</p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-body">
+                  <strong>Solicite o apontamento imediatamente</strong>
+                  <p>Se o setor anterior não apontou, solicite que ele realize o apontamento agora.</p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-body">
+                  <strong>Comunique sua liderança</strong>
+                  <p>Informe seu líder sobre a situação para que ele possa acompanhar e resolver com agilidade.</p>
+                </div>
+              </div>
+              <div class="step">
+                <div class="step-num">4</div>
+                <div class="step-body">
+                  <strong>Registre no papel e continue</strong>
+                  <p>Não interrompa sua produção. Registre tudo no papel e atualize o apontamento assim que o saldo for
+                    liberado.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. ERROS DE PRODUÇÃO -->
+      <div class="section theme-red" id="sec-erros-prod">
+        <div class="section-header" onclick="toggle(this)">
+          <div class="section-header-left">
+            <div class="section-icon">❌</div>
+            <div>
+              <div class="section-title">Erros mais comuns no Apontamento de Produção</div>
+              <div class="section-subtitle">Tempo incorreto, duplicidade, sobreposição, produto errado</div>
+            </div>
+          </div>
+          <div class="chevron">▼</div>
+        </div>
+        <div class="section-body">
+          <div class="section-content">
+            <!-- REGRA DE CÁLCULO DE HORAS -->
+            <div class="label">Regra de Ouro — O Sistema Subtrai as Paradas Automaticamente</div>
+            <p class="body-text">Você <strong>não deve descontar</strong> o tempo de parada do seu apontamento de
+              produção. O operador deve cobrir o período integral do turno com o apontamento de produção, e o sistema
+              subtrairá as paradas registradas automaticamente.</p>
+
+            <div class="timeline-wrap">
+              <div class="timeline-label">✅ Forma Correta — Produção 06:00–14:00 + Parada 12:00–13:00</div>
+              <div class="timeline-bar">
+                <div class="tl-seg prod"
+                  style="flex:8; background: var(--blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; text-align: center;">
+                  PRODUÇÃO REGISTRADA INTEGRAL (06:00–14:00)</div>
+              </div>
+              <div class="alert alert-green" style="margin-top:8px;padding:10px 14px;">
+                <span class="alert-icon">✅</span>
+                <span class="alert-text"><strong>Cálculo do Sistema:</strong> 480 min (Produção) − 60 min (Parada) =
+                  <strong>420 min reais</strong></span>
+              </div>
+            </div>
+
+            <div class="alert alert-blue" style="margin-top:8px;">
+              <span class="alert-icon">💡</span>
+              <div class="alert-text">
+                <strong>Nunca subtraia manualmente!</strong>
+                <p>Se você descontar a parada e apontar apenas o "tempo líquido", o sistema subtrairá a parada novamente
+                  sobre o seu tempo já reduzido, gerando dados de produtividade falsos e incorretos.</p>
+              </div>
+            </div>
+
+            <div class="timeline-wrap" style="margin-top:20px; opacity: 0.8;">
+              <div class="timeline-label">❌ Forma Incorreta — Fragmentar a produção (Picar o horário)</div>
+              <div class="timeline-bar">
+                <div class="tl-seg prod" style="flex:3; background: #cbd5e1; color: #475569;">Produção 06:00-12:00</div>
+                <div class="tl-seg stop" style="flex:1; background: var(--red); color: white;">PARADA</div>
+                <div class="tl-seg prod" style="flex:1; background: #cbd5e1; color: #475569;">Prod 13:00-14:00</div>
+              </div>
+              <div class="alert alert-red" style="margin-top:8px;padding:10px 14px;">
+                <span class="alert-icon">❌</span>
+                <span class="alert-text"><strong>Erro:</strong> Você está "picando" a produção para abrir espaço para a
+                  parada. <strong>Não faça isso!</strong> Lance a produção de 06:00 às 14:00 direto.</span>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- ERRO 2 -->
+            <div class="label">Erro 2 — Produção Maior que o Turno</div>
+            <p class="body-text">O tempo registrado ultrapassa o horário de fim do turno.</p>
+            <div class="timeline-wrap">
+              <div class="timeline-bar">
+                <div class="tl-seg prod" style="flex:8">Turno válido 06:00–14:00</div>
+                <div class="tl-seg stop" style="flex:3">FORA DO TURNO ❌<br>14:00–15:30</div>
+              </div>
+            </div>
+            <div class="alert alert-red" style="margin-top:8px;">
+              <span class="alert-icon">❌</span>
+              <span class="alert-text">Nunca registre produção fora do período do seu turno.</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- ERRO 3 -->
+            <div class="label">Erro 3 — Apontamento Duplicado</div>
+            <p class="body-text">A mesma produção registrada duas vezes. O sistema soma tudo — dobrando a quantidade.
+            </p>
+            <div class="compare">
+              <div class="compare-card good">
+                <strong>✅ Correto</strong>
+                <p class="mono">Registro único:<br>06:00 – 10:00 → 1.000 peças<br><br>Sistema conta: <strong>1.000 peças
+                    ✅</strong></p>
+              </div>
+              <div class="compare-card bad">
+                <strong>❌ Errado</strong>
+                <p class="mono">Registro 1: 06:00–10:00 → 1.000<br>Registro 2: 06:00–10:00 → 1.000<br><br>Sistema conta:
+                  <strong>2.000 peças ❌</strong>
+                </p>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- ERRO 4 -->
+            <div class="label">Erro 4 — Produção Sobreposta</div>
+            <p class="body-text">Dois registros que compartilham parte do mesmo período causam duplicidade no intervalo
+              sobreposto.</p>
+            <div class="timeline-wrap">
+              <div class="timeline-bar">
+                <div class="tl-seg prod" style="flex:7">Registro 1 — 06:00 a 10:00</div>
+                <div class="tl-seg over" style="flex:2">SOBREPOSIÇÃO<br>09:30–10:00 ❌</div>
+                <div class="tl-seg dark" style="flex:4">Registro 2 — 09:30 a 12:00</div>
+              </div>
+            </div>
+            <div class="alert alert-red" style="margin-top:8px;">
+              <span class="alert-icon">❌</span>
+              <span class="alert-text">09:30–10:00 foi contado duas vezes. Verifique se os horários não se
+                cruzam.</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- ERRO 5 -->
+            <div class="label">Erro 5 — Produto Incorreto</div>
+            <p class="body-text">Registrar o código de produto errado distorce o estoque, o MRP e gera relatórios
+              falsos.</p>
+            <div class="alert alert-green">
+              <span class="alert-icon">✅</span>
+              <div class="alert-text">
+                <strong>Antes de iniciar: sempre confirme o produto</strong>
+                <p>Confira a Ordem de Produção ou etiqueta · Verifique o código no sistema · Em caso de dúvida, pergunte
+                  ao líder — nunca "arrisque" um código.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. ERROS DE PARADA -->
+      <div class="section theme-red" id="sec-erros-parada">
+        <div class="section-header" onclick="toggle(this)">
+          <div class="section-header-left">
+            <div class="section-icon">⏸</div>
+            <div>
+              <div class="section-title">Erros mais comuns no Apontamento de Paradas</div>
+              <div class="section-subtitle">Parada não registrada, duplicada, sobreposta, maior que o turno</div>
+            </div>
+          </div>
+          <div class="chevron">▼</div>
+        </div>
+        <div class="section-body">
+          <div class="section-content">
+
+            <div class="alert alert-blue">
+              <span class="alert-icon">📌</span>
+              <div class="alert-text">
+                <strong>Regra Geral</strong>
+                <p>Toda parada acima de <strong>5 minutos DEVE ser registrada</strong>. Paradas não registradas fazem o
+                  sistema entender que a máquina estava produzindo quando estava parada.</p>
+              </div>
+            </div>
+
+            <!-- ERRO 1 -->
+            <div class="label">Erro 1 — Parada Não Registrada</div>
+            <p class="body-text">A máquina parou, mas o operador não registrou. O sistema considera produção contínua.
+            </p>
+            <div class="timeline-wrap">
+              <div class="timeline-label">❌ Parada das 10:30 às 11:00 não foi registrada</div>
+              <div class="timeline-bar">
+                <div class="tl-seg stop" style="flex:1">Produção contínua registrada — 480 min (ERRADO ❌)</div>
+              </div>
+            </div>
+            <div class="timeline-wrap" style="margin-top:8px;">
+              <div class="timeline-label">✅ Correto — parada devidamente registrada</div>
+              <div class="timeline-bar">
+                <div class="tl-seg prod" style="flex:9">Produção 06:00–10:30</div>
+                <div class="tl-seg ok" style="flex:2">PARADA ✅<br>10:30–11:00</div>
+                <div class="tl-seg prod" style="flex:5">Produção 11:00–14:00</div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- ERRO 2 -->
+            <div class="label">Erro 2 — Parada Duplicada</div>
+            <p class="body-text">Registrar a mesma parada duas vezes dobra o tempo — eficiência fica incorreta.</p>
+            <div class="compare">
+              <div class="compare-card good">
+                <strong>✅ Correto</strong>
+                <p class="mono">Uma parada:<br>10:00 – 10:30 = 30 min</p>
+              </div>
+              <div class="compare-card bad">
+                <strong>❌ Errado</strong>
+                <p class="mono">Parada 1: 10:00–10:30<br>Parada 2: 10:00–10:30<br>Sistema conta: <strong>60 min
+                    ❌</strong></p>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- ERRO 3 -->
+            <div class="label">Erro 3 — Parada Sobreposta</div>
+            <p class="body-text">Duas paradas com horários que se cruzam — o período em comum é contado duas vezes.</p>
+            <div class="timeline-wrap">
+              <div class="timeline-bar">
+                <div class="tl-seg ok" style="flex:5">Parada 1 — 10:00–10:30</div>
+                <div class="tl-seg stop" style="flex:2">DUPLIC ❌<br>10:20–10:30</div>
+                <div class="tl-seg dark" style="flex:6">Parada 2 — 10:20–11:00</div>
+              </div>
+            </div>
+            <div class="alert alert-red" style="margin-top:8px;">
+              <span class="alert-icon">❌</span>
+              <span class="alert-text">10:20–10:30 foi contado duas vezes.</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- ERRO 4 -->
+            <div class="label">Erro 4 — Total de Paradas Maior que o Turno</div>
+            <div class="alert alert-red">
+              <span class="alert-icon">❌</span>
+              <div class="alert-text">
+                <strong>Fisicamente impossível!</strong>
+                <p class="mono">Turno = 480 min<br>Parada A = 300 min + Parada B = 250 min = 550 min ❌<br>Nunca a soma
+                  das paradas pode ultrapassar o turno.</p>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- ERRO 5 -->
+            <div class="label">Erro 5 — Parada Ultrapassando o Turno</div>
+            <p class="body-text">O horário de fim da parada ultrapassa o horário de fim do turno.</p>
+            <div class="timeline-wrap">
+              <div class="timeline-bar">
+                <div class="tl-seg prod" style="flex:7">Turno — 06:00 até 13:30</div>
+                <div class="tl-seg ok" style="flex:1">Parada ✅</div>
+                <div class="tl-seg stop" style="flex:3">FORA DO TURNO ❌<br>14:00–15:00</div>
+              </div>
+            </div>
+            <div class="alert alert-orange" style="margin-top:8px;">
+              <span class="alert-icon">⚠️</span>
+              <span class="alert-text">A parada que continua no próximo turno deve ser registrada no turno seguinte,
+                pelo operador correspondente.</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. DATA E TURNO -->
+      <div class="section theme-blue" id="sec-data">
+        <div class="section-header" onclick="toggle(this)">
+          <div class="section-header-left">
+            <div class="section-icon">📅</div>
+            <div>
+              <div class="section-title">Erros de Data e Turno</div>
+              <div class="section-subtitle">Como registrar corretamente o turno 3 e evitar confusões de data</div>
+            </div>
+          </div>
+          <div class="chevron">▼</div>
+        </div>
+        <div class="section-body">
+          <div class="section-content">
+            <div class="label">Os três turnos da fábrica</div>
+            <div class="turno-grid">
+              <div class="turno-card t1">
+                <div class="t-num">1º TURNO</div>
+                <div class="t-name">Manhã</div>
+                <div class="t-hours">06:00 – 14:00</div>
+              </div>
+              <div class="turno-card t2">
+                <div class="t-num">2º TURNO</div>
+                <div class="t-name">Tarde</div>
+                <div class="t-hours">14:00 – 22:00</div>
+              </div>
+              <div class="turno-card t3">
+                <div class="t-num">3º TURNO</div>
+                <div class="t-name">Noite</div>
+                <div class="t-hours">22:00 – 06:00</div>
+              </div>
+            </div>
+
+            <div class="label">Data incorreta — Atenção ao Turno 3!</div>
+            <p class="body-text">O caso mais comum é o turno 3, que começa em um dia e termina no dia seguinte.
+              <strong>Sempre registre na data inicio o dia que o turno começou e data fim o dia que o turno
+                Finalizou.</strong>
+            </p>
+            <div class="compare">
+              <div class="compare-card good">
+                <strong>✅ Correto</strong>
+                <p class="mono">Turno 3: inicia dia 10 às 22:00<br>Termina dia 11 às 06:00<br><br>→ Registrar como:
+                  <strong>Data inicio DIA 10 e data fim DIA 11 ✅</strong>
+                </p>
+              </div>
+              <div class="compare-card bad">
+                <strong>❌ Errado</strong>
+                <p class="mono">Turno 3: inicia dia 10 às 22:00<br>Termina dia 11 às 06:00<br><br>→ Registrar como:
+                  <strong>data inicio e fim como DIA 11 ❌</strong>
+                </p>
+              </div>
+            </div>
+
+            <div class="label">Turno incorreto</div>
+            <p class="body-text">Selecionar o turno errado coloca sua produção no relatório de outro período. Se você
+              produziu às 15:00, é o <strong>2º Turno</strong> — não o 1º.</p>
+            <div class="alert alert-orange">
+              <span class="alert-icon">⚠️</span>
+              <div class="alert-text">
+                <strong>Sempre verifique o turno antes de iniciar o apontamento.</strong>
+                <p>Em caso de dúvida, consulte seu líder. Um turno errado gera relatórios incorretos para o dia inteiro.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- 8. BOAS PRÁTICAS -->
+      <div class="section theme-green" id="sec-boas">
+        <div class="section-header" onclick="toggle(this)">
+          <div class="section-header-left">
+            <div class="section-icon">✅</div>
+            <div>
+              <div class="section-title">Boas Práticas — Checklist do Operador</div>
+              <div class="section-subtitle">Marque cada item antes de encerrar o turno</div>
+            </div>
+          </div>
+          <div class="chevron">▼</div>
+        </div>
+        <div class="section-body">
+          <div class="section-content">
+            <p class="body-text">Antes de encerrar cada turno, confirme que você fez tudo isso. Clique nos itens para
+              marcar como concluído:</p>
+            <div class="checklist" id="checklist">
+              <div class="check-item" onclick="checkItem(this)">
+                <div class="check-box"></div>
+                <span>Verifiquei o código do produto antes de iniciar o apontamento</span>
+              </div>
+              <div class="check-item" onclick="checkItem(this)">
+                <div class="check-box"></div>
+                <span>Confirmei que estou no turno correto e na data correta</span>
+              </div>
+              <div class="check-item" onclick="checkItem(this)">
+                <div class="check-box"></div>
+                <span>Registrei o início e fim da produção corretamente, sem ultrapassar o turno</span>
+              </div>
+              <div class="check-item" onclick="checkItem(this)">
+                <div class="check-box"></div>
+                <span>Registrei todas as paradas acima de 5 minutos com motivo</span>
+              </div>
+              <div class="check-item" onclick="checkItem(this)">
+                <div class="check-box"></div>
+                <span>Verifiquei todas as quantidades de produção antes de confirmar o envio</span>
+              </div>
+              <div class="check-item" onclick="checkItem(this)">
+                <div class="check-box"></div>
+                <span>Comuniquei trocas de produto ou paradas à liderança</span>
+              </div>
+              <div class="check-item" onclick="checkItem(this)">
+                <div class="check-box"></div>
+                <span>Revisei todos os apontamentos antes de fechar o turno</span>
+              </div>
+              <div class="check-item" onclick="checkItem(this)">
+                <div class="check-box"></div>
+                <span>Em caso de erro no sistema: anotei no papel e comuniquei o líder</span>
+              </div>
+            </div>
+            <div id="check-progress" style="margin-top:12px; font-size:13px; color:var(--mid); text-align:center;">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 9. DÚVIDAS FREQUENTES -->
+      <div class="section theme-blue" id="sec-faq">
+        <div class="section-header" onclick="toggle(this)">
+          <div class="section-header-left">
+            <div class="section-icon">❓</div>
+            <div>
+              <div class="section-title">Dúvidas Frequentes</div>
+              <div class="section-subtitle">As perguntas mais comuns dos operadores — com respostas diretas</div>
+            </div>
+          </div>
+          <div class="chevron">▼</div>
+        </div>
+        <div class="section-body">
+          <div class="section-content">
+            <div class="faq-list">
+
+              <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">
+                  <span>Esqueci de apontar durante o turno. O que faço?</span>
+                  <span class="faq-arrow">▼</span>
+                </div>
+                <div class="faq-a">
+                  <div class="faq-a-inner">
+                    Comunique imediatamente sua liderança. Não tente fazer o apontamento retroativo por conta própria
+                    sem orientação — isso pode gerar sobreposição ou duplicidade. O líder irá orientar a correção
+                    correta.
+                  </div>
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">
+                  <span>Registrei o produto errado. Consigo corrigir?</span>
+                  <span class="faq-arrow">▼</span>
+                </div>
+                <div class="faq-a">
+                  <div class="faq-a-inner">
+                    Sim, mas NÃO faça a correção sozinho. Informe sua liderança que houve registro com produto
+                    incorreto, passe o código errado e o código correto. A correção deve ser feita de forma orientada
+                    para não gerar novos erros de estoque.
+                  </div>
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">
+                  <span>A máquina parou menos de 5 minutos. Preciso registrar?</span>
+                  <span class="faq-arrow">▼</span>
+                </div>
+                <div class="faq-a">
+                  <div class="faq-a-inner">
+                    Paradas com menos de 5 minutos <strong>não precisam ser registradas</strong>. Apenas registre
+                    paradas que ultrapassaram 5 minutos de duração.
+                  </div>
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">
+                  <span>Trabalhei no turno 3 (22h–06h). Em qual dia registro?</span>
+                  <span class="faq-arrow">▼</span>
+                </div>
+                <div class="faq-a">
+                  <div class="faq-a-inner">
+                    A data inicio no dia que começou o turno e data fim o dia que o turno finalizou <strong>Voce deve
+                      informar as duas datas</strong>. Se o turno iniciou na noite do dia 10, a data inicio é do dia 10
+                    — e a data fim é dia 11.
+                  </div>
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">
+                  <span>O sistema trava ou dá erro ao apontar. O que fazer?</span>
+                  <span class="faq-arrow">▼</span>
+                </div>
+                <div class="faq-a">
+                  <div class="faq-a-inner">
+                    Anote tudo no papel (horário, quantidade, produto, mensagem de erro) e <strong>comunique seu líder
+                      imediatamente</strong>. Não reinicie o processo por conta própria sem orientação — isso pode gerar
+                    registros duplicados.
+                  </div>
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">
+                  <span>Falta saldo no sistema e não consigo apontar. O que faço?</span>
+                  <span class="faq-arrow">▼</span>
+                </div>
+                <div class="faq-a">
+                  <div class="faq-a-inner">
+                    Verifique se o setor anterior ao seu já realizou o apontamento. Se não, solicite que ele atualize
+                    agora. Comunique sua liderança e continue produzindo registrando no papel. Atualize o sistema assim
+                    que o saldo for liberado.
+                  </div>
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">
+                  <span>Posso apontar a produção de outro operador no lugar dele?</span>
+                  <span class="faq-arrow">▼</span>
+                </div>
+                <div class="faq-a">
+                  <div class="faq-a-inner">
+                    <strong>Apenas com autorização expressa da liderança.</strong> Apontamentos realizados sem
+                    autorização podem gerar inconsistências graves nos dados e responsabilidade disciplinar.
+                  </div>
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">
+                  <span>Como sei se meu apontamento está correto?</span>
+                  <span class="faq-arrow">▼</span>
+                </div>
+                <div class="faq-a">
+                  <div class="faq-a-inner">
+                    Ao final do turno, confirme: o horário não ultrapassa o turno; as paradas foram descontadas do tempo
+                    de produção; o produto está correto; não há sobreposições de horário. Em caso de dúvida, acione a
+                    liderança <strong>antes de fechar</strong>.
+                  </div>
+                </div>
+              </div>
+
+              <div class="faq-item">
+                <div class="faq-q" onclick="toggleFaq(this)">
+                  <span>Quais as principais causas de erro no apontamento?</span>
+                  <span class="faq-arrow">▼</span>
+                </div>
+                <div class="faq-a">
+                  <div class="faq-a-inner">
+                    As causas mais comuns são: <strong>falta de comunicação</strong> entre operadores (troca de
+                    produção, paradas não avisadas); <strong>falta de treinamento</strong> (produto errado, turno
+                    errado, paradas esquecidas); e <strong>falta de validação pela liderança</strong> ao longo do turno.
+                    A verificação diária no BI pelo líder ajuda a identificar erros rapidamente.
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="alert alert-dark" style="margin-top:20px;">
+              <span class="alert-icon">📞</span>
+              <div class="alert-text">
+                <strong>Sempre que tiver dúvida — fale com sua liderança</strong>
+                <p>Não arrisque um apontamento errado por medo de perguntar. Perguntar é correto. Errar por não
+                  perguntar gera consequências para você e para todos.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- SEÇÃO DE DEPURAÇÃO (SEMPRE VISÍVEL) -->
+      <div id="sec-debug"
+        style="margin-top: 30px; padding: 20px; border: 2px dashed var(--accent); border-radius: 12px; background: var(--surface2); text-align: center;">
+        <h3 style="color: var(--accent); margin-bottom: 10px;">🛠️ Ferramenta de Depuração</h3>
+        <p style="margin-bottom: 20px; color: var(--text2);">Use o botão abaixo para enviar um teste rápido para o
+          servidor.</p>
+        <button onclick="testarEnvioAPI()" class="btn-confirm"
+          style="background: var(--accent); width: auto; padding: 15px 30px; font-weight: bold; border-radius: 8px; cursor: pointer;">
+          <i class="fas fa-paper-plane" style="margin-right: 8px;"></i> TESTAR ENVIO (SIMULADO)
+        </button>
+      </div>
+
+    </div><!-- /sections -->
+
+    <footer>
+      Guia de Apontamento de Produção · Uso interno · Em caso de dúvidas, comunique imediatamente sua liderança.
+    </footer>
+
+    <button class="back-top" id="backTop" onclick="scrollToTop()" title="Voltar ao topo">↑</button>
+
+    <script src="assets/js/duvidas.js"></script>
+  </div>
+
+  <!-- ════════════════════════════════ MODAL ════════════════════════════════ -->
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal-box" id="modalBox">
+      <div class="modal-head" id="modalHead">
+        <i id="modalIcon" class="fas fa-info-circle"></i>
+        <h3 id="modalTitle">Título</h3>
+      </div>
+      <div class="modal-body" id="modalBody">Mensagem</div>
+      <div class="modal-foot"></div>
+    </div>
+  </div>
+
+  <script>
+    // Carregador dinâmico sequencial anti-cache
+    (function () {
+      // Previne erro se o usuário clicar antes do app.js estar pronto
+      window.goTo = function () {
+        console.warn("Aguarde, sistema carregando...");
+      };
+
+      // Mostra o overlay de loading imediatamente
+      var overlay = document.getElementById('fullLoadingOverlay');
+      if (overlay) {
+        document.getElementById('loadingText').textContent = "Baixando dados atualizados...";
+        overlay.classList.add('active');
+      }
+
+      var version = new Date().getTime();
+      var scripts = [
+        "produtos.js",
+        "recursos.js",
+        "motivos.js",
+        "ops.js",
+        "zink-data.js",
+        "colaboradores.js",
+        "assets/js/app.js"
+      ];
+
+      function loadScript(index) {
+        if (index >= scripts.length) {
+          // Finalizou o carregamento de todos os scripts
+          if (overlay) overlay.classList.remove('active');
+          return;
+        }
+        var scriptEl = document.createElement("script");
+        scriptEl.src = scripts[index] + "?v=" + version;
+        // Carrega o próximo apenas quando o atual terminar (mantém a ordem de dependência)
+        scriptEl.onload = function () {
+          loadScript(index + 1);
+        };
+        scriptEl.onerror = function () {
+          console.error("Erro ao carregar script: " + scripts[index]);
+          loadScript(index + 1); // Tenta continuar mesmo com erro
+        };
+        document.body.appendChild(scriptEl);
+      }
+
+      loadScript(0);
+    })();
+  </script>
+</body>
+
+</html>
