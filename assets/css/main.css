@@ -35,14 +35,6 @@
       padding: 1rem;
     }
 
-    @media (orientation: landscape) and (min-height: 600px) {
-      body {
-        align-items: center;
-        padding: .5rem;
-      }
-    }
-
-    /* ── SCREENS ── */
     .screen {
       display: none;
       width: 100%;
@@ -1241,10 +1233,58 @@
       animation: pulseOfflineDot 1.5s infinite;
     }
 
-    /* ── TABLET LANDSCAPE ── */
+    /* ── TABLET LANDSCAPE (agressivo — maximizar espaço) ── */
     @media (orientation: landscape) and (min-width: 900px) {
+      body {
+        padding: .3rem .5rem;
+      }
+
+      .screen {
+        max-width: 100%;
+      }
+
       .home-cards {
         grid-template-columns: repeat(3, 1fr);
+        gap: .6rem;
+      }
+
+      .home-card {
+        padding: 1rem .8rem;
+      }
+
+      .home-card .card-icon {
+        font-size: 1.6rem;
+      }
+
+      .home-card h3 {
+        font-size: .85rem;
+      }
+
+      .home-card p {
+        font-size: .7rem;
+      }
+
+      .home-logo {
+        font-size: 1.6rem;
+        margin-bottom: 0;
+      }
+
+      .home-sub {
+        font-size: .78rem;
+        margin-bottom: .8rem;
+      }
+
+      .logo-img-home {
+        max-width: 120px;
+        margin-bottom: .5rem;
+      }
+
+      .status-bar {
+        margin-bottom: .6rem;
+      }
+
+      .fields-grid {
+        gap: .35rem;
       }
 
       .fields-grid.cols-3 {
@@ -1263,58 +1303,150 @@
         grid-template-columns: 1fr 1fr;
       }
 
+      .fields-grid.cols-6 {
+        grid-template-columns: repeat(6, 1fr);
+      }
+
       .form-card {
-        padding: .7rem .9rem;
-        margin-bottom: .5rem;
+        padding: .45rem .7rem;
+        margin-bottom: .3rem;
+        border-radius: 10px;
+      }
+
+      .form-card h4 {
+        font-size: .62rem;
+        margin-bottom: .25rem;
       }
 
       .field input,
       .field select {
-        padding: 6px 8px;
-        font-size: .78rem;
+        padding: 4px 7px;
+        font-size: .72rem;
+        border-radius: 6px;
       }
 
       .field label {
-        font-size: .6rem;
+        font-size: .55rem;
+      }
+
+      .field {
+        gap: 1px;
       }
 
       .page-header {
-        margin-bottom: 1rem;
-        padding-bottom: .7rem;
+        margin-bottom: .5rem;
+        padding-bottom: .4rem;
+        gap: 6px;
       }
 
       .page-header h2 {
-        font-size: 1.2rem;
+        font-size: 1rem;
+      }
+
+      .page-header .ph-icon {
+        font-size: 1.1rem;
+      }
+
+      .logo-img-header {
+        max-height: 28px;
+        margin-right: 6px;
+      }
+
+      .btn {
+        padding: 5px 12px;
+        font-size: .72rem;
+        gap: 4px;
+      }
+
+      .btn-sm {
+        padding: 4px 10px;
+        font-size: .68rem;
+      }
+
+      .actions-row {
+        padding-top: .2rem;
+        gap: .5rem;
+      }
+
+      .timeline-container {
+        display: none;
       }
 
       .summary-grid {
         grid-template-columns: 1fr 1fr;
+        gap: .4rem;
+        margin-top: .4rem;
       }
 
-      .home-card {
-        padding: 1.5rem 1rem;
+      .summary-item {
+        padding: .4rem .6rem;
       }
 
-      .home-card .card-icon {
-        font-size: 2rem;
+      .summary-item .s-label {
+        font-size: .6rem;
       }
 
-      .home-logo {
-        font-size: 2.2rem;
-      }
-
-      .logo-img-home {
-        max-width: 180px;
-        margin-bottom: 1rem;
-      }
-
-      .status-bar {
-        margin-bottom: 1.2rem;
+      .summary-item .s-val {
+        font-size: .85rem;
       }
 
       .modal-box {
-        padding: 1.5rem;
-        width: 500px;
+        padding: 1.2rem;
+        width: 480px;
+      }
+
+      .modal-head h3 {
+        font-size: 1rem;
+      }
+
+      .modal-body {
+        font-size: .8rem;
+        max-height: 50vh;
+      }
+
+      .date-arrow-btn {
+        width: 20px;
+        height: 20px;
+        font-size: .55rem;
+      }
+
+      .help-btn {
+        width: 22px;
+        height: 22px;
+        font-size: .6rem;
+      }
+
+      section .help-btn {
+        width: 18px;
+        height: 18px;
+      }
+
+      .field-span2 {
+        grid-column: span 2;
+      }
+
+      .ml-auto {
+        margin-left: auto;
+      }
+
+      .version-badge {
+        font-size: .6rem;
+        padding: 3px 10px;
+      }
+
+      .connection-status {
+        font-size: .62rem;
+        padding: 3px 10px;
+      }
+
+      .header-status-pill {
+        font-size: .55rem;
+        padding: 2px 7px;
+      }
+
+      #p-timeline-wrap,
+      #s-timeline-wrap {
+        display: none !important;
       }
     }
 
