@@ -1,7 +1,7 @@
 {
   "appId": "com.progeral.apontamento",
   "appName": "Apontamento Producao",
-  "webDir": "dist",
+  "webDir": ".build/dist",
   "server": {
     "url": "https://interno.progeral.com.br/apontamentodev/",
     "cleartext": true,
