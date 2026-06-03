@@ -2063,14 +2063,35 @@ if ('serviceWorker' in navigator) {
     headerParada: document.getElementById('headerStatusParada')
   };
 
+  let _forcedOffline = false;
+  let _lastPingOk = true;
+
+  function pingServer(callback) {
+    const base = (document.querySelector('base') || {}).href || window.location.origin + '/';
+    const url = base + 'manifest.json?_=' + Date.now();
+    const controller = new AbortController();
+    const timer = setTimeout(function () { controller.abort(); }, 3000);
+    fetch(url, { method: 'HEAD', mode: 'same-origin', cache: 'no-store', signal: controller.signal })
+      .then(function (r) {
+        clearTimeout(timer);
+        _lastPingOk = r.ok;
+        callback(true);
+      })
+      .catch(function () {
+        clearTimeout(timer);
+        _lastPingOk = false;
+        callback(false);
+      });
+  }
+
   function updateConnectionUI() {
-    const isOnline = navigator.onLine;
+    const navOnline = navigator.onLine;
+    const isOnline = navOnline && _lastPingOk;
 
     // Detecção de internet lenta (Network Information API)
     const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     let isSlow = false;
     if (conn) {
-      // Considera lento se for 2G ou se o RTT (ping) estiver acima de 1000ms
       isSlow = (conn.effectiveType === '2g' || conn.effectiveType === 'slow-2g' || (conn.rtt && conn.rtt > 1000));
     }
 
@@ -2079,7 +2100,7 @@ if ('serviceWorker' in navigator) {
       elements.banner.classList.toggle('visible', !isOnline);
     }
 
-    // 2. Banner de internet lenta (visível apenas se estiver online e lenta)
+    // 2. Banner de internet lenta
     const slowBanner = document.getElementById('slowInternetBanner');
     if (slowBanner) {
       slowBanner.classList.toggle('visible', isOnline && isSlow);
@@ -2096,24 +2117,24 @@ if ('serviceWorker' in navigator) {
       elements.homeText.textContent = isOnline ? 'Online' : 'Sem Conexão';
     }
 
-    // 3. Mini-pills nos headers de Produção e Parada
-    [elements.headerProd, elements.headerParada].forEach(pill => {
+    // 4. Mini-pills nos headers de Produção e Parada
+    [elements.headerProd, elements.headerParada].forEach(function (pill) {
       if (!pill) return;
       pill.className = 'header-status-pill ' + (isOnline ? 'online' : 'offline');
       pill.title = isOnline ? 'Online' : 'Offline';
-      const textEl = pill.querySelector('.hsp-text');
-      if (textEl) textEl.textContent = isOnline ? 'Online' : 'Offline';
     });
-
-    console.log(`[CONEXÃO] Status: ${isOnline ? '🟢 ONLINE' : '🔴 OFFLINE'}`);
   }
 
-  window.addEventListener('online', updateConnectionUI);
-  window.addEventListener('offline', updateConnectionUI);
+  function fullCheck() {
+    pingServer(function () {
+      updateConnectionUI();
+    });
+  }
 
-  // Verificação inicial
-  updateConnectionUI();
+  window.addEventListener('online', fullCheck);
+  window.addEventListener('offline', fullCheck);
 
-  // Verificação periódica a cada 10 segundos (para pegar quedas de Wi-Fi que nem sempre disparam o evento)
-  setInterval(updateConnectionUI, 10000);
+  // Verificação inicial + periódica (a cada 5s faz um ping real no servidor)
+  fullCheck();
+  setInterval(fullCheck, 5000);
 })();
