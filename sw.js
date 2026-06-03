@@ -1,10 +1,7 @@
-const CACHE_NAME = 'apontamentos-v1';
-const ASSETS = [
+const CACHE_NAME = 'apontamentos-v2';
+const STATIC_ASSETS = [
   './',
-  './index.html',
   './manifest.json',
-  './db-data.js',
-  './zink-data.js',
   './icons/logo progeral azul.png',
   './icons/app-icon.jpg',
   './icons/icon-192.png',
@@ -13,32 +10,49 @@ const ASSETS = [
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
 
-// Install Event
-self.addEventListener('install', (event) => {
+self.addEventListener('install', function (event) {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('Caching assets');
-      return cache.addAll(ASSETS);
+    caches.open(CACHE_NAME).then(function (cache) {
+      return cache.addAll(STATIC_ASSETS);
     })
   );
 });
 
-// Activate Event
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', function (event) {
   event.waitUntil(
-    caches.keys().then((keys) => {
+    caches.keys().then(function (keys) {
       return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+        keys.filter(function (key) { return key !== CACHE_NAME; }).map(function (key) { return caches.delete(key); })
       );
     })
   );
 });
 
-// Fetch Event
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', function (event) {
+  var url = event.request.url;
+
+  // Static assets: cache-first
+  if (url.includes('icons/') || url.includes('font-awesome') || url.includes('fonts.googleapis') || url.includes('fonts.gstatic')) {
+    event.respondWith(
+      caches.match(event.request).then(function (cached) {
+        return cached || fetch(event.request);
+      })
+    );
+    return;
+  }
+
+  // HTML, CSS, JS, PHP, data files: network-first (sempre buscar atualizado)
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request);
-    })
+    fetch(event.request)
+      .then(function (response) {
+        var clone = response.clone();
+        caches.open(CACHE_NAME).then(function (cache) {
+          cache.put(event.request, clone);
+        });
+        return response;
+      })
+      .catch(function () {
+        return caches.match(event.request);
+      })
   );
 });
