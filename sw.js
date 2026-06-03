@@ -33,6 +33,9 @@ self.addEventListener('activate', function (event) {
 });
 
 self.addEventListener('fetch', function (event) {
+  // Never cache non-GET requests (POST, PUT, DELETE, etc.)
+  if (event.request.method !== 'GET') return;
+
   var url = event.request.url;
 
   // Static assets: cache-first
