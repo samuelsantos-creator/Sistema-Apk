@@ -183,3 +183,36 @@ Este arquivo documenta as principais decisões arquiteturais do projeto Apontame
 **Consequências:**
 - **Positivas:** Fluxo claro de deploy; MDM atualiza apenas quando necessário.
 - **Negativas:** Requer disciplina para versionar corretamente.
+
+---
+
+## [ADR-012] Geração Automatizada de Ícones do App (v1.4.5)
+
+**Data:** 2026-06-03
+**Contexto:** O APK estava usando o ícone padrão do Capacitor (círculo azul com raio). O PWA estava usando ícones antigos. A equipe precisava de um método simples para trocar todos os ícones (Android + PWA) a partir de uma única imagem fonte.
+
+**Decisão:**
+1. Criar um script PowerShell que usa `System.Drawing` para redimensionar `icons/app-icon.jpg` (1024×1024) para todos os tamanhos necessários.
+2. Gerar automaticamente: `ic_launcher.png`, `ic_launcher_round.png` (com corte circular via GraphicsPath) e `ic_launcher_foreground.png` para cada densidade mipmap (mdpi a xxxhdpi).
+3. Gerar os ícones PWA (`icon-192.png` e `icon-512.png`) a partir da mesma fonte.
+
+**Consequências:**
+- **Positivas:** Troca de ícone centralizada — substitui um arquivo e executa o script. Consistência entre APK e PWA.
+- **Negativas:** Depende do .NET Framework (`System.Drawing`) disponível no Windows.
+
+---
+
+## [ADR-013] Monitor de Conexão com Ping HTTP para WebView (v1.4.5)
+
+**Data:** 2026-06-03
+**Contexto:** O monitor de conexão original dependia exclusivamente de `navigator.onLine` e dos eventos `online`/`offline`. Em testes com o APK (Android WebView), desligar o WiFi não disparava o banner de offline — o WebView não refletia corretamente a perda de conectividade.
+
+**Decisão:**
+1. Manter `navigator.onLine` como primeira camada de detecção.
+2. Adicionar uma segunda camada: ping HTTP periódico a cada 5s com `fetch('manifest.json', { method: 'HEAD' })` e timeout de 3s via `AbortController`.
+3. Considerar offline se o ping falhar **ou** `navigator.onLine` for `false`.
+4. Reduzir intervalo de polling de 10s para 5s para resposta mais rápida.
+
+**Consequências:**
+- **Positivas:** Detecção de perda de conexão funciona de forma confiável tanto em navegador quanto no APK WebView.
+- **Negativas:** Leve tráfego adicional (1 requisição HEAD a cada 5s para `manifest.json`).

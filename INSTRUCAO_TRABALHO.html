@@ -153,6 +153,8 @@
   <tr><td><code>.build/dist/index.html</code></td><td>Placeholder exigido pelo Ionic Appflow</td></tr>
   <tr><td><code>android/</code></td><td>Projeto Android nativo (gerado pelo Capacitor)</td></tr>
   <tr><td><code>.gitignore</code></td><td>Regras de exclusão do Git</td></tr>
+  <tr><td><code>icons/</code></td><td>Ícones e logos da interface</td></tr>
+  <tr><td><code>icons/app-icon.jpg</code></td><td>Imagem fonte 1024×1024 para gerar ícones do APK e PWA</td></tr>
 </table>
 
 <!-- ============================================================ -->
@@ -386,7 +388,80 @@ versionName "1.4.5"  ← versão semântica do app</code></pre>
 </div>
 
 <!-- ============================================================ -->
-<h2>❓ 10. Dúvidas Frequentes</h2>
+<h2>🎨 10. Ícone do Aplicativo</h2>
+
+<p>O ícone do APK e do PWA é gerado a partir de um único arquivo fonte: <code>icons/app-icon.jpg</code> (1024×1024).</p>
+
+<div class="box info">
+  <strong>📌 Como trocar o ícone:</strong>
+  <ol>
+    <li>Substitua o arquivo <code>icons/app-icon.jpg</code> por uma nova imagem <strong>1024×1024</strong></li>
+    <li>Execute o script de geração no PowerShell (pasta raiz do projeto):
+<pre><code>Add-Type -AssemblyName System.Drawing
+$img = [System.Drawing.Image]::FromFile("icons\app-icon.jpg")
+$sizes = @{ "mipmap-mdpi"=48; "mipmap-hdpi"=72; "mipmap-xhdpi"=96; "mipmap-xxhdpi"=144; "mipmap-xxxhdpi"=192 }
+$resDir = "android\app\src\main\res"
+foreach ($f in $sizes.Keys) {
+  $s = $sizes[$f]; $b = New-Object System.Drawing.Bitmap($s,$s)
+  $g = [System.Drawing.Graphics]::FromImage($b); $g.InterpolationMode = "HighQualityBicubic"
+  $g.DrawImage($img,0,0,$s,$s); $g.Dispose()
+  $b.Save("$resDir\$f\ic_launcher.png",[System.Drawing.Imaging.ImageFormat]::Png)
+  $b.Save("$resDir\$f\ic_launcher_foreground.png",[System.Drawing.Imaging.ImageFormat]::Png)
+  $b.Dispose()
+}
+# PWA icons
+$img192 = New-Object System.Drawing.Bitmap(192,192)
+$g192 = [System.Drawing.Graphics]::FromImage($img192); $g192.InterpolationMode = "HighQualityBicubic"
+$g192.DrawImage($img,0,0,192,192); $g192.Dispose()
+$img192.Save("icons\icon-192.png",[System.Drawing.Imaging.ImageFormat]::Png); $img192.Dispose()
+$img512 = New-Object System.Drawing.Bitmap(512,512)
+$g512 = [System.Drawing.Graphics]::FromImage($img512); $g512.InterpolationMode = "HighQualityBicubic"
+$g512.DrawImage($img,0,0,512,512); $g512.Dispose()
+$img512.Save("icons\icon-512.png",[System.Drawing.Imaging.ImageFormat]::Png); $img512.Dispose()
+$img.Dispose()</code></pre>
+    </li>
+    <li>Commit, push e gere um novo APK no Ionic Appflow</li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2>📡 11. Monitor de Conexão</h2>
+
+<p>O app possui um indicador visual de conectividade que funciona em todas as telas:</p>
+
+<table>
+  <tr><th>Indicador</th><th>Onde aparece</th><th>Quando ativa</th></tr>
+  <tr>
+    <td><span style="color:#dc2626;">🔴 Banner vermelho</span></td>
+    <td>Topo fixo (todas as telas)</td>
+    <td>Sem conexão com o servidor</td>
+  </tr>
+  <tr>
+    <td><span style="color:#d97706;">🟡 Banner amarelo</span></td>
+    <td>Topo fixo (todas as telas)</td>
+    <td>Conexão lenta (2G ou RTT > 1s)</td>
+  </tr>
+  <tr>
+    <td><span style="color:#059669;">🟢 Pilula verde</span></td>
+    <td>Header (Produção/Parada)</td>
+    <td>Online</td>
+  </tr>
+  <tr>
+    <td><span style="color:#dc2626;">🔴 Pilula vermelha</span></td>
+    <td>Header (Produção/Parada)</td>
+    <td>Offline</td>
+  </tr>
+</table>
+
+<p><strong>Como funciona:</strong> O sistema combina duas verificações:</p>
+<ol>
+  <li><code>navigator.onLine</code> — API nativa do navegador/WebView</li>
+  <li><strong>Ping HTTP</strong> a cada 5s — faz um HEAD request em <code>manifest.json</code> com timeout de 3s. Se falhar, considera offline.</li>
+</ol>
+<p>Isso garante que funcione corretamente mesmo no APK (Android WebView), onde o <code>navigator.onLine</code> sozinho é instável.</p>
+
+<!-- ============================================================ -->
+<h2>❓ 12. Dúvidas Frequentes</h2>
 
 <h3>Preciso instalar Android Studio para atualizar?</h3>
 <p><strong>Não.</strong> O Ionic Appflow compila o APK na nuvem. Você só precisa do Git e do navegador.</p>

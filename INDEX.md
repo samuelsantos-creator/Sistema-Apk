@@ -33,6 +33,7 @@ A aplicação é transformada em **APK Android** via **Capacitor** + **Ionic App
 | `android/` | Projeto Android | Gerado pelo Capacitor; compilado na nuvem pelo Ionic Appflow. |
 | `.htaccess` | Config Apache | Políticas agressivas de No-Cache para dados dinâmicos. |
 | `icons/` | Assets | Ícones e logos da interface. |
+| `icons/app-icon.jpg` | Assets | Imagem fonte 1024×1024 para geração de ícones Android e PWA. |
 
 ---
 
@@ -108,7 +109,7 @@ Tablets (chão de fábrica)
 
 | Versão | Data | Descrição |
 |---|---|---|
-| 1.4.5 | Jun/2026 | Responsividade agressiva para landscape tablet |
+| 1.4.5 | Jun/2026 | Responsividade landscape, .build/, novo ícone, monitor conexão com ping HTTP |
 | 1.4.0 | Jun/2026 | Capacitor + Ionic Appflow + APK Android |
 | 2.1.1 | Jun/2026 | Compatibilidade PWABuilder (manifest.json) |
 | 2.1.0 | Mai/2026 | Idempotência 3 camadas + validações |

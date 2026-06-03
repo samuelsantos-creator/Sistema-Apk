@@ -9,11 +9,15 @@ e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 
 ### Adicionado
 - **Responsividade Agressiva para Tablet Landscape:** Media query `(orientation: landscape) and (min-width: 900px)` completamente reescrita com valores mais compactos. Timeline oculta, padding de cards reduzido (`0.45rem 0.7rem`), inputs menores (`4px 7px`, fonte `0.72rem`), botões compactos (`5px 12px`), header reduzido (`1rem`), gaps de grid minimizados. Logo do header em `28px`.
+- **Novo Ícone do App:** `icons/app-icon.jpg` (1024×1024) usado como fonte única para gerar todos os ícones do Android (mipmap-mdpi a xxxhdpi, incluindo foreground e round) e do PWA (icon-192.png, icon-512.png). Gerado via script PowerShell com `System.Drawing`.
+- **Seção Ambientes Teste vs Produção:** Documentação em `INSTRUCAO_TRABALHO.html` explicando as duas URLs (`.../apontamentodev/` para teste, `.../apontamento/` para produção) e onde alterar a URL no `capacitor.config.json`.
 
 ### Alterado
 - **Refatoração de diretórios:** `dist/` e `node_modules/` movidos para `.build/`. `capacitor.config.json` atualizado com `"webDir": ".build/dist"`. O `.build/` não precisa ser copiado para o servidor interno, mantendo a raiz limpa.
+- **`INSTRUCAO_TRABALHO.html`:** Removido do `.gitignore` e adicionado ao repositório. Caminho local substituído por exemplo genérico. Adicionada seção 9 (Ambientes) e seção 10 (FAQ expandida). Referências `dist/` corrigidas para `.build/dist/`.
 
 ### Corrigido
+- **Monitor de Conexão para APK (WebView):** O `navigator.onLine` do Android WebView é instável — muitas vezes não detecta perda de WiFi. Adicionado ping HTTP periódico a cada 5s (HEAD em `manifest.json` com timeout de 3s). Agora o sistema considera offline se o ping falhar **ou** `navigator.onLine` for `false`. Intervalo de verificação reduzido de 10s para 5s.
 - **Compatibilidade Android (build.gradle):** `versionName` atualizado de `"1.0"` para `"1.4.5"`, `versionCode` incrementado para `2` para distribuição via MDM.
 
 ## [1.4.0] — 2026-06-02
