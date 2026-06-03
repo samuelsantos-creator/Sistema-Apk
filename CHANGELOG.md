@@ -5,10 +5,31 @@ Toda mudança notável neste projeto será documentada neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
-## [Unreleased]
+## [1.4.5] — 2026-06-03
+
+### Adicionado
+- **Responsividade Agressiva para Tablet Landscape:** Media query `(orientation: landscape) and (min-width: 900px)` completamente reescrita com valores mais compactos. Timeline oculta, padding de cards reduzido (`0.45rem 0.7rem`), inputs menores (`4px 7px`, fonte `0.72rem`), botões compactos (`5px 12px`), header reduzido (`1rem`), gaps de grid minimizados. Logo do header em `28px`.
+
+### Corrigido
+- **Compatibilidade Android (build.gradle):** `versionName` atualizado de `"1.0"` para `"1.4.5"`, `versionCode` incrementado para `2` para distribuição via MDM.
+
+## [1.4.0] — 2026-06-02
+
+### Adicionado
+- **Capacitor + Ionic Appflow:** Projeto transformado em aplicação Android híbrida usando Capacitor. Criados `package.json`, `capacitor.config.json`, e plataforma `android/`. APK compilado via Ionic Appflow Cloud Build.
+- **Configuração `capacitor.config.json`:** App aponta para URL interna `https://interno.progeral.com.br/apontamentodev/` com `cleartext: true` e `allowNavigation` para os domínios internos (`interno.progeral.com.br`, `192.168.8.21`).
+- **Git Ignore:** Adicionado `.gitignore` ignorando `node_modules/`, `.opencode/`, `*.log`, `.DS_Store`, `Thumbs.db`, `.env`, `INSTRUCAO_TRABALHO.html`.
+- **dist/index.html:** Página de placeholder (redirecionamento) criada para atender exigência do Ionic Appflow de ter um `webDir` existente no repositório.
+
+### Alterado
+- **Manifest.json corrigido:** Adicionados campos obrigatórios para PWABuilder — `lang`, `scope`, `orientation`, `categories`, `prefer_related_applications`. `start_url` alterado de relativo para absoluto. Descrição expandida.
+
+## [2.1.1] — 2026-06-02
 
 ### Alterado
 - **manifest.json:** Adicionados campos obrigatórios para compatibilidade com PWABuilder/Bubblewrap — `lang`, `scope`, `orientation`, `categories`, `prefer_related_applications`. Corrigido `start_url` de relativo (`./index.html`) para absoluto (`/index.html`). Descrição expandida para atender requisitos de geração de APK.
+
+## [2.1.0] — 2026-05-29
 
 ### Adicionado
 - **Idempotência (3 Camadas):** Implementado sistema de prevenção de apontamentos duplicados:

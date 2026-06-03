@@ -1,6 +1,8 @@
 # Architecture Decision Records (ADR)
 
-Este arquivo documenta as principais decisões arquiteturais tomadas para o projeto `apontamentodev`.
+Este arquivo documenta as principais decisões arquiteturais do projeto Apontamento de Produção.
+
+---
 
 ## [ADR-001] Separação Monolítica e Adoção de Arquitetura LAMP (v2.0.0)
 
@@ -30,114 +32,154 @@ Este arquivo documenta as principais decisões arquiteturais tomadas para o proj
 
 **Consequências:**
 - **Positivas:** Operadores *sempre* consumirão a carga de dados exata do momento em que recarregam a página.
-- **Negativas:** Leve aumento no consumo de banda na rede Wi-Fi interna da fábrica, dado que scripts extensos (como `produtos.js` de ~2MB) serão trafegados em todo refresh. (Mitigação recomendada no futuro: Service Workers granulares com Cache Validation ETag).
+- **Negativas:** Leve aumento no consumo de banda na rede Wi-Fi interna da fábrica, dado que scripts extensos (como `produtos.js` de ~2MB) serão trafegados em todo refresh.
 
 ---
 
 ## [ADR-003] Regras de Validação Dinâmica de Quantidades e Peso por Unidade de Medida (v2.0.1)
 
 **Data:** 2026-05-19
-**Contexto:** O sistema original permitia qualquer caractere numérico e decimal no campo de quantidade produzida (`p-qtd`), sem validar se o produto selecionado aceitava valores fracionários. Isso causava erros operacionais, como apontar frações de peças (ex: `0.5 PC`), o que gerava inconsistências na integração com o ERP. Por outro lado, para produtos com processos de pesagem na zincagem, o campo de peso (`p-peso`) era lido como inteiro, impedindo o cálculo exato de peças por peso fracionário (ex: `1.5 kg`).
+**Contexto:** O sistema original permitia qualquer caractere numérico e decimal no campo de quantidade produzida (`p-qtd`), sem validar se o produto selecionado aceitava valores fracionários. Isso causava erros operacionais, como apontar frações de peças (ex: `0.5 PC`), o que gerava inconsistências na integração com o ERP.
 
 **Decisão:**
-1. Habilitar dinamicamente a validação de decimais ou inteiros no campo de Quantidade Produzida (`p-qtd`) com base na Unidade de Medida (`um`) do produto selecionado em `produtos.js`.
+1. Habilitar dinamicamente a validação de decimais ou inteiros no campo de Quantidade Produzida com base na Unidade de Medida (`um`) do produto.
 2. Criar uma lista branca de UMs que admitem ponto decimal (`KG`, `M`, `MT`). Todas as demais UMs (como `PC` e `UN`) são tratadas estritamente como inteiras.
-3. Bloquear o caractere vírgula (`,`) em tempo real em todos os inputs decimais (`p-qtd` e `p-peso`), aceitando apenas ponto (`.`) para compatibilidade com o parser de ponto flutuante do JavaScript.
-4. Mudar o tratamento do campo `p-peso` no cálculo de zincagem e no envio da API para usar `parseFloat` ao invés de `parseInt`, permitindo a digitação de pesos fracionários e arredondando o número final de peças calculadas para cima (`Math.ceil`).
-5. Configurar os atributos `step`, `placeholder` e `inputmode` dos campos dinamicamente para melhorar a acessibilidade e abrir teclados otimizados em dispositivos móveis.
+3. Bloquear o caractere vírgula (`,`) em tempo real em todos os inputs decimais, aceitando apenas ponto (`.`).
+4. Mudar o tratamento do campo `p-peso` para usar `parseFloat` ao invés de `parseInt`, permitindo pesos fracionários e arredondando para cima (`Math.ceil`).
+5. Configurar `step`, `placeholder` e `inputmode` dinamicamente para melhor acessibilidade.
 
 **Consequências:**
 - **Positivas:** Redução de erros de digitação no chão de fábrica; validação reativa e imediata na interface; cálculo preciso da produção por pesagem.
-- **Negativas:** Exige sincronização precisa da UM no arquivo `produtos.js` exportado do ERP para que as restrições reflitam a regra de negócio correta.
+- **Negativas:** Exige sincronização precisa da UM no arquivo `produtos.js` exportado do ERP.
 
 ---
 
-## [ADR-004] Restrição de Matrícula (Comprimento Fixo) e Validação Cruzada de O.P. Opcional (v2.0.1)
+## [ADR-004] Restrição de Matrícula e Validação Cruzada de O.P. (v2.0.1)
 
 **Data:** 2026-05-19
-**Contexto:** Anteriormente, a matrícula do operador podia ser digitada com qualquer comprimento, o que gerava logs confusos de erros ou inconsistências na integração direta com os cadastros do Protheus. Adicionalmente, o campo de Ordem de Produção (OP) aceitava qualquer número sem realizar uma validação de existência real na base local (`ops.js`), impossibilitando alertas visuais imediatos ao operador no caso de erros de digitação.
+**Contexto:** Matrícula sem comprimento fixo gerava logs confusos. O campo de OP aceitava qualquer número sem validação de existência real na base local.
 
 **Decisão:**
-1. Fixar o comprimento de Matrícula para exatamente 6 números através de `maxlength="6"` no input e verificação de comprimento em tempo real no JavaScript. O check visual (borda verde) só é liberado se a matrícula tiver tamanho 6 e for válida.
-2. Manter a OP (Ordem de Produção) como opcional, mas aplicar validação dinâmica caso seja preenchida: o sistema verifica se a OP existe em `db.ops`. Se não existir no arquivo local `ops.js`, a OP recebe borda vermelha e um erro na tela ("OP não encontrada"), bloqueando também a gravação e os testes da API.
+1. Fixar comprimento da matrícula em exatamente 6 números (`maxlength="6"`).
+2. Manter OP como opcional, mas validar contra `db.ops` se preenchida.
 
 **Consequências:**
-- **Positivas:** Prevenção antecipada de lançamentos incorretos de OPs inválidas; garantia de que a matrícula possui formato idêntico ao do ERP Protheus.
-- **Negativas:** Requer atualização regular do banco de dados de OPs ativas (`ops.js`) no servidor LAMP para evitar falsos negativos ao tentar lançar OPs recém-criadas.
+- **Positivas:** Prevenção antecipada de lançamentos incorretos; formato idêntico ao ERP Protheus.
+- **Negativas:** Requer atualização regular do banco de OPs ativas (`ops.js`) no servidor.
 
 ---
 
 ## [ADR-005] Preenchimento Automático do Produto por O.P. em Tempo Real (v2.0.2)
 
 **Data:** 2026-05-19
-**Contexto:** O sistema permitia que o operador digitasse uma O.P. e associasse manualmente qualquer código de produto, gerando inconsistências no ERP por erros de digitação (ex: apontar um produto que não pertence àquela O.P.). Embora houvesse validação na gravação, era necessário fornecer uma experiência mais fluida que preenchesse os dados automaticamente assim que a O.P. fosse validada.
+**Contexto:** Operador digitava O.P. e associava manualmente qualquer produto, gerando inconsistências no ERP.
 
 **Decisão:**
-1. Interceptar a digitação do operador no campo de O.P. (`p-op` e `s-op`) em tempo real através do evento `input`.
-2. Assim que o valor inserido corresponder a uma O.P. válida no banco de dados local (`db.ops`), o sistema preenche automaticamente os campos de **Produto** e **Descrição**.
-3. Adicionar a classe `.user-interacted` a estes campos e chamar `validateLive()` para que o operador receba feedback visual imediato de validação (cor verde de sucesso) sem precisar tirar o foco da caixa de texto ou apertar Enter.
+1. Interceptar digitação no campo de O.P. via evento `input`.
+2. Ao encontrar O.P. válida, preencher automaticamente **Produto** e **Descrição**.
+3. Aplicar feedback visual (classe `.user-interacted` + `validateLive()`) imediato.
 
 **Consequências:**
-- **Positivas:** Elimina a possibilidade de apontamentos inconsistentes ligando o produto errado à O.P.; otimiza a velocidade de preenchimento (UX do operador); fornece feedback visual imediato e reativo.
-- **Negativas:** Nenhuma identificada, visto que se o operador optar por apontar sem O.P., o campo de produto continua livre para preenchimento manual normal.
+- **Positivas:** Elimina associação incorreta de produto à O.P.; UX otimizada.
+- **Negativas:** Nenhuma identificada.
 
 ---
 
 ## [ADR-006] Fallback de Comunicação Resiliente no Proxy PHP (v2.0.3)
 
 **Data:** 2026-05-20
-**Contexto:** O script `proxy.php` dependia exclusivamente da extensão `cURL` para encaminhar as requisições ao ERP Protheus. No entanto, o servidor Apache/PHP (`192.168.50.2`) não possuía a extensão `cURL` ativada, gerando um erro fatal (`500 Internal Server Error`) com resposta vazia sempre que um payload válido era enviado.
+**Contexto:** O `proxy.php` dependia exclusivamente da extensão `cURL`, que não estava ativada no servidor Apache/PHP, gerando erro 500 fatal.
 
 **Decisão:**
-1. Implementar verificação dinâmica usando `extension_loaded('curl')`.
-2. Caso a extensão esteja desativada no servidor, utilizar o método nativo do PHP `file_get_contents` configurado com um contexto de stream HTTP POST (`stream_context_create`).
-3. Capturar o código de retorno HTTP do ERP através da variável nativa do PHP `$http_response_header`.
+1. Implementar verificação dinâmica com `extension_loaded('curl')`.
+2. Se cURL ausente, usar `file_get_contents` com `stream_context_create`.
+3. Capturar código HTTP de retorno via `$http_response_header`.
 
 **Consequências:**
-- **Positivas:** O proxy torna-se totalmente autônomo e resiliente, funcionando em qualquer servidor PHP sem necessidade de configurar ou ativar extensões no `php.ini`. O front-end passa a receber mensagens de erro detalhadas mesmo em falhas de rede.
+- **Positivas:** Proxy funciona em qualquer servidor PHP sem configurar extensões.
 - **Negativas:** Nenhuma identificada.
 
 ---
 
-## [ADR-007] Prevenção de Apontamentos Duplicados (Idempotência em 3 Camadas) (v2.1.0)
+## [ADR-007] Prevenção de Apontamentos Duplicados — Idempotência em 3 Camadas (v2.1.0)
 
 **Data:** 2026-05-29
-**Contexto:** O sistema não possuía nenhuma proteção contra o envio de apontamentos duplicados para o Protheus. Em situações de lentidão de rede, timeout ou ansiedade do operador, o mesmo apontamento podia ser enviado múltiplas vezes, gerando registros inconsistentes no ERP. Como o ambiente de chão de fábrica não possui banco de dados relacional acessível pelo PHP, a solução precisava ser baseada em sistema de arquivos.
+**Contexto:** Sem proteção contra envio de apontamentos duplicados. Em lentidão de rede, o mesmo apontamento podia ser enviado múltiplas vezes ao Protheus.
 
 **Decisão:**
-1. **Proxy (PHP):** Implementar idempotência via fingerprint SHA-256 do payload + file locking exclusivo:
-   - `normalizePayloadForHash()` ordena chaves recursivamente para hash consistente
-   - `hash('sha256', tipo + '|' + json_encode(payload))` gera fingerprint único
-   - Arquivos `.lock` e `.json` no diretório temporário do servidor (`sys_get_temp_dir`)
-   - Lock exclusivo (`flock` com `LOCK_EX | LOCK_NB`) impede processamento simultâneo
-   - Cache de resposta por 15 minutos (TTL) com limpeza probabilística
-   - Resposta "incerta" em falhas de rede: cacheia erro 409 para bloquear reenvio
-2. **Frontend (JS):** `Set` de submissões em andamento (`pendingSubmissions`) — bloqueia reenvio no cliente antes mesmo de chegar ao proxy
-3. **Frontend (JS):** Exclusão do retry automático — `return;` antes da lógica de retry, exibindo apenas modal de erro sem opção de tentar novamente
+1. **Proxy (PHP):** Idempotência via SHA-256 + file locking exclusivo.
+2. **Frontend:** `Set` de submissões em andamento (`pendingSubmissions`).
+3. **Frontend:** Retry automático desativado.
+4. Resposta "incerta" em falhas de rede: cacheia erro 409 por 15 min.
 
 **Consequências:**
-- **Positivas:** Garantia de que nenhum apontamento duplicado é enviado ao Protheus, mesmo sem acesso a banco de dados; bloqueio no cliente e no servidor; resposta incerta em falhas de rede previne duplicidade em cenários de timeout.
-- **Negativas:** O cache de 15 minutos pode bloquear reenvios legítimos se o operador precisar corrigir um apontamento dentro da janela; dependência do sistema de arquivos do servidor (diretório temporário precisa ser persistente entre requisições PHP).
+- **Positivas:** Garantia de nenhum apontamento duplicado, mesmo sem banco de dados.
+- **Negativas:** Cache de 15 min pode bloquear reenvios legítimos dentro da janela.
 
 ---
 
-## [ADR-008] Adequação do Manifest.json para Geração de APK via PWABuilder (v2.1.1)
+## [ADR-008] Adequação do Manifest.json para PWABuilder (v2.1.1)
 
 **Data:** 2026-06-02
-**Contexto:** O PWABuilder (ferramenta da Microsoft para empacotar PWAs em APK Android) rejeitava o `manifest.json` por falta de campos obrigatórios: `lang`, `scope`, `categories`, `orientation` e `prefer_related_applications`. O `start_url` relativo (`./index.html`) também causava problemas na geração do Trusted Web Activity (TWA). A descrição curta era considerada insuficiente pela validação da plataforma.
+**Contexto:** PWABuilder rejeitava o `manifest.json` por falta de campos obrigatórios.
 
 **Decisão:**
-1. Adicionar `"lang": "pt-BR"` para declarar o idioma predominante do app.
-2. Adicionar `"scope": "/"` para delimitar o escopo de navegação do PWA.
-3. Adicionar `"orientation": "portrait-primary"` para fixar a orientação em retrato no APK.
-4. Adicionar `"categories": ["productivity", "business"]` para classificação na Play Store.
-5. Adicionar `"prefer_related_applications": false`.
-6. Alterar `start_url` de relativo (`./index.html`) para absoluto (`/index.html`).
-7. Expandir a `description` com texto mais completo.
+1. Adicionar `lang`, `scope`, `orientation`, `categories`, `prefer_related_applications`.
+2. Alterar `start_url` de relativo para absoluto.
+3. Expandir `description`.
 
 **Consequências:**
-- **Positivas:** O manifest.json agora passa em todas as validações do PWABuilder e Bubblewrap, permitindo gerar APK sem erros.
-- **Negativas:** Nenhuma identificada. O manifesto continua compatível com navegadores e PWA convencional.
+- **Positivas:** Manifest.json passa em todas as validações do PWABuilder/Bubblewrap.
+- **Negativas:** Nenhuma identificada.
 
+---
 
+## [ADR-009] Escolha do Capacitor + Ionic Appflow para Geração de APK (v1.4.0)
 
+**Data:** 2026-06-02
+**Contexto:** O PWABuilder/Bubblewrap não conseguia gerar APK funcional porque a URL do app (`https://interno.progeral.com.br/apontamentodev/`) é interna (acessível apenas na rede da Progeral). O Bubblewrap precisa acessar a URL publicamente para gerar o Trusted Web Activity (TWA). O Ionic Appflow, por outro lado, compila o APK na nuvem a partir do código fonte e permite configurar uma URL interna no WebView.
+
+**Decisão:**
+1. Utilizar **Capacitor** como framework de container Android (substitui o Cordova).
+2. Utilizar **Ionic Appflow** como serviço de Cloud Build (compila o APK sem necessidade de Android Studio).
+3. Configurar `capacitor.config.json` com `server.url` apontando para a URL interna.
+4. Manter `allowNavigation` para os IPs/domínios internos (`interno.progeral.com.br`, `192.168.8.21`).
+
+**Consequências:**
+- **Positivas:** APK funcional mesmo com URL interna; build na nuvem sem instalar Android Studio; mesmo repositório GitHub serve para código e build; distribuição via Headwind MDM.
+- **Negativas:** Dependência de terceiros (Ionic Appflow) para compilar; o build falha se o repositório não estiver íntegro.
+
+---
+
+## [ADR-010] Abordagem de Responsividade Agressiva para Landscape (v1.4.5)
+
+**Data:** 2026-06-03
+**Contexto:** Em modo landscape (~1280x800), a altura disponível (~700px após chrome do navegador) era insuficiente para exibir todo o conteúdo dos formulários sem scroll vertical. A timeline visual, padding excessivo e fontes grandes contribuíam para o estouro vertical.
+
+**Decisão:**
+1. Criar media query específica para `(orientation: landscape) and (min-width: 900px)`.
+2. Ocultar componente visual de timeline (não essencial para o preenchimento).
+3. Reduzir drasticamente: padding de cards (`.45rem .7rem`), altura de inputs (`4px 7px`), fontes (`.72rem` labels `.55rem`), botões (`5px 12px`).
+4. Reduzir header (`1rem`, logo `28px`).
+5. Minimizar gaps e margens entre todos os elementos do formulário.
+
+**Consequências:**
+- **Positivas:** Todo o formulário cabe na viewport landscape sem scroll vertical ou horizontal.
+- **Negativas:** Interface mais compacta, pode ser menos confortável para toque em tablets muito pequenos.
+
+---
+
+## [ADR-011] Estratégia de Versionamento e Deploy (v1.4.5)
+
+**Data:** 2026-06-03
+**Contexto:** O fluxo de atualização precisa ser claro: o APK é um container WebView que carrega o conteúdo do servidor interno. Mudanças em CSS/JS/HTML não exigem novo APK. Apenas mudanças na configuração do Capacitor, permissões Android ou manifesto exigem rebuild.
+
+**Decisão:**
+1. Manter versionamento semântico no `versionName` do `build.gradle`.
+2. Incrementar `versionCode` a cada build do APK (para MDM identificar atualização).
+3. Documentar explicitamente que alterações de front-end (CSS/JS/HTML) são aplicadas imediatamente no servidor interno, sem necessidade de novo APK.
+4. Manter `dist/index.html` como placeholder de redirecionamento no repositório (exigência do Ionic Appflow).
+
+**Consequências:**
+- **Positivas:** Fluxo claro de deploy; MDM atualiza apenas quando necessário.
+- **Negativas:** Requer disciplina para versionar corretamente.

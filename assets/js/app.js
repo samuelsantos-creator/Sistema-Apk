@@ -2100,6 +2100,7 @@ if ('serviceWorker' in navigator) {
     [elements.headerProd, elements.headerParada].forEach(pill => {
       if (!pill) return;
       pill.className = 'header-status-pill ' + (isOnline ? 'online' : 'offline');
+      pill.title = isOnline ? 'Online' : 'Offline';
       const textEl = pill.querySelector('.hsp-text');
       if (textEl) textEl.textContent = isOnline ? 'Online' : 'Offline';
     });

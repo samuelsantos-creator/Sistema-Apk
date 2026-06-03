@@ -110,7 +110,7 @@
 
       <!-- Barra de Status: Versão + Conexão -->
       <div class="status-bar">
-        <span class="version-badge"><i class="fas fa-code-branch"></i> V1.4.4</span>
+        <span class="version-badge"><i class="fas fa-code-branch"></i> V1.4.5</span>
         <div class="connection-status online" id="connectionStatus">
           <span class="connection-dot"></span>
           <i class="fas fa-wifi" id="connectionIcon"></i>
@@ -147,15 +147,14 @@
         <i class="fas fa-vial"></i> TESTAR API
       </button>
       <i class="fas fa-industry ph-icon" style="color:var(--blue)"></i>
-      <h2>Apontamento de Produção</h2>
-      <button class="btn btn-ghost btn-sm" onclick="goTo('screen-duvidas')">
-        <i class="fas fa-question-circle"></i> Dúvidas
+      <h2>Apontamento</h2>
+      <button class="btn btn-ghost btn-sm" onclick="goTo('screen-duvidas')" title="Dúvidas">
+        <i class="fas fa-question-circle"></i>
       </button>
       <div style="display:flex;gap:.5rem;margin-left:auto;align-items:center;">
-        <div class="header-status-pill online" id="headerStatusProd"><span class="mini-dot"></span><span
-            class="hsp-text">Online</span></div>
+        <div class="header-status-pill online" id="headerStatusProd" title="Online"><span class="mini-dot"></span></div>
         <button class="btn btn-red btn-sm" onclick="goTo('screen-parada')"><i class="fas fa-pause-circle"></i>
-          Apontar Parada</button>
+          Parada</button>
         <button class="btn btn-ghost btn-sm" onclick="goTo('screen-home')"><i class="fas fa-home"></i></button>
       </div>
     </div>
@@ -166,7 +165,8 @@
       <div class="fields-grid cols-2">
         <div class="field">
           <label>Operador (Matrícula)</label>
-          <input type="text" id="p-matricula" placeholder="Digite sua matrícula" autocomplete="off" inputmode="numeric" maxlength="6">
+          <input type="text" id="p-matricula" placeholder="Digite sua matrícula" autocomplete="off" inputmode="numeric"
+            maxlength="6">
         </div>
         <div class="field">
           <label>Nome do Colaborador</label>
@@ -406,15 +406,15 @@
         <i class="fas fa-vial"></i> TESTAR API
       </button>
       <i class="fas fa-pause-circle ph-icon" style="color:var(--red)"></i>
-      <h2>Apontamento de Horas Paradas</h2>
-      <button class="btn btn-ghost btn-sm" onclick="goTo('screen-duvidas')">
-        <i class="fas fa-question-circle"></i> Dúvidas
+      <h2>Paradas</h2>
+      <button class="btn btn-ghost btn-sm" onclick="goTo('screen-duvidas')" title="Dúvidas">
+        <i class="fas fa-question-circle"></i>
       </button>
       <div style="display:flex;gap:.5rem;margin-left:auto;align-items:center;">
-        <div class="header-status-pill online" id="headerStatusParada"><span class="mini-dot"></span><span
-            class="hsp-text">Online</span></div>
+        <div class="header-status-pill online" id="headerStatusParada" title="Online"><span class="mini-dot"></span>
+        </div>
         <button class="btn btn-blue btn-sm" onclick="goTo('screen-prod')"><i class="fas fa-industry"></i>
-          Apontar Produção</button>
+          Produção</button>
         <button class="btn btn-ghost btn-sm" onclick="goTo('screen-home')"><i class="fas fa-home"></i></button>
       </div>
     </div>
@@ -425,7 +425,8 @@
       <div class="fields-grid cols-2">
         <div class="field">
           <label>Operador (Matrícula)</label>
-          <input type="text" id="s-matricula" placeholder="Digite sua matrícula" autocomplete="off" inputmode="numeric" maxlength="6">
+          <input type="text" id="s-matricula" placeholder="Digite sua matrícula" autocomplete="off" inputmode="numeric"
+            maxlength="6">
         </div>
         <div class="field">
           <label>Nome do Colaborador</label>
