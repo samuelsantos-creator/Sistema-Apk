@@ -5,6 +5,28 @@ Toda mudança notável neste projeto será documentada neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.4.6] — 2026-06-03
+
+### Adicionado
+- **Assets Locais (Font Awesome):** CDN removido definitivamente. `all.min.css` baixado e salvo em `assets/css/fa/all.min.css`. 4 arquivos de fonte (woff2) salvos em `assets/fonts/fa-*.woff2`. Path corrigido para `../../fonts/`. `sw.js` atualizado para cachear assets locais em vez de CDN.
+
+### Alterado
+- **`assets/css/duvidas.css`:** Restaurado para proporções do backup v1.4.4 (CSS de responsividade compacta removido). Corrigida especificidade de seletores `.section` → `#screen-duvidas .section` e fallback de ícones escopado em `.fa-fallback`.
+
+### Removido
+- **CDN Font Awesome:** Links para `cdnjs.cloudflare.com/ajax/libs/font-awesome/...` removidos de `index.html` e `sw.js`.
+- **Script `fa-fallback`:** Removido do `index.html` — não é mais necessário com FA local.
+- **`content-visibility: auto`:** Removido de `.section` no `duvidas.css` (causava sobreposição de layout nos accordions).
+
+### Corrigido
+- **Ícones do Font Awesome não apareciam na tela de Dúvidas no APK:** Causado por regras de fallback sem escopo que sobrescreviam `font-family` com Arial. Escopadas sob `.fa-fallback`.
+- **Cards da tela de Dúvidas sem espaçamento vertical:** Seletor `.section` sem prefixo `#screen-duvidas` perdia especificidade para `#screen-duvidas * { margin: 0 }`. Corrigido para `#screen-duvidas .section`.
+
+### Performance
+- **`will-change: transform`** adicionado em elementos animados (spinner moderno, screens activas, modal overlay) no `main.css`.
+- **Google Fonts carregado de forma deferida:** Atributo `media="print" onload="this.media='all'"` no link do Google Fonts.
+- **Guard POST no Service Worker:** `if (event.request.method !== 'GET') return;` no `sw.js` — evita processar requisições não-GET no fetch handler.
+
 ## [1.4.5] — 2026-06-03
 
 ### Adicionado

@@ -136,7 +136,7 @@
       #screen-duvidas
 
       /* ── SECTION BLOCK ── */
-      .section {
+      #screen-duvidas .section {
         max-width: 860px;
         margin: 0 auto 32px;
         background: white;
@@ -144,8 +144,6 @@
         box-shadow: var(--shadow);
         overflow: hidden;
         animation: slideUp .4s ease both;
-        content-visibility: auto;
-        contain-intrinsic-size: 80px;
       }
 
       @keyframes slideUp {
@@ -922,10 +920,8 @@
         border-color: var(--blue2);
       }
 
-      #screen-duvidas
-
       /* ── HIDDEN SEARCH ── */
-      .section.hidden-search {
+      #screen-duvidas .section.hidden-search {
         display: none;
       }
 
@@ -984,47 +980,47 @@
       }
 
       /* ── FALLBACK ÍCONES (offline) ── */
-      #screen-duvidas .section-icon,
-      #screen-duvidas .chevron,
-      #screen-duvidas .search-icon {
+      .fa-fallback #screen-duvidas .section-icon,
+      .fa-fallback #screen-duvidas .chevron,
+      .fa-fallback #screen-duvidas .search-icon {
         font-family: Arial, Helvetica, sans-serif;
       }
 
-      #screen-duvidas .section-icon {
+      .fa-fallback #screen-duvidas .section-icon {
         font-size: 0;
       }
 
-      #screen-duvidas .section-icon::before {
+      .fa-fallback #screen-duvidas .section-icon::before {
         content: "i";
         font-size: 18px;
         font-weight: 800;
       }
 
-      #screen-duvidas #sec-oque .section-icon::before { content: "?"; }
-      #screen-duvidas #sec-importancia .section-icon::before { content: "!"; }
-      #screen-duvidas #sec-nao-consegue .section-icon::before { content: "?"; }
-      #screen-duvidas #sec-saldo .section-icon::before { content: "$"; }
-      #screen-duvidas #sec-erros-prod .section-icon::before { content: "P"; }
-      #screen-duvidas #sec-erros-parada .section-icon::before { content: "II"; font-size: 15px; }
-      #screen-duvidas #sec-data .section-icon::before { content: "D"; }
-      #screen-duvidas #sec-boas .section-icon::before { content: "OK"; font-size: 13px; }
-      #screen-duvidas #sec-faq .section-icon::before { content: "?"; }
+      .fa-fallback #screen-duvidas #sec-oque .section-icon::before { content: "?"; }
+      .fa-fallback #screen-duvidas #sec-importancia .section-icon::before { content: "!"; }
+      .fa-fallback #screen-duvidas #sec-nao-consegue .section-icon::before { content: "?"; }
+      .fa-fallback #screen-duvidas #sec-saldo .section-icon::before { content: "$"; }
+      .fa-fallback #screen-duvidas #sec-erros-prod .section-icon::before { content: "P"; }
+      .fa-fallback #screen-duvidas #sec-erros-parada .section-icon::before { content: "II"; font-size: 15px; }
+      .fa-fallback #screen-duvidas #sec-data .section-icon::before { content: "D"; }
+      .fa-fallback #screen-duvidas #sec-boas .section-icon::before { content: "OK"; font-size: 13px; }
+      .fa-fallback #screen-duvidas #sec-faq .section-icon::before { content: "?"; }
 
-      #screen-duvidas .chevron {
+      .fa-fallback #screen-duvidas .chevron {
         font-size: 0;
       }
 
-      #screen-duvidas .chevron::before {
+      .fa-fallback #screen-duvidas .chevron::before {
         content: "v";
         font-size: 14px;
         font-weight: 800;
       }
 
-      #screen-duvidas .search-icon {
+      .fa-fallback #screen-duvidas .search-icon {
         font-size: 0;
       }
 
-      #screen-duvidas .search-icon::before {
+      .fa-fallback #screen-duvidas .search-icon::before {
         content: "?";
         font-size: 16px;
         font-weight: 800;

@@ -32,6 +32,11 @@ A aplicação é transformada em **APK Android** via **Capacitor** + **Ionic App
 | `package.json` | Dependências | Capacitor e dependências Node. |
 | `android/` | Projeto Android | Gerado pelo Capacitor; compilado na nuvem pelo Ionic Appflow. |
 | `.htaccess` | Config Apache | Políticas agressivas de No-Cache para dados dinâmicos. |
+| `assets/css/fa/all.min.css` | Assets | Folha de estilo do Font Awesome (local, sem CDN). |
+| `assets/fonts/fa-solid-900.woff2` | Assets | Fonte Font Awesome (ícones sólidos). |
+| `assets/fonts/fa-regular-400.woff2` | Assets | Fonte Font Awesome (ícones regulares). |
+| `assets/fonts/fa-brands-400.woff2` | Assets | Fonte Font Awesome (ícones de marcas). |
+| `assets/fonts/fa-v4compatibility.woff2` | Assets | Fonte Font Awesome (compatibilidade v4). |
 | `icons/` | Assets | Ícones e logos da interface. |
 | `icons/app-icon.jpg` | Assets | Imagem fonte 1024×1024 para geração de ícones Android e PWA. |
 
@@ -41,6 +46,7 @@ A aplicação é transformada em **APK Android** via **Capacitor** + **Ionic App
 
 ```text
 index.html
+  ├── /assets/css/fa/all.min.css   (Font Awesome local)
   ├── /assets/css/main.css
   ├── /assets/css/duvidas.css
   ├── /assets/js/app.js  (Motor principal PWA)
@@ -109,6 +115,7 @@ Tablets (chão de fábrica)
 
 | Versão | Data | Descrição |
 |---|---|---|
+| 1.4.6 | Jun/2026 | Font Awesome local, performance (will-change, defer fonts), correção especificidade CSS dúvidas |
 | 1.4.5 | Jun/2026 | Responsividade landscape, .build/, novo ícone, monitor conexão com ping HTTP |
 | 1.4.0 | Jun/2026 | Capacitor + Ionic Appflow + APK Android |
 | 2.1.1 | Jun/2026 | Compatibilidade PWABuilder (manifest.json) |

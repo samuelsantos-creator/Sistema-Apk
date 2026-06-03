@@ -216,3 +216,42 @@ Este arquivo documenta as principais decisões arquiteturais do projeto Apontame
 **Consequências:**
 - **Positivas:** Detecção de perda de conexão funciona de forma confiável tanto em navegador quanto no APK WebView.
 - **Negativas:** Leve tráfego adicional (1 requisição HEAD a cada 5s para `manifest.json`).
+
+---
+
+## [ADR-014] Font Awesome Local (Offline First) (v1.4.6)
+
+**Data:** 2026-06-03
+**Contexto:** O APK Android (WebView) carrega a URL interna `https://interno.progeral.com.br/apontamentodev/`. O Android WebView bloqueia requisições para domínios CDN públicos (como `cdnjs.cloudflare.com`) quando o APK não tem acesso à internet aberta ou quando a política de segurança do MDM restringe tráfego externo. Os ícones do Font Awesome simplesmente não apareciam no APK.
+
+**Decisão:**
+1. Remover todos os links para `cdnjs.cloudflare.com/ajax/libs/font-awesome/...` do `index.html` e `sw.js`.
+2. Baixar o `all.min.css` do Font Awesome e salvar em `assets/css/fa/all.min.css`.
+3. Baixar os 4 webfonts (woff2) e salvar em `assets/fonts/fa-*.woff2`.
+4. Corrigir o path relativo no `all.min.css` de `url(../fonts/` (que resolve para `assets/css/fonts/`) para `url(../../fonts/` (que resolve para `assets/fonts/`).
+5. Remover o script `fa-fallback` do HTML (não é mais necessário).
+6. Remover as regras de fallback de ícones em `duvidas.css` que estavam ativas sem escopo e sobrescrevendo o Font Awesome.
+
+**Consequências:**
+- **Positivas:** Ícones funcionam no APK independentemente de rede externa. Zero dependência de CDN. Carregamento mais rápido (sem DNS lookup para CDN).
+- **Negativas:** Aumento do repositório (~160KB em assets). Requer atualização manual do all.min.css se quiser versão mais nova do FA.
+
+---
+
+## [ADR-015] Otimizações de Performance e Especificidade CSS (v1.4.6)
+
+**Data:** 2026-06-03
+**Contexto:** A tela de Dúvidas apresentava dois problemas: (1) os cards das seções estavam colados (sem espaçamento vertical) e (2) os ícones não apareciam. Ambos causados por conflitos de especificidade CSS introduzidos durante a restauração do CSS do backup v1.4.4. Além disso, não havia otimizações de renderização (will-change, content-visibility, carregamento deferido de fontes).
+
+**Decisão:**
+1. Restaurar `duvidas.css` a partir do backup v1.4.4.
+2. Corrigir `.section { margin: 0 auto 32px }` para `#screen-duvidas .section` — o reset universal `#screen-duvidas * { margin: 0 }` tem especificidade maior que `.section` e anulava a margin.
+3. Escopar regras de fallback de ícones com `.fa-fallback #screen-duvidas ...` para não interferirem quando o FA está carregando normalmente.
+4. Remover `content-visibility: auto` das sections (interferia com accordion `overflow: hidden`).
+5. Adicionar guard `if (event.request.method !== 'GET') return;` no fetch handler do service worker para evitar processar requisições POST/OPTIONS.
+6. Adicionar `will-change: transform` em elementos animados (spinner, screens, overlay modal) para hints de composição.
+7. Deferir carregamento do Google Fonts via `media="print" onload="this.media='all'"`.
+
+**Consequências:**
+- **Positivas:** Espaçamento correto entre cards de dúvidas; ícones aparecem; melhor performance de renderização; service worker não intercepta requisições não-GET.
+- **Negativas:** Nenhuma identificada.

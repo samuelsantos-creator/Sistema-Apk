@@ -86,7 +86,7 @@
 <h1>📋 Instrução de Trabalho</h1>
 <p class="version-badge">
   <strong>Apontamento de Produção</strong> — PWA + Capacitor + PHP Proxy<br>
-  Versão 1.4.5 | Atualizado: Junho/2026
+  Versão 1.4.6 | Atualizado: Junho/2026
 </p>
 
 <div class="box info">
@@ -302,7 +302,7 @@ git push</code></pre>
   <strong>💡 Dica:</strong> Para atualizar o <code>versionCode</code> e <code>versionName</code>,
   edite o arquivo <code>android/app/build.gradle</code> (linhas 10-11):
   <pre><code>versionCode 2     ← aumentar em +1 a cada build
-versionName "1.4.5"  ← versão semântica do app</code></pre>
+versionName "1.4.6"  ← versão semântica do app</code></pre>
 </div>
 
 <!-- ============================================================ -->
@@ -475,7 +475,7 @@ $img.Dispose()</code></pre>
 </ul>
 
 <h3>Preciso atualizar o versionCode sempre?</h3>
-<p><strong>Sim, recomendado.</strong> Edite <code>android/app/build.gradle</code> e aumente o <code>versionCode</code> em 1 a cada atualização. O <code>versionName</code> segue o padrão semântico (ex: "1.4.5", "1.5.0").</p>
+<p><strong>Sim, recomendado.</strong> Edite <code>android/app/build.gradle</code> e aumente o <code>versionCode</code> em 1 a cada atualização. O <code>versionName</code> segue o padrão semântico (ex: "1.4.6", "1.5.0").</p>
 
 <h3>As alterações no CSS/JS/dados aparecem sem APK novo?</h3>
 <p><strong>Sim.</strong> O APK é uma WebView que carrega o conteúdo do servidor interno. Alterações em <strong>HTML, CSS, JS, PHP e arquivos de dados (*.js)</strong> no servidor interno são aplicadas imediatamente — <strong>sem precisar gerar novo APK</strong>. APK novo só é necessário se alterar algo no Capacitor (config, permissões Android) ou manifesto.</p>
