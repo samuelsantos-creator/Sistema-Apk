@@ -6,12 +6,15 @@ const STATIC_ASSETS = [
   './assets/css/duvidas.css',
   './assets/js/app.js',
   './assets/js/duvidas.js',
+  './assets/css/fa/all.min.css',
+  './assets/fonts/fa-solid-900.woff2',
+  './assets/fonts/fa-regular-400.woff2',
+  './assets/fonts/fa-brands-400.woff2',
+  './assets/fonts/fa-v4compatibility.woff2',
   './icons/logo progeral azul.png',
   './icons/app-icon.jpg',
   './icons/icon-192.png',
-  './icons/icon-512.png',
-  'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+  './icons/icon-512.png'
 ];
 
 self.addEventListener('install', function (event) {
@@ -39,7 +42,7 @@ self.addEventListener('fetch', function (event) {
   var url = event.request.url;
 
   // Static assets: cache-first
-  if (url.includes('icons/') || url.includes('font-awesome') || url.includes('/webfonts/') || url.includes('cdnjs.cloudflare.com/ajax/libs/font-awesome') || url.includes('fonts.googleapis') || url.includes('fonts.gstatic')) {
+  if (url.includes('/icons/') || url.includes('/fonts/') || url.includes('/css/fa/')) {
     event.respondWith(
       caches.match(event.request).then(function (cached) {
         return cached || fetch(event.request);
