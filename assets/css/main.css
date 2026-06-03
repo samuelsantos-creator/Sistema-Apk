@@ -683,25 +683,27 @@
 
     .modal-box {
       background: var(--surface);
-      border: 1.5px solid var(--border);
       border-radius: var(--radius-lg);
       padding: 2rem;
       width: 460px;
       max-width: 95vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
       animation: fadeIn .2s;
     }
 
     .modal-box.type-erro {
-      border-color: var(--red);
+      box-shadow: 0 20px 60px rgba(0,0,0,.3), inset 0 0 0 1.5px var(--red);
     }
 
     .modal-box.type-aviso {
-      border-color: var(--yellow);
+      box-shadow: 0 20px 60px rgba(0,0,0,.3), inset 0 0 0 1.5px var(--yellow);
     }
 
     .modal-box.type-sucesso {
-      border-color: var(--green);
+      box-shadow: 0 20px 60px rgba(0,0,0,.3), inset 0 0 0 1.5px var(--green);
     }
+
+
 
     .modal-head {
       display: flex;
