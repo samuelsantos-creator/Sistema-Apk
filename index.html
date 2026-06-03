@@ -49,15 +49,23 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Apontamentos de produção e Horas paradas.
-
-  </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Apontamentos de Produção e Horas Paradas · Progeral</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
     href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@300;400;600;700;800&family=DM+Mono:wght@400;500&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    document.documentElement.classList.add('fa-fallback');
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () {
+        if (document.fonts.check('900 1em "Font Awesome 6 Free"')) {
+          document.documentElement.classList.remove('fa-fallback');
+        }
+      }).catch(function () {});
+    }
+  </script>
   <link rel="icon" type="image/jpeg" href="icons/app-icon.jpg">
 
   <!-- PWA Settings -->

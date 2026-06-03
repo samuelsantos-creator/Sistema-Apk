@@ -913,41 +913,6 @@
       margin-top: 2px;
     }
 
-    /* ── RESPONSIVE ── */
-    @media (max-width: 700px) {
-      .home-cards {
-        grid-template-columns: 1fr;
-      }
-
-      .fields-grid.cols-2,
-      .fields-grid.cols-3,
-      .fields-grid.cols-4,
-      .fields-grid.cols-5 {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      /* Faz o campo Turno ocupar toda a largura no mobile para que Datas e Horas fiquem perfeitamente alinhadas */
-      .fields-grid.cols-3 .field:nth-child(1) {
-        grid-column: span 2;
-      }
-
-      .field-span3 {
-        grid-column: span 2;
-      }
-
-      .summary-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 480px) {
-
-      .fields-grid.cols-4,
-      .fields-grid.cols-5 {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-
     /* Ocultando itens temporariamente conforme pedido */
     #p-timeline-wrap,
     #s-timeline-wrap,
@@ -1414,194 +1379,6 @@
         font-size: .6rem;
       }
 
-    .header-status-pill.offline .mini-dot {
-      background: #ef4444;
-      animation: pulseOfflineDot 1.5s infinite;
-    }
-
-    /* ── TABLET LANDSCAPE (agressivo — maximizar espaço) ── */
-    @media (orientation: landscape) and (min-width: 900px) {
-      body {
-        padding: .3rem .5rem;
-      }
-
-      .screen {
-        max-width: 100%;
-      }
-
-      .home-cards {
-        grid-template-columns: repeat(3, 1fr);
-        gap: .6rem;
-      }
-
-      .home-card {
-        padding: 1rem .8rem;
-      }
-
-      .home-card .card-icon {
-        font-size: 1.6rem;
-      }
-
-      .home-card h3 {
-        font-size: .85rem;
-      }
-
-      .home-card p {
-        font-size: .7rem;
-      }
-
-      .home-logo {
-        font-size: 1.6rem;
-        margin-bottom: 0;
-      }
-
-      .home-sub {
-        font-size: .78rem;
-        margin-bottom: .8rem;
-      }
-
-      .logo-img-home {
-        max-width: 120px;
-        margin-bottom: .5rem;
-      }
-
-      .status-bar {
-        margin-bottom: .6rem;
-      }
-
-      .fields-grid {
-        gap: .35rem;
-      }
-
-      .fields-grid.cols-3 {
-        grid-template-columns: 1fr 1fr 1fr;
-      }
-
-      .fields-grid.cols-4 {
-        grid-template-columns: 1fr 1fr 1fr 1fr;
-      }
-
-      .fields-grid.cols-5 {
-        grid-template-columns: repeat(5, 1fr);
-      }
-
-      .fields-grid.cols-2 {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .fields-grid.cols-6 {
-        grid-template-columns: repeat(6, 1fr);
-      }
-
-      .form-card {
-        padding: .45rem .7rem;
-        margin-bottom: .3rem;
-        border-radius: 10px;
-      }
-
-      .form-card h4 {
-        font-size: .62rem;
-        margin-bottom: .25rem;
-      }
-
-      .field input,
-      .field select {
-        padding: 4px 7px;
-        font-size: .72rem;
-        border-radius: 6px;
-      }
-
-      .field label {
-        font-size: .55rem;
-      }
-
-      .field {
-        gap: 1px;
-      }
-
-      .page-header {
-        margin-bottom: .5rem;
-        padding-bottom: .4rem;
-        gap: 6px;
-      }
-
-      .page-header h2 {
-        font-size: 1rem;
-      }
-
-      .page-header .ph-icon {
-        font-size: 1.1rem;
-      }
-
-      .logo-img-header {
-        max-height: 28px;
-        margin-right: 6px;
-      }
-
-      .btn {
-        padding: 5px 12px;
-        font-size: .72rem;
-        gap: 4px;
-      }
-
-      .btn-sm {
-        padding: 4px 10px;
-        font-size: .68rem;
-      }
-
-      .actions-row {
-        padding-top: .2rem;
-        gap: .5rem;
-      }
-
-      .timeline-container {
-        display: none;
-      }
-
-      .summary-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: .4rem;
-        margin-top: .4rem;
-      }
-
-      .summary-item {
-        padding: .4rem .6rem;
-      }
-
-      .summary-item .s-label {
-        font-size: .6rem;
-      }
-
-      .summary-item .s-val {
-        font-size: .85rem;
-      }
-
-      .modal-box {
-        padding: 1.2rem;
-        width: 480px;
-      }
-
-      .modal-head h3 {
-        font-size: 1rem;
-      }
-
-      .modal-body {
-        font-size: .8rem;
-        max-height: 50vh;
-      }
-
-      .date-arrow-btn {
-        width: 20px;
-        height: 20px;
-        font-size: .55rem;
-      }
-
-      .help-btn {
-        width: 22px;
-        height: 22px;
-        font-size: .6rem;
-      }
-
       section .help-btn {
         width: 18px;
         height: 18px;
@@ -1609,10 +1386,6 @@
 
       .field-span2 {
         grid-column: span 2;
-      }
-
-      .ml-auto {
-        margin-left: auto;
       }
 
       .version-badge {
@@ -1637,10 +1410,24 @@
       }
     }
 
-    /* ── TABLET RETRATO / TELAS MÉDIAS ── */
+    /* ── TABLET RETRATO / TELAS MÉDIAS (701px-1023px) ── */
     @media (min-width: 701px) and (max-width: 1023px) {
+      body {
+        padding: .8rem;
+        overflow-x: hidden;
+      }
+
+      .screen {
+        max-width: 100%;
+      }
+
       .home-cards {
         grid-template-columns: repeat(3, 1fr);
+        gap: .8rem;
+      }
+
+      .home-card {
+        padding: 1.5rem 1rem;
       }
 
       .fields-grid.cols-3 {
@@ -1649,6 +1436,907 @@
 
       .fields-grid.cols-4,
       .fields-grid.cols-5 {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      .fields-grid.cols-6 {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .page-header {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+    }
+
+    /* ── MOBILE LANDSCAPE - TELEFONES DEITADOS (landscape ate 899px) ── */
+    @media (orientation: landscape) and (max-width: 899px) {
+      body {
+        padding: .3rem .5rem;
+        overflow-x: hidden;
+      }
+
+      .screen {
+        max-width: 100%;
+        width: 100%;
+      }
+
+      .home-logo {
+        font-size: 1.3rem;
+        margin-bottom: 0;
+      }
+
+      .home-sub {
+        font-size: .75rem;
+        margin-bottom: .6rem;
+      }
+
+      .logo-img-home {
+        max-width: 100px;
+        margin-bottom: .3rem;
+      }
+
+      .status-bar {
+        margin-bottom: .5rem;
+        margin-top: .2rem;
+      }
+
+      .home-cards {
+        grid-template-columns: repeat(3, 1fr);
+        gap: .5rem;
+      }
+
+      .home-card {
+        padding: .8rem .6rem;
+        gap: .4rem;
+      }
+
+      .home-card .card-icon {
+        font-size: 1.4rem;
+      }
+
+      .home-card h3 {
+        font-size: .8rem;
+      }
+
+      .home-card p {
+        font-size: .68rem;
+      }
+
+      .page-header {
+        flex-wrap: nowrap;
+        gap: 5px;
+        margin-bottom: .4rem;
+        padding-bottom: .3rem;
+        overflow: hidden;
+      }
+
+      .logo-img-header {
+        max-height: 24px;
+        flex-shrink: 0;
+      }
+
+      .page-header h2 {
+        font-size: .88rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .page-header .ph-icon {
+        font-size: .9rem;
+        flex-shrink: 0;
+      }
+
+      .fields-grid {
+        gap: .3rem;
+      }
+
+      .fields-grid.cols-2 {
         grid-template-columns: 1fr 1fr;
+      }
+
+      .fields-grid.cols-3 {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      .fields-grid.cols-3 .field:nth-child(1) {
+        grid-column: span 3;
+      }
+
+      .fields-grid.cols-4 {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .fields-grid.cols-5 {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .fields-grid.cols-6 {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .form-card {
+        padding: .4rem .55rem;
+        margin-bottom: .25rem;
+        border-radius: 8px;
+      }
+
+      .form-card h4 {
+        font-size: .6rem;
+        margin-bottom: .18rem;
+      }
+
+      .field input,
+      .field select {
+        padding: 4px 7px;
+        font-size: .73rem;
+        border-radius: 5px;
+      }
+
+      .field label {
+        font-size: .58rem;
+      }
+
+      .field {
+        gap: 2px;
+      }
+
+      .btn {
+        padding: 4px 9px;
+        font-size: .7rem;
+        gap: 3px;
+      }
+
+      .btn-sm {
+        padding: 3px 7px;
+        font-size: .65rem;
+      }
+
+      .actions-row {
+        padding-top: .15rem;
+        gap: .4rem;
+      }
+
+      .field .help-btn {
+        width: 24px;
+        font-size: .63rem;
+      }
+
+      .date-arrow-btn {
+        width: 17px;
+        height: 17px;
+        font-size: .52rem;
+      }
+
+      .timeline-container {
+        display: none !important;
+      }
+
+      .version-badge {
+        font-size: .58rem;
+        padding: 2px 8px;
+      }
+
+      .connection-status {
+        font-size: .6rem;
+        padding: 2px 8px;
+      }
+
+      .header-status-pill {
+        width: 15px;
+        height: 15px;
+      }
+
+      .modal-box {
+        padding: .9rem;
+        width: 88vw;
+        max-height: 88vh;
+        overflow-y: auto;
+      }
+
+      .modal-head h3 {
+        font-size: .9rem;
+      }
+
+      .modal-body {
+        font-size: .76rem;
+        max-height: 42vh;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: .3rem;
+        margin-top: .3rem;
+      }
+
+      .summary-item {
+        padding: .3rem .45rem;
+      }
+
+      .summary-item .s-label {
+        font-size: .56rem;
+      }
+
+      .summary-item .s-val {
+        font-size: .78rem;
+      }
+
+      #p-timeline-wrap,
+      #s-timeline-wrap {
+        display: none !important;
+      }
+    }
+
+    /* ── MOBILE PORTRAIT (max 700px) ── */
+    @media (max-width: 700px) {
+      body {
+        padding: .6rem .5rem;
+        overflow-x: hidden;
+      }
+
+      .screen {
+        max-width: 100%;
+        width: 100%;
+      }
+
+      /* HOME */
+      .home-logo {
+        font-size: 1.7rem;
+      }
+
+      .home-sub {
+        font-size: .88rem;
+        margin-bottom: 1.4rem;
+      }
+
+      .logo-img-home {
+        max-width: 170px;
+      }
+
+      .home-cards {
+        grid-template-columns: 1fr;
+        gap: .7rem;
+      }
+
+      .home-card {
+        padding: 1.2rem 1rem;
+        flex-direction: row;
+        align-items: center;
+        text-align: left;
+        gap: 1rem;
+      }
+
+      .home-card .card-icon {
+        font-size: 2rem;
+        flex-shrink: 0;
+      }
+
+      .home-card p {
+        text-align: left;
+      }
+
+      /* PAGE HEADER */
+      .page-header {
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-bottom: .9rem;
+        padding-bottom: .7rem;
+        align-items: center;
+      }
+
+      .page-header .logo-img-header {
+        max-height: 30px;
+      }
+
+      .page-header h2 {
+        font-size: 1.05rem;
+        flex: 1;
+        min-width: 60px;
+      }
+
+      .page-header .ph-icon {
+        font-size: 1.15rem;
+      }
+
+      /* GRIDS */
+      .fields-grid.cols-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .fields-grid.cols-3 {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .fields-grid.cols-3 .field:nth-child(1) {
+        grid-column: span 2;
+      }
+
+      .fields-grid.cols-4,
+      .fields-grid.cols-5 {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .fields-grid.cols-6 {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .field-span2 {
+        grid-column: span 2;
+      }
+
+      .field-span3 {
+        grid-column: span 2;
+      }
+
+      /* INPUTS */
+      .field input,
+      .field select {
+        padding: 8px 9px;
+        font-size: .82rem;
+      }
+
+      .field label {
+        font-size: .67rem;
+      }
+
+      /* BUTTONS */
+      .btn {
+        padding: 9px 15px;
+        font-size: .8rem;
+      }
+
+      .btn-sm {
+        padding: 6px 11px;
+        font-size: .74rem;
+      }
+
+      .actions-row {
+        flex-wrap: wrap;
+        gap: .55rem;
+      }
+
+      /* SUMMARY */
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      /* MODAL */
+      .modal-box {
+        width: 95vw;
+        padding: 1.2rem;
+      }
+    }
+
+    /* ── TELAS MUITO PEQUENAS (max 400px) ── */
+    @media (max-width: 400px) {
+      body {
+        padding: .4rem .3rem;
+      }
+
+      .home-logo {
+        font-size: 1.3rem;
+      }
+
+      .page-header h2 {
+        font-size: .9rem;
+      }
+
+      .btn {
+        padding: 7px 11px;
+        font-size: .75rem;
+      }
+
+      .field input,
+      .field select {
+        font-size: .77rem;
+        padding: 6px 8px;
+      }
+
+      .home-card {
+        padding: 1rem .8rem;
+      }
+
+      .home-card .card-icon {
+        font-size: 1.7rem;
+      }
+    }
+
+    /* Mobile/PWA/APK hardening layer.
+       Mantem o fluxo atual, mas corrige conflitos de media queries antigos. */
+    html {
+      width: 100%;
+      min-width: 0;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      width: 100%;
+      min-width: 0;
+      overflow-x: hidden;
+      padding:
+        max(.75rem, env(safe-area-inset-top))
+        max(.75rem, env(safe-area-inset-right))
+        max(.75rem, env(safe-area-inset-bottom))
+        max(.75rem, env(safe-area-inset-left));
+    }
+
+    .screen {
+      max-width: 1200px;
+      min-width: 0;
+    }
+
+    .home-wrap {
+      width: 100%;
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+
+    .home-logo {
+      font-size: clamp(1.55rem, 7vw, 2.6rem);
+      letter-spacing: 0;
+      line-height: 1.12;
+      overflow-wrap: anywhere;
+    }
+
+    .home-sub {
+      font-size: clamp(.9rem, 3.2vw, 1rem);
+      margin-bottom: clamp(1rem, 4vw, 2rem);
+    }
+
+    .logo-img-home {
+      width: min(58vw, 220px);
+      height: auto;
+    }
+
+    .home-cards {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+      gap: clamp(.8rem, 2.5vw, 1.15rem);
+      align-items: stretch;
+    }
+
+    .home-card {
+      min-height: clamp(142px, 24vw, 190px);
+      padding: clamp(1.15rem, 4vw, 2rem) clamp(1rem, 3vw, 1.35rem);
+      justify-content: center;
+      text-align: center;
+      touch-action: manipulation;
+    }
+
+    .home-card .card-icon {
+      font-size: clamp(2.15rem, 7vw, 2.8rem);
+      line-height: 1;
+    }
+
+    .home-card h3 {
+      font-size: clamp(1rem, 3.6vw, 1.15rem);
+      line-height: 1.25;
+    }
+
+    .home-card p {
+      max-width: 28rem;
+      font-size: clamp(.82rem, 3vw, .92rem);
+      line-height: 1.45;
+    }
+
+    .page-header {
+      min-width: 0;
+      flex-wrap: wrap;
+    }
+
+    .page-header h2 {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      line-height: 1.2;
+    }
+
+    .page-header .logo-img-header,
+    .page-header .ph-icon,
+    .header-status-pill {
+      flex-shrink: 0;
+    }
+
+    .fields-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .fields-grid.cols-2,
+    .fields-grid.cols-3,
+    .fields-grid.cols-4,
+    .fields-grid.cols-5,
+    .fields-grid.cols-6 {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+    }
+
+    .field-span2,
+    .field-span3 {
+      grid-column: span 1;
+    }
+
+    .field input,
+    .field select {
+      min-height: 42px;
+      font-size: max(16px, .9rem);
+    }
+
+    .field .help-btn {
+      width: 42px;
+      min-height: 42px;
+      font-size: .95rem;
+    }
+
+    .field input.with-btn {
+      padding-right: 48px;
+    }
+
+    input.field-valid,
+    select.field-valid,
+    input.field-invalid,
+    select.field-invalid {
+      background-position: right 48px center;
+      padding-right: 70px !important;
+    }
+
+    .date-arrow-btn,
+    .btn-rm {
+      min-width: 36px;
+      min-height: 36px;
+    }
+
+    .btn {
+      min-height: 44px;
+      justify-content: center;
+      white-space: normal;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .btn-sm {
+      min-height: 38px;
+    }
+
+    .actions-row,
+    .actions-row > div {
+      min-width: 0;
+    }
+
+    .table-wrap {
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table.apt-table {
+      min-width: 680px;
+    }
+
+    table.apt-table th,
+    table.apt-table td {
+      vertical-align: middle;
+    }
+
+    .modal-overlay {
+      padding:
+        max(.75rem, env(safe-area-inset-top))
+        max(.75rem, env(safe-area-inset-right))
+        max(.75rem, env(safe-area-inset-bottom))
+        max(.75rem, env(safe-area-inset-left));
+    }
+
+    .modal-box {
+      width: min(94vw, 520px);
+      max-height: min(88vh, 720px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: clamp(1rem, 4vw, 2rem);
+    }
+
+    .modal-head,
+    .modal-foot {
+      flex-shrink: 0;
+    }
+
+    .modal-body {
+      max-height: none;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .modal-foot {
+      gap: .6rem;
+      flex-wrap: wrap;
+    }
+
+    .modal-foot .btn {
+      flex: 1 1 150px;
+    }
+
+    #search-modal-input {
+      min-height: 44px;
+      font-size: 16px !important;
+    }
+
+    #search-modal-results {
+      max-height: min(48vh, 420px) !important;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .search-item {
+      min-height: 54px;
+    }
+
+    /* Local fallback for critical icons when Font Awesome CDN/webfont is absent. */
+    .fa-fallback .fas::before,
+    .fa-fallback .far::before,
+    .fa-fallback .fa::before {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1em;
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .fa-fallback .fa-search::before { content: "?"; }
+    .fa-fallback .fa-question-circle::before { content: "?"; }
+    .fa-fallback .fa-home::before { content: "H"; }
+    .fa-fallback .fa-calendar-alt::before { content: "D"; }
+    .fa-fallback .fa-exclamation-triangle::before,
+    .fa-fallback .fa-exclamation-circle::before { content: "!"; }
+    .fa-fallback .fa-check-circle::before { content: "OK"; font-size: .72em; }
+    .fa-fallback .fa-industry::before { content: "P"; }
+    .fa-fallback .fa-pause-circle::before { content: "II"; font-size: .78em; }
+    .fa-fallback .fa-wifi::before { content: "~"; }
+    .fa-fallback .fa-vial::before { content: "T"; }
+    .fa-fallback .fa-code-branch::before { content: "V"; }
+    .fa-fallback .fa-user::before { content: "U"; }
+    .fa-fallback .fa-cubes::before { content: "#"; }
+    .fa-fallback .fa-tag::before { content: "@"; }
+    .fa-fallback .fa-sort-numeric-up::before { content: "1"; }
+    .fa-fallback .fa-list::before { content: "="; }
+    .fa-fallback .fa-door-open::before { content: ">"; }
+    .fa-fallback .fa-eraser::before { content: "X"; }
+    .fa-fallback .fa-chevron-left::before { content: "<"; }
+    .fa-fallback .fa-chevron-right::before { content: ">"; }
+    .fa-fallback .fa-info-circle::before { content: "i"; }
+    .fa-fallback .fa-clipboard-check::before { content: "OK"; font-size: .72em; }
+    .fa-fallback .fa-times-circle::before { content: "X"; }
+    .fa-fallback .fa-tachometer-alt::before { content: "!"; }
+
+    #screen-duvidas .section-icon,
+    #screen-duvidas .chevron,
+    #screen-duvidas .search-icon {
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    #screen-duvidas .section-icon {
+      font-size: 0;
+    }
+
+    #screen-duvidas .section-icon::before {
+      content: "i";
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    #screen-duvidas #sec-oque .section-icon::before { content: "?"; }
+    #screen-duvidas #sec-importancia .section-icon::before { content: "!"; }
+    #screen-duvidas #sec-nao-consegue .section-icon::before { content: "?"; }
+    #screen-duvidas #sec-saldo .section-icon::before { content: "$"; }
+    #screen-duvidas #sec-erros-prod .section-icon::before { content: "P"; }
+    #screen-duvidas #sec-erros-parada .section-icon::before { content: "II"; }
+    #screen-duvidas #sec-data .section-icon::before { content: "D"; }
+    #screen-duvidas #sec-boas .section-icon::before { content: "OK"; font-size: 13px; }
+    #screen-duvidas #sec-faq .section-icon::before { content: "?"; }
+
+    #screen-duvidas .chevron {
+      font-size: 0;
+    }
+
+    #screen-duvidas .chevron::before {
+      content: "v";
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    #screen-duvidas .search-icon {
+      font-size: 0;
+    }
+
+    #screen-duvidas .search-icon::before {
+      content: "?";
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    @media (min-width: 701px) {
+      .fields-grid.cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .fields-grid.cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .fields-grid.cols-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .fields-grid.cols-5 {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+
+      .fields-grid.cols-6 {
+        grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      }
+
+      .field-span2 {
+        grid-column: span 2;
+      }
+
+      .field-span3 {
+        grid-column: span 3;
+      }
+
+      .field input,
+      .field select {
+        min-height: 38px;
+        font-size: .88rem;
+      }
+
+      .field .help-btn {
+        width: 38px;
+        min-height: 38px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      body {
+        padding: 1rem;
+      }
+
+      .screen {
+        max-width: 1200px;
+      }
+
+      .home-cards {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding:
+          max(.55rem, env(safe-area-inset-top))
+          max(.5rem, env(safe-area-inset-right))
+          max(.7rem, env(safe-area-inset-bottom))
+          max(.5rem, env(safe-area-inset-left));
+      }
+
+      .home-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .home-card {
+        flex-direction: column;
+        align-items: center;
+        min-height: 150px;
+        text-align: center;
+        gap: .75rem;
+      }
+
+      .home-card p {
+        text-align: center;
+      }
+
+      .page-header {
+        gap: .55rem;
+      }
+
+      .page-header h2 {
+        flex: 1 1 180px;
+        font-size: clamp(.98rem, 4.2vw, 1.12rem);
+      }
+
+      .page-header .btn {
+        flex: 1 1 auto;
+      }
+
+      .fields-grid.cols-2,
+      .fields-grid.cols-3,
+      .fields-grid.cols-4,
+      .fields-grid.cols-5,
+      .fields-grid.cols-6 {
+        grid-template-columns: 1fr;
+      }
+
+      .fields-grid.cols-3 .field:nth-child(1) {
+        grid-column: auto;
+      }
+
+      .actions-row > div {
+        justify-content: stretch !important;
+      }
+
+      .actions-row .btn {
+        flex: 1 1 130px;
+      }
+
+      .form-card {
+        border-radius: var(--radius);
+        padding: .85rem;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .confirm-summary p {
+        display: block;
+      }
+
+      .confirm-summary p span,
+      .confirm-summary p b {
+        display: block;
+      }
+
+      .modal-head {
+        align-items: flex-start;
+      }
+
+      .modal-head h3 {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+    }
+
+    @media (min-width: 390px) and (max-width: 700px) {
+      .fields-grid.cols-6 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (orientation: landscape) and (max-width: 899px) {
+      body {
+        padding: .5rem .6rem;
+      }
+
+      .home-cards {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: .75rem;
+      }
+
+      .home-card {
+        min-height: 132px;
+        padding: 1rem;
+        gap: .6rem;
+      }
+
+      .home-card .card-icon {
+        font-size: 2rem;
+      }
+
+      .home-card h3 {
+        font-size: .98rem;
+      }
+
+      .home-card p {
+        font-size: .8rem;
+      }
+
+      .page-header {
+        flex-wrap: wrap;
+        overflow: visible;
+      }
+
+      .page-header h2 {
+        white-space: normal;
+        overflow: visible;
+      }
+
+      .btn,
+      .btn-sm {
+        min-height: 40px;
       }
     }

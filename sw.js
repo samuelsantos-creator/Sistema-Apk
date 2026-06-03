@@ -1,7 +1,11 @@
-const CACHE_NAME = 'apontamentos-v2';
+const CACHE_NAME = 'apontamentos-v3-mobile-pwa';
 const STATIC_ASSETS = [
   './',
   './manifest.json',
+  './assets/css/main.css',
+  './assets/css/duvidas.css',
+  './assets/js/app.js',
+  './assets/js/duvidas.js',
   './icons/logo progeral azul.png',
   './icons/app-icon.jpg',
   './icons/icon-192.png',
@@ -32,7 +36,7 @@ self.addEventListener('fetch', function (event) {
   var url = event.request.url;
 
   // Static assets: cache-first
-  if (url.includes('icons/') || url.includes('font-awesome') || url.includes('fonts.googleapis') || url.includes('fonts.gstatic')) {
+  if (url.includes('icons/') || url.includes('font-awesome') || url.includes('/webfonts/') || url.includes('cdnjs.cloudflare.com/ajax/libs/font-awesome') || url.includes('fonts.googleapis') || url.includes('fonts.gstatic')) {
     event.respondWith(
       caches.match(event.request).then(function (cached) {
         return cached || fetch(event.request);
