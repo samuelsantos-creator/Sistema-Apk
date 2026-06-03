@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Instrução de Trabalho — Apontamento de Produção</title>
+<style>
+  @page { margin: 1.5cm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #1e293b;
+    background: #fff;
+    padding: 2rem;
+    max-width: 900px;
+    margin: auto;
+    line-height: 1.6;
+  }
+  h1 { font-size: 1.8rem; color: #2563eb; border-bottom: 3px solid #2563eb; padding-bottom: .5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; }
+  h2 { font-size: 1.3rem; color: #1e40af; margin: 1.5rem 0 .8rem; display: flex; align-items: center; gap: 8px; }
+  h3 { font-size: 1rem; color: #334155; margin: 1rem 0 .5rem; }
+  p, li { font-size: .92rem; color: #475569; }
+  ul, ol { padding-left: 1.5rem; margin: .5rem 0; }
+  li { margin-bottom: .3rem; }
+  .box {
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+    padding: 1rem 1.2rem; margin: 1rem 0;
+    page-break-inside: avoid;
+  }
+  .box.warn { background: #fffbeb; border-color: #fde68a; }
+  .box.info { background: #eff6ff; border-color: #bfdbfe; }
+  .box.success { background: #f0fdf4; border-color: #bbf7d0; }
+  code {
+    font-family: 'Consolas', 'Courier New', monospace;
+    background: #f1f5f9; padding: 2px 6px; border-radius: 4px;
+    font-size: .85rem; color: #1e293b;
+  }
+  pre {
+    background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 8px;
+    overflow-x: auto; font-size: .82rem; line-height: 1.5; margin: .5rem 0;
+    page-break-inside: avoid;
+  }
+  pre code { background: none; color: inherit; padding: 0; }
+  table {
+    width: 100%; border-collapse: collapse; margin: .8rem 0; font-size: .88rem;
+    page-break-inside: avoid;
+  }
+  th, td { border: 1px solid #e2e8f0; padding: .5rem .7rem; text-align: left; }
+  th { background: #f1f5f9; font-weight: 600; color: #334155; }
+  .tag {
+    display: inline-block; padding: 2px 10px; border-radius: 12px;
+    font-size: .72rem; font-weight: 600;
+  }
+  .tag.blue { background: #dbeafe; color: #1d4ed8; }
+  .tag.green { background: #d1fae5; color: #059669; }
+  .tag.red { background: #fee2e2; color: #dc2626; }
+  .tag.yellow { background: #fef3c7; color: #d97706; }
+  hr { border: none; border-top: 1px solid #e2e8f0; margin: 1.5rem 0; page-break-after: avoid; }
+  .step { display: flex; gap: 12px; margin: .6rem 0; align-items: flex-start; page-break-inside: avoid; }
+  .step-num {
+    flex-shrink: 0; width: 28px; height: 28px; background: #2563eb; color: #fff;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: .85rem;
+  }
+  .print-btn {
+    position: fixed; top: 1rem; right: 1rem; padding: .6rem 1.2rem;
+    background: #2563eb; color: #fff; border: none; border-radius: 8px;
+    cursor: pointer; font-size: .9rem; font-weight: 600; z-index: 100;
+  }
+  .print-btn:hover { background: #1d4ed8; }
+  @media print {
+    .print-btn { display: none; }
+    body { padding: 0; margin: 0; max-width: 100%; }
+    h2 { page-break-after: avoid; }
+    h3 { page-break-after: avoid; }
+    .box, table, pre, .step { page-break-inside: avoid; }
+    hr { page-break-after: avoid; }
+  }
+  .icon-example { font-size: 1.2rem; margin-right: 6px; }
+  .version-badge { font-size: .8rem; color: #64748b; margin-bottom: 2rem; }
+</style>
+</head>
+<body>
+
+<button class="print-btn" onclick="window.print()">🖨️ Imprimir / PDF</button>
+
+<h1>📋 Instrução de Trabalho</h1>
+<p class="version-badge">
+  <strong>Apontamento de Produção</strong> — PWA + Capacitor + PHP Proxy<br>
+  Versão 1.4.5 | Atualizado: Junho/2026
+</p>
+
+<div class="box info">
+  <strong>📌 Objetivo:</strong> Este documento explica a arquitetura do sistema,
+  como ele funciona e o passo a passo completo para publicar atualizações no aplicativo Android.
+</div>
+
+<!-- ============================================================ -->
+<h2>🔧 1. Visão Geral do Projeto</h2>
+
+<p>
+  Sistema de <strong>registro de apontamentos de produção e horas paradas</strong>
+  para chão de fábrica, integrado ao <strong>ERP Protheus (TOTVS)</strong>.
+</p>
+
+<table>
+  <tr><th>Componente</th><th>Tecnologia</th><th>Função</th></tr>
+  <tr>
+    <td>Front-end (PWA)</td>
+    <td><span class="tag blue">HTML + CSS + JS</span></td>
+    <td>Interface do operador no tablet</td>
+  </tr>
+  <tr>
+    <td>Proxy API</td>
+    <td><span class="tag yellow">PHP</span></td>
+    <td>Bridge entre front-end e ERP Protheus</td>
+  </tr>
+  <tr>
+    <td>Container Android</td>
+    <td><span class="tag green">Capacitor</span></td>
+    <td>Empacota o PWA como APK nativo</td>
+  </tr>
+  <tr>
+    <td>Cloud Build</td>
+    <td><span class="tag blue">Ionic Appflow</span></td>
+    <td>Compila o APK na nuvem (sem precisar de Android Studio)</td>
+  </tr>
+  <tr>
+    <td>Gerenciamento</td>
+    <td><span class="tag red">Headwind MDM</span></td>
+    <td>Distribui e atualiza o APK nos tablets</td>
+  </tr>
+</table>
+
+<!-- ============================================================ -->
+<h2>📁 2. Estrutura de Arquivos</h2>
+
+<table>
+  <tr><th>Arquivo/Pasta</th><th>Função</th></tr>
+  <tr><td><code>index.html</code></td><td>Página principal do PWA</td></tr>
+  <tr><td><code>manifest.json</code></td><td>Configuração do PWA (nome, ícones, tema)</td></tr>
+  <tr><td><code>sw.js</code></td><td>Service Worker (cache offline)</td></tr>
+  <tr><td><code>assets/css/main.css</code></td><td>Estilos da interface</td></tr>
+  <tr><td><code>assets/js/app.js</code></td><td>Motor principal do PWA</td></tr>
+  <tr><td><code>api/proxy.php</code></td><td>Proxy para o ERP Protheus</td></tr>
+  <tr><td><code>produtos.js</code></td><td>Catálogo de produtos (ERP)</td></tr>
+  <tr><td><code>ops.js</code></td><td>Ordens de produção abertas</td></tr>
+  <tr><td><code>recursos.js</code></td><td>Cadastro de máquinas/recursos</td></tr>
+  <tr><td><code>motivos.js</code></td><td>Motivos de parada</td></tr>
+  <tr><td><code>colaboradores.js</code></td><td>Mapa matrícula → nome</td></tr>
+  <tr><td><code>zink-data.js</code></td><td>Peso unitário por produto (ZINK)</td></tr>
+  <tr><td><code>capacitor.config.json</code></td><td>Configuração do Capacitor (URL interna)</td></tr>
+  <tr><td><code>package.json</code></td><td>Dependências Node (Capacitor)</td></tr>
+  <tr><td><code>dist/index.html</code></td><td>Placeholder exigido pelo Ionic Appflow</td></tr>
+  <tr><td><code>android/</code></td><td>Projeto Android nativo (gerado pelo Capacitor)</td></tr>
+  <tr><td><code>.gitignore</code></td><td>Regras de exclusão do Git</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2>🔀 3. Fluxo de Dados</h2>
+
+<div class="box" style="text-align:center;font-size:.9rem;">
+
+<pre style="background:#f8fafc;color:#1e293b;text-align:center;font-size:.85rem;line-height:2;">
+  📱 Tablet (APK)
+       │
+       ▼  (abre URL definida no capacitor.config.json)
+  🌐 Teste:  https://interno.progeral.com.br/apontamentodev/
+  🌐 Produção: https://interno.progeral.com.br/apontamento/
+       │
+       ├── 📄 index.html + assets (CSS/JS)
+       ├── 📦 produtos.js, ops.js, recursos.js...
+       │
+       ▼  (POST)
+  🔄 api/proxy.php?tipo=producao
+       │         ou
+  🔄 api/proxy.php?tipo=parada
+       │
+       ▼  (HTTP POST)
+  🖥️ ERP Protheus (192.168.8.21:20080)
+</pre>
+
+</div>
+
+<!-- ============================================================ -->
+<h2>📱 4. Telas do Aplicativo</h2>
+
+<table>
+  <tr><th>Tela</th><th>ID</th><th>Descrição</th></tr>
+  <tr><td><span class="icon-example">🏠</span> Home</td><td><code>screen-home</code></td><td>Tela inicial com 3 opções: Produção, Parada, Dúvidas</td></tr>
+  <tr><td><span class="icon-example">🏭</span> Produção</td><td><code>screen-prod</code></td><td>Registro de produção: OP, produto, recurso, turno, quantidades</td></tr>
+  <tr><td><span class="icon-example">⏸️</span> Parada</td><td><code>screen-parada</code></td><td>Registro de horas paradas: motivo, recurso, turno, período</td></tr>
+  <tr><td><span class="icon-example">❓</span> Dúvidas</td><td><code>screen-duvidas</code></td><td>FAQ e regras de apontamento</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<hr>
+<h2>🔄 5. Como Atualizar o Aplicativo</h2>
+
+<p>Quando houver mudanças no código (correções, melhorias, novos campos), siga este passo a passo:</p>
+
+<div class="box warn">
+  <strong>⚠️ Pré-requisitos:</strong> Git instalado, acesso ao repositório no GitHub,
+  conta no Ionic Appflow e acesso ao Headwind MDM.
+</div>
+
+<h3>📝 Passo 1 — Fazer as alterações no código</h3>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div>Abra o projeto na pasta <code>C:\Users\samuel.inacio\OneDrive - Progeral\Área de Trabalho\PROJETOS\APONTAMENTO-APK</code></div>
+</div>
+<div class="step">
+  <div class="step-num">2</div>
+  <div>Edite os arquivos necessários (CSS, JS, HTML, dados, etc.)</div>
+</div>
+<div class="step">
+  <div class="step-num">3</div>
+  <div><strong>Importante:</strong> Se alterou CSS/JS/HTML, copie os arquivos para o <strong>servidor interno</strong> em <code>https://interno.progeral.com.br/apontamentodev/</code> — as mudanças refletem imediatamente nos tablets, <strong>sem precisar de APK novo</strong>.</div>
+</div>
+
+<h3>💾 Passo 2 — Commitar e subir para o GitHub</h3>
+
+<div class="step">
+  <div class="step-num">4</div>
+  <div>Abra o PowerShell na pasta do projeto</div>
+</div>
+<div class="step">
+  <div class="step-num">5</div>
+  <div>Execute os comandos:
+<pre><code>git add .
+git commit -m "descrição das alterações"
+git push</code></pre>
+  </div>
+</div>
+
+<h3>☁️ Passo 3 — Gerar novo APK no Ionic Appflow</h3>
+<p style="margin-bottom:.5rem;"><em>Este passo só é necessário se você alterou algo no Capacitor, permissões Android, ou quer atualizar o versionCode para distribuição via MDM.</em></p>
+
+<div class="step">
+  <div class="step-num">6</div>
+  <div>Acesse <strong>https://dashboard.ionicframework.com</strong></div>
+</div>
+<div class="step">
+  <div class="step-num">7</div>
+  <div>Vá em <strong>Builds</strong> → <strong>Create New Build</strong></div>
+</div>
+<div class="step">
+  <div class="step-num">8</div>
+  <div>Configure:
+    <ul>
+      <li><strong>Branch:</strong> main</li>
+      <li><strong>Plataforma:</strong> Android</li>
+      <li><strong>Tipo:</strong> Debug</li>
+    </ul>
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">9</div>
+  <div>Clique em <strong>Build</strong> e aguarde (5-10 minutos)</div>
+</div>
+<div class="step">
+  <div class="step-num">10</div>
+  <div>Quando finalizar, clique em <strong>Download APK</strong></div>
+</div>
+
+<h3>📲 Passo 4 — Distribuir via Headwind MDM</h3>
+
+<div class="step">
+  <div class="step-num">11</div>
+  <div>Acesse o <strong>Headwind MDM</strong></div>
+</div>
+<div class="step">
+  <div class="step-num">12</div>
+  <div>Vá na configuração do aplicativo <strong>Apontamento de Produção</strong></div>
+</div>
+<div class="step">
+  <div class="step-num">13</div>
+  <div>Faça upload do novo arquivo <code>.apk</code></div>
+</div>
+<div class="step">
+  <div class="step-num">14</div>
+  <div>Os tablets receberão a atualização automaticamente</div>
+</div>
+
+<!-- ============================================================ -->
+<h2>⚙️ 6. Configuração do Headwind MDM</h2>
+
+<table>
+  <tr><th>Campo</th><th>Valor</th></tr>
+  <tr><td>Tipo</td><td>Aplicativo</td></tr>
+  <tr><td>ID do pacote</td><td><code>com.progeral.apontamento</code></td></tr>
+  <tr><td>Nome da Aplicação</td><td><code>Apontamento de Produção</code></td></tr>
+  <tr><td>Versão</td><td><code>2</code> (versionCode) — aumentar a cada atualização</td></tr>
+  <tr><td>Código nativo</td><td>Nenhum (APK universal)</td></tr>
+  <tr><td>Arquivo</td><td>Upload do <code>.apk</code></td></tr>
+  <tr><td>Mostrar Ícone</td><td>✅ Sim</td></tr>
+</table>
+
+<div class="box info">
+  <strong>💡 Dica:</strong> Para atualizar o <code>versionCode</code> e <code>versionName</code>,
+  edite o arquivo <code>android/app/build.gradle</code> (linhas 10-11):
+  <pre><code>versionCode 2     ← aumentar em +1 a cada build
+versionName "1.4.5"  ← versão semântica do app</code></pre>
+</div>
+
+<!-- ============================================================ -->
+<h2>🔄 7. Ciclo Completo de Atualização (Resumo)</h2>
+
+<div class="box success">
+  <ol>
+    <li><strong>Editar</strong> arquivos no projeto local</li>
+    <li><strong>Copiar</strong> CSS/JS/HTML alterados para o servidor interno (se aplicável)</li>
+    <li><strong>git add + commit + push</strong> para o GitHub</li>
+    <li><strong>Ionic Appflow</strong> → Create New Build → Android (só se necessário)</li>
+    <li><strong>Download</strong> do APK gerado</li>
+    <li><strong>Headwind MDM</strong> → Upload do novo APK</li>
+    <li>✅ Tablets atualizam automaticamente</li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2>❓ 8. Dúvidas Frequentes</h2>
+
+<!-- ============================================================ -->
+<h2>🌐 9. Ambientes: Teste vs Produção</h2>
+
+<p>Existem duas pastas no servidor interno. O APK é uma WebView que carrega os arquivos de uma delas (definido no <code>capacitor.config.json</code>):</p>
+
+<table>
+  <tr><th>Ambiente</th><th>URL</th><th>Finalidade</th></tr>
+  <tr>
+    <td><span class="tag yellow">Teste / Dev</span></td>
+    <td><code>https://interno.progeral.com.br/apontamentodev/</code></td>
+    <td>Homologação — testar alterações antes de ir para produção</td>
+  </tr>
+  <tr>
+    <td><span class="tag green">Produção</span></td>
+    <td><code>https://interno.progeral.com.br/apontamento/</code></td>
+    <td>Ambiente real usado pelos operadores nos tablets</td>
+  </tr>
+</table>
+
+<h3>Onde alterar a URL que o APK carrega?</h3>
+
+<p>No arquivo <code>capacitor.config.json</code>, campo <code>server.url</code>:</p>
+
+<pre><code>{
+  "server": {
+    "url": "https://interno.progeral.com.br/apontamentodev/"
+  }
+}</code></pre>
+
+<p>Depois de alterar, precisa <strong>commitar, push e gerar um novo APK no Ionic Appflow</strong>.</p>
+
+<div class="box warn">
+  <strong>⚠️ Atenção:</strong> O APK em si é um container vazio. Todo o conteúdo (HTML, CSS, JS, dados) é carregado ao vivo da URL configurada. Se você alterar arquivos no servidor, as mudanças aparecem imediatamente — sem precisar de APK novo.
+</div>
+
+<h3>Precisa ter dois APKs (teste + produção)?</h3>
+<p><strong>Não necessariamente.</strong> Você pode ter um único APK apontando para o ambiente de teste, testar, e quando estiver tudo certo, copiar os arquivos para a pasta de produção. O APK continua o mesmo — só o conteúdo do servidor muda.</p>
+<p>Mas se quiser dois APKs coexistentes nos tablets (um de teste, um de produção), você precisará de dois builds com <code>capacitor.config.json</code> diferentes (URLs diferentes) e <code>appId</code> diferentes no <code>build.gradle</code>.</p>
+
+<h3>Quais arquivos atualizar em cada ambiente?</h3>
+
+<p><strong>Alterações de código (CSS/JS/HTML/PHP):</strong></p>
+<ul>
+  <li>Teste: copiar para <code>.../apontamentodev/</code></li>
+  <li>Produção: copiar para <code>.../apontamento/</code></li>
+  <li>GitHub: push para versionar o código fonte</li>
+</ul>
+
+<p><strong>Alterações de dados (produtos.js, ops.js, recursos.js, motivos.js, zink-data.js):</strong></p>
+<ul>
+  <li>Teste: copiar para <code>.../apontamentodev/</code> (se quiser testar)</li>
+  <li>Produção: copiar para <code>.../apontamento/</code></li>
+  <li><strong>GitHub: não precisa</strong> — esses arquivos são carregados ao vivo do servidor. O GitHub só precisa deles se houver mudança na <strong>estrutura</strong> (ex: mudou o formato que o <code>app.js</code> lê os dados). Para atualizações rotineiras de dados (nova OP, novo produto), só o servidor basta.</li>
+</ul>
+
+<div class="box info">
+  <strong>💡 Fluxo recomendado para dados:</strong>
+  <ol>
+    <li>Extraia os dados do ERP</li>
+    <li>Copie os <code>*.js</code> para a pasta de produção (<code>.../apontamento/</code>)</li>
+    <li>Pronto — os tablets já veem os dados novos na próxima atualização</li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2>❓ 10. Dúvidas Frequentes</h2>
+
+<h3>Preciso instalar Android Studio para atualizar?</h3>
+<p><strong>Não.</strong> O Ionic Appflow compila o APK na nuvem. Você só precisa do Git e do navegador.</p>
+
+<h3>O que fazer se o build falhar?</h3>
+<p>Verifique se:</p>
+<ul>
+  <li>O arquivo <code>dist/index.html</code> existe no repositório</li>
+  <li>Todos os arquivos foram commitados (<code>git status</code> limpo)</li>
+  <li>A branch correta está selecionada no Appflow</li>
+</ul>
+
+<h3>Preciso atualizar o versionCode sempre?</h3>
+<p><strong>Sim, recomendado.</strong> Edite <code>android/app/build.gradle</code> e aumente o <code>versionCode</code> em 1 a cada atualização. O <code>versionName</code> segue o padrão semântico (ex: "1.4.5", "1.5.0").</p>
+
+<h3>As alterações no CSS/JS/dados aparecem sem APK novo?</h3>
+<p><strong>Sim.</strong> O APK é uma WebView que carrega o conteúdo do servidor interno. Alterações em <strong>HTML, CSS, JS, PHP e arquivos de dados (*.js)</strong> no servidor interno são aplicadas imediatamente — <strong>sem precisar gerar novo APK</strong>. APK novo só é necessário se alterar algo no Capacitor (config, permissões Android) ou manifesto.</p>
+
+<h3>Preciso atualizar produtos.js / ops.js no GitHub toda vez?</h3>
+<p><strong>Não.</strong> Esses arquivos de dados são carregados ao vivo do servidor. O GitHub só precisa deles se houver mudança na <strong>estrutura</strong> (ex: mudou o formato que o <code>app.js</code> lê os dados). Para atualizações rotineiras (nova OP, novo produto, novo recurso), basta copiar o arquivo atualizado para a pasta do servidor — o GitHub não precisa ser alterado.</p>
+
+<h3>Preciso copiar os arquivos para o servidor interno?</h3>
+<p><strong>Sim.</strong> O fluxo correto é:</p>
+<ol>
+  <li>Editar os arquivos localmente</li>
+  <li>Copiar para o servidor de <strong>teste</strong> (<code>.../apontamentodev/</code>)</li>
+  <li>Testar nos tablets com APK de teste</li>
+  <li>Quando aprovado, copiar para o servidor de <strong>produção</strong> (<code>.../apontamento/</code>)</li>
+  <li>Push para o GitHub para versionamento</li>
+</ol>
+<p>O push para o GitHub é para versionar o código e para o Ionic Appflow poder compilar o APK quando necessário.</p>
+
+<h3>O APK funciona fora da empresa?</h3>
+<p><strong>Não.</strong> O APK aponta para uma URL interna (<code>https://interno.progeral.com.br/apontamentodev/</code> ou <code>https://interno.progeral.com.br/apontamento/</code>), que só é acessível dentro da rede da Progeral.</p>
+
+<!-- ============================================================ -->
+<hr>
+<div class="box" style="text-align:center;color:#64748b;font-size:.85rem;">
+  Documento gerado em Junho/2026 — Progeral<br>
+  Em caso de dúvidas, contatar o TI.
+</div>
+
+</body>
+</html>
