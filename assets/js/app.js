@@ -2067,10 +2067,10 @@ if ('serviceWorker' in navigator) {
   let _lastPingOk = true;
 
   function pingServer(callback) {
-    const base = (document.querySelector('base') || {}).href || window.location.origin + '/';
-    const url = base + 'manifest.json?_=' + Date.now();
-    const controller = new AbortController();
-    const timer = setTimeout(function () { controller.abort(); }, 3000);
+    var path = window.location.pathname.replace(/[^/]*$/, '');
+    var url = window.location.origin + path + 'manifest.json?_=' + Date.now();
+    var controller = new AbortController();
+    var timer = setTimeout(function () { controller.abort(); }, 3000);
     fetch(url, { method: 'HEAD', mode: 'same-origin', cache: 'no-store', signal: controller.signal })
       .then(function (r) {
         clearTimeout(timer);
