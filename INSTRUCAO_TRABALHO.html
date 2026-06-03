@@ -150,7 +150,7 @@
   <tr><td><code>zink-data.js</code></td><td>Peso unitário por produto (ZINK)</td></tr>
   <tr><td><code>capacitor.config.json</code></td><td>Configuração do Capacitor (URL interna)</td></tr>
   <tr><td><code>package.json</code></td><td>Dependências Node (Capacitor)</td></tr>
-  <tr><td><code>dist/index.html</code></td><td>Placeholder exigido pelo Ionic Appflow</td></tr>
+  <tr><td><code>.build/dist/index.html</code></td><td>Placeholder exigido pelo Ionic Appflow</td></tr>
   <tr><td><code>android/</code></td><td>Projeto Android nativo (gerado pelo Capacitor)</td></tr>
   <tr><td><code>.gitignore</code></td><td>Regras de exclusão do Git</td></tr>
 </table>
@@ -207,7 +207,7 @@
 
 <div class="step">
   <div class="step-num">1</div>
-  <div>Abra o projeto na pasta <code>C:\Users\samuel.inacio\OneDrive - Progeral\Área de Trabalho\PROJETOS\APONTAMENTO-APK</code></div>
+  <div>Abra o projeto na pasta <code>C:\caminho\do\projeto\APONTAMENTO-APK</code> (exemplo: <code>C:\Users\seu_usuario\OneDrive - Empresa\Área de Trabalho\PROJETOS\APONTAMENTO-APK</code>)</div>
 </div>
 <div class="step">
   <div class="step-num">2</div>
@@ -222,7 +222,7 @@
 
 <div class="step">
   <div class="step-num">4</div>
-  <div>Abra o PowerShell na pasta do projeto</div>
+  <div>Abra o PowerShell na pasta do projeto (ex: <code>C:\caminho\do\projeto\APONTAMENTO-APK</code>)</div>
 </div>
 <div class="step">
   <div class="step-num">5</div>
@@ -394,7 +394,7 @@ versionName "1.4.5"  ← versão semântica do app</code></pre>
 <h3>O que fazer se o build falhar?</h3>
 <p>Verifique se:</p>
 <ul>
-  <li>O arquivo <code>dist/index.html</code> existe no repositório</li>
+  <li>O arquivo <code>.build/dist/index.html</code> existe no repositório</li>
   <li>Todos os arquivos foram commitados (<code>git status</code> limpo)</li>
   <li>A branch correta está selecionada no Appflow</li>
 </ul>

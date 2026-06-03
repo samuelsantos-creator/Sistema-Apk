@@ -28,8 +28,8 @@ A aplicação é transformada em **APK Android** via **Capacitor** + **Ionic App
 | `colaboradores.js` | Dados | `window.COLABORADORES` — mapa matrícula → nome. |
 | `zink-data.js` | Dados | `window.ZINK_DATA` — peso unitário por produto (ZINK). |
 | `capacitor.config.json` | Config Capacitor | URL interna, permissões de navegação e configuração do APK. |
+| `.build/dist/index.html` | Build | Placeholder exigido pelo Ionic Appflow (webDir). |
 | `package.json` | Dependências | Capacitor e dependências Node. |
-| `dist/index.html` | Placeholder | Página de redirecionamento exigida pelo Ionic Appflow (webDir). |
 | `android/` | Projeto Android | Gerado pelo Capacitor; compilado na nuvem pelo Ionic Appflow. |
 | `.htaccess` | Config Apache | Políticas agressivas de No-Cache para dados dinâmicos. |
 | `icons/` | Assets | Ícones e logos da interface. |

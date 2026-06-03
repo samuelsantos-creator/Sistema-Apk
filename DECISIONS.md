@@ -178,7 +178,7 @@ Este arquivo documenta as principais decisões arquiteturais do projeto Apontame
 1. Manter versionamento semântico no `versionName` do `build.gradle`.
 2. Incrementar `versionCode` a cada build do APK (para MDM identificar atualização).
 3. Documentar explicitamente que alterações de front-end (CSS/JS/HTML) são aplicadas imediatamente no servidor interno, sem necessidade de novo APK.
-4. Manter `dist/index.html` como placeholder de redirecionamento no repositório (exigência do Ionic Appflow).
+4. Manter `.build/dist/index.html` como placeholder de redirecionamento no repositório (exigência do Ionic Appflow). `dist/` e `node_modules/` movidos para `.build/` para manter a raiz do projeto limpa ao copiar arquivos para o servidor interno.
 
 **Consequências:**
 - **Positivas:** Fluxo claro de deploy; MDM atualiza apenas quando necessário.

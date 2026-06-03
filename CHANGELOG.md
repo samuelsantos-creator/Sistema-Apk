@@ -10,6 +10,9 @@ e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 ### Adicionado
 - **Responsividade Agressiva para Tablet Landscape:** Media query `(orientation: landscape) and (min-width: 900px)` completamente reescrita com valores mais compactos. Timeline oculta, padding de cards reduzido (`0.45rem 0.7rem`), inputs menores (`4px 7px`, fonte `0.72rem`), botões compactos (`5px 12px`), header reduzido (`1rem`), gaps de grid minimizados. Logo do header em `28px`.
 
+### Alterado
+- **Refatoração de diretórios:** `dist/` e `node_modules/` movidos para `.build/`. `capacitor.config.json` atualizado com `"webDir": ".build/dist"`. O `.build/` não precisa ser copiado para o servidor interno, mantendo a raiz limpa.
+
 ### Corrigido
 - **Compatibilidade Android (build.gradle):** `versionName` atualizado de `"1.0"` para `"1.4.5"`, `versionCode` incrementado para `2` para distribuição via MDM.
 
