@@ -39,6 +39,10 @@ A aplicação é transformada em **APK Android** via **Capacitor** + **Ionic App
 | `assets/fonts/fa-v4compatibility.woff2` | Assets | Fonte Font Awesome (compatibilidade v4). |
 | `icons/` | Assets | Ícones e logos da interface. |
 | `icons/app-icon.jpg` | Assets | Imagem fonte 1024×1024 para geração de ícones Android e PWA. |
+| `deploy.py` | Deploy | Script Python (Paramiko) que sobe `app.js` + `main.css` via SFTP com backup local. |
+| `deploy.ps1` | Deploy | Wrapper PowerShell do deploy.py (verifica dependências). |
+| `api/.env` | Config | Credenciais SSH do servidor de produção (não sobe para o VPS). |
+| `backups/` | Deploy | Backups locais dos arquivos remotos antes de cada deploy (gitignored). |
 
 ---
 
@@ -115,6 +119,7 @@ Tablets (chão de fábrica)
 
 | Versão | Data | Descrição |
 |---|---|---|
+| 1.4.7 | Jul/2026 | OP obrigatória para produtos E/TT/J, bloqueio de campos, deploy simplificado com backup local |
 | 1.4.6 | Jun/2026 | Font Awesome local, performance (will-change, defer fonts), correção especificidade CSS dúvidas |
 | 1.4.5 | Jun/2026 | Responsividade landscape, .build/, novo ícone, monitor conexão com ping HTTP |
 | 1.4.0 | Jun/2026 | Capacitor + Ionic Appflow + APK Android |

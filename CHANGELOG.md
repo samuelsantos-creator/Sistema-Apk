@@ -5,6 +5,21 @@ Toda mudança notável neste projeto será documentada neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.4.7] — 2026-07-07
+
+### Adicionado
+- **OP Obrigatória por Tipo de Produto:** Produtos cujo código termina com `E`, `TT` ou `J` agora exigem O.P. obrigatória. Função `produtoRequerOP()` implementada em `app.js`.
+- **Bloqueio de Campos quando OP Obrigatória:** Quando um produto exige OP e o campo está vazio, todos os campos de produção (recurso, datas, horas, quantidades, botão confirmar) são desabilitados via `toggleProdFieldsBlocked()`. Banner vermelho exibido: *"Preencha uma O.P. válida para liberar os demais campos"*.
+- **Deploy Automático (Paramiko):** Script `deploy.py` que sobe apenas `app.js` e `main.css` via SFTP com backup local automático em `backups/`. Configuração via `api/.env`.
+- **Wrapper PowerShell:** `deploy.ps1` — verifica Python/paramiko e chama `deploy.py`.
+
+### Alterado
+- **`assets/js/app.js`**: Validação em `confirmarProd()` bloqueia envio se OP obrigatória estiver vazia, com modal de erro.
+- **`assets/css/main.css`**: Regras CSS para `input:disabled, button:disabled` (opacidade reduzida, ponteiro desabilitado, escala de cinza).
+
+### Corrigido
+- **Campos não eram bloqueados ao selecionar produto que exige OP sem OP preenchida:** `toggleProdFieldsBlocked()` agora é chamado em todos os caminhos de alteração de produto/OP (change, input, populate automático).
+
 ## [1.4.6] — 2026-06-03
 
 ### Adicionado

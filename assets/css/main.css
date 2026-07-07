@@ -1271,3 +1271,10 @@
     .fa-fallback .fa-clipboard-check::before { content: "OK"; font-size: .72em; }
     .fa-fallback .fa-times-circle::before { content: "X"; }
     .fa-fallback .fa-tachometer-alt::before { content: "!"; }
+
+    input:disabled, button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
+      filter: grayscale(0.6);
+    }

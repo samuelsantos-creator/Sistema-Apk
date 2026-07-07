@@ -238,6 +238,41 @@ Este arquivo documenta as principais decisões arquiteturais do projeto Apontame
 
 ---
 
+## [ADR-016] OP Obrigatória para Produtos com Sufixo E, TT ou J (v1.4.7)
+
+**Data:** 2026-07-07
+**Contexto:** Produtos cujo código termina com `E`, `TT` ou `J` representam operações especiais (ex: estamparia, tratamento térmico, jato) que exigem Ordem de Produção (OP) para rastreabilidade no ERP. Operadores estavam apontando produção nesses produtos sem informar a OP, gerando inconsistências.
+
+**Decisão:**
+1. Implementar `produtoRequerOP(codigo)` que retorna `true` se o código do produto terminar com `E`, `TT` ou `J`.
+2. Implementar `toggleProdFieldsBlocked()` que desabilita todos os campos de produção (recurso, datas, horas, quantidades, botão confirmar) quando o produto exige OP e o campo está vazio.
+3. Exibir banner vermelho no topo: *"Preencha uma O.P. válida para liberar os demais campos"*.
+4. Bloquear o envio em `confirmarProd()` com modal de erro se a validação falhar.
+5. Estilizar campos desabilitados com `opacity: 0.5`, `pointer-events: none` e `filter: grayscale(1)`.
+
+**Consequências:**
+- **Positivas:** Garantia de que produtos que exigem OP sempre terão uma OP associada. Feedback visual claro para o operador.
+- **Negativas:** Nenhuma identificada.
+
+---
+
+## [ADR-017] Deploy Simplificado com Paramiko SFTP (v1.4.7)
+
+**Data:** 2026-07-07
+**Contexto:** O deploy anterior via tarball completo do projeto era lento (~79MB) e arriscado por sobrescrever arquivos de configuração do servidor (`.htaccess`) e pastas de build. O SSH interativo com senha não funcionava no ambiente de desenvolvimento (PowerShell não passa senha por pipe).
+
+**Decisão:**
+1. Criar `deploy.py` usando Paramiko (SFTP) que sobe apenas `app.js` e `main.css`.
+2. Fazer backup local dos arquivos remotos atuais antes de sobrescrever (`backups/`).
+3. Centralizar credenciais em `api/.env` (excluído do upload).
+4. Criar wrapper `deploy.ps1` que verifica dependências e chama o Python.
+
+**Consequências:**
+- **Positivas:** Deploy em segundos (~130KB vs 79MB). Backup local permite reversão imediata. Configuração externa evita hardcode de senha. Não toca em arquivos de configuração do servidor.
+- **Negativas:** Dependência de Python com Paramiko no ambiente de desenvolvimento.
+
+---
+
 ## [ADR-015] Otimizações de Performance e Especificidade CSS (v1.4.6)
 
 **Data:** 2026-06-03

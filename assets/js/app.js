@@ -682,6 +682,32 @@
     }
   }
 
+  const PROD_FIELDS_TO_BLOCK = ['p-recurso-cod', 'p-data-ini', 'p-data-fim', 'p-hora-ini', 'p-hora-fim', 'p-qtd', 'p-qtd-ret', 'p-setup', 'p-rnc', 'p-cestos', 'p-peso'];
+  function toggleProdFieldsBlocked(blocked) {
+    PROD_FIELDS_TO_BLOCK.forEach(function (id) {
+      const el = document.getElementById(id);
+      if (el) el.disabled = blocked;
+    });
+    const btn = document.getElementById('p-btn-confirmar');
+    if (btn) btn.disabled = blocked;
+
+    const msg = document.getElementById('p-op-required-msg');
+    if (blocked) {
+      if (!msg) {
+        const m = document.createElement('div');
+        m.id = 'p-op-required-msg';
+        m.style.cssText = 'padding:12px 16px;margin-bottom:12px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;color:#991b1b;font-weight:600;font-size:14px;text-align:center;';
+        m.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Preencha uma O.P. válida para liberar os demais campos';
+        const card = document.querySelector('#screen-prod .form-card:nth-of-type(2)');
+        if (card && card.parentNode) {
+          card.parentNode.insertBefore(m, card.nextSibling);
+        }
+      }
+    } else {
+      if (msg) msg.remove();
+    }
+  }
+
   function validateLive(isProd) {
     const p = isProd ? 'p-' : 's-';
     // Usuário
@@ -719,12 +745,30 @@
     updateFieldClass(p + 'recurso-cod', !!db.recursos[rCod], 'Recurso não encontrado');
 
     if (isProd) {
+      const prod = document.getElementById('p-produto').value.trim().toUpperCase();
+      updateFieldClass('p-produto', !!db.produtos[prod], 'Produto não encontrado');
+
       const op = document.getElementById('p-op').value.trim();
+      const requerOP = !!prod && window.produtoRequerOP(prod);
+      const opOk = op && !!db.ops[op];
       if (op) {
-        const opExists = !!db.ops[op];
-        updateFieldClass('p-op', opExists, opExists ? '' : 'OP não encontrada');
+        updateFieldClass('p-op', !!db.ops[op], opOk ? '' : 'OP não encontrada');
+      } else if (requerOP) {
+        const elOp = document.getElementById('p-op');
+        elOp.classList.add('user-interacted');
+        elOp.classList.remove('field-empty', 'field-valid');
+        elOp.classList.add('field-invalid');
+        const container = elOp.closest('.field') || elOp.parentNode;
+        let msgEl = container.querySelector('.field-error-message');
+        if (!msgEl) {
+          msgEl = document.createElement('div');
+          msgEl.className = 'field-error-message';
+          container.appendChild(msgEl);
+        }
+        msgEl.textContent = 'Este produto exige informar a O.P.';
+        msgEl.style.display = 'inline-block';
       } else {
-        // O.P. é sempre opcional
+        // O.P. é opcional para produtos sem restrição
         const elOp = document.getElementById('p-op');
         elOp.classList.remove('field-empty', 'field-valid', 'field-invalid');
         const container = elOp.closest('.field') || elOp.parentNode;
@@ -735,8 +779,7 @@
         }
       }
 
-      const prod = document.getElementById('p-produto').value.trim().toUpperCase();
-      updateFieldClass('p-produto', !!db.produtos[prod], 'Produto não encontrado');
+      toggleProdFieldsBlocked(requerOP && !opOk);
 
       const prodData = db.produtos[prod];
       const um = prodData ? (prodData.um || '').toUpperCase() : '';
@@ -1225,6 +1268,12 @@
     return p.endsWith('Z') || p.endsWith('J') || p.endsWith('TT');
   };
 
+  window.produtoRequerOP = function (prodCode) {
+    if (!prodCode) return false;
+    const p = prodCode.toUpperCase();
+    return p.endsWith('E') || p.endsWith('TT') || p.endsWith('J');
+  };
+
   // maskTime(id)       : aplica máscara HH:MM ao digitar
   // isValidTimeStr(t)  : valida se a string está no formato HH:MM
 
@@ -1515,8 +1564,9 @@
     if (matricula.length !== 6) { showModal('erro', 'ERRO: Operador', 'A matrícula do operador deve ter exatamente 6 números.'); return; }
     const userExists = window.COLABORADORES.hasOwnProperty(matricula);
     if (!userExists) { showModal('erro', 'ERRO: Acesso', 'Usuário não encontrado.'); return; }
-    if (op && !db.ops[op]) { showModal('erro', 'ERRO: O.P.', 'Ordem de Produção não encontrada no cadastro.'); return; }
     if (!prod || !db.produtos[prod]) { showModal('erro', 'ERRO: Produto', 'Código do produto inválido ou não encontrado.'); return; }
+    if (window.produtoRequerOP(prod) && !op) { showModal('erro', 'ERRO: O.P. Obrigatória', 'Para este produto é obrigatório informar a Ordem de Produção (O.P.).'); return; }
+    if (op && !db.ops[op]) { showModal('erro', 'ERRO: O.P.', 'Ordem de Produção não encontrada no cadastro.'); return; }
     if (!rCod || !db.recursos[rCod]) { showModal('erro', 'ERRO: Recurso/Máquina', 'Máquina não encontrada no cadastro.'); return; }
     if (qtd <= 0) { showModal('erro', 'ERRO: Quantidade', 'A quantidade produzida deve ser maior que zero.'); return; }
 
