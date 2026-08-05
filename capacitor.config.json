@@ -2,14 +2,6 @@
   "appId": "com.progeral.apontamento",
   "appName": "Apontamento Producao",
   "webDir": ".build/dist",
-  "server": {
-    "url": "https://interno.progeral.com.br/apontamentodev/",
-    "cleartext": true,
-    "allowNavigation": [
-      "interno.progeral.com.br",
-      "192.168.8.21"
-    ]
-  },
   "android": {
     "buildOptions": {
       "keystore": null

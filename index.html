@@ -71,21 +71,12 @@
 
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/app-icon.jpg">
-  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/main.css?v=3">
+  <link rel="stylesheet" href="assets/css/duvidas.css">
 </head>
 
 <body>
-  <!-- Banner Offline (fixo no topo, visível em todas as telas quando sem internet) -->
-  <div id="offlineBanner">
-    <i class="fas fa-exclamation-triangle"></i>
-    <span>SEM CONEXÃO — Verifique o Wi-Fi. Os registros não serão enviados.</span>
-  </div>
-
-  <!-- Banner Internet Lenta -->
-  <div id="slowInternetBanner">
-    <i class="fas fa-tachometer-alt"></i>
-    <span>CONEXÃO LENTA — O envio pode demorar mais que o normal.</span>
-  </div>
+  <!-- Banners removidos para evitar falsos positivos -->
 
   <!-- Overlay Loading -->
   <div id="fullLoadingOverlay">
@@ -106,14 +97,16 @@
       <div class="home-logo">Apontamentos <span>· Produção e Horas paradas.</span></div>
       <div class="home-sub">Sistema de registro de produção e horas paradas</div>
 
-      <!-- Barra de Status: Versão + Conexão -->
-      <div class="status-bar">
+      <!-- Barra de Status: Versão -->
+      <!-- Barra de Status: Versão -->
+      <div class="status-bar" style="justify-content: center; gap: 15px;">
         <span class="version-badge"><i class="fas fa-code-branch"></i> V1.4.7</span>
-        <div class="connection-status online" id="connectionStatus">
-          <span class="connection-dot"></span>
-          <i class="fas fa-wifi" id="connectionIcon"></i>
-          <span id="connectionText">Online</span>
-        </div>
+        
+        <!-- Botão de Sincronização Offline -->
+        <button id="btnSyncCloud" onclick="if(window.syncOfflineQueue) window.syncOfflineQueue()" style="display: none; align-items: center; gap: 6px; background: var(--blue); color: white; border: none; padding: 4px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+          <i class="fas fa-cloud-upload-alt"></i> Sincronizar Pendentes
+          <span id="btnSyncCloudBadge" style="background: red; color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.7rem; margin-left: 4px;">0</span>
+        </button>
       </div>
 
       <div class="home-cards">
@@ -150,7 +143,6 @@
         <i class="fas fa-question-circle"></i>
       </button>
       <div style="display:flex;gap:.5rem;margin-left:auto;align-items:center;">
-        <div class="header-status-pill online" id="headerStatusProd" title="Online"><span class="mini-dot"></span></div>
         <button class="btn btn-red btn-sm" onclick="goTo('screen-parada')"><i class="fas fa-pause-circle"></i>
           Parada</button>
         <button class="btn btn-ghost btn-sm" onclick="goTo('screen-home')"><i class="fas fa-home"></i></button>
@@ -163,7 +155,7 @@
       <div class="fields-grid cols-2">
         <div class="field">
           <label>Operador (Matrícula)</label>
-          <input type="text" id="p-matricula" placeholder="Digite sua matrícula" autocomplete="off" inputmode="numeric"
+          <input type="tel" id="p-matricula" placeholder="Digite sua matrícula" autocomplete="off" inputmode="numeric"
             maxlength="6">
         </div>
         <div class="field">
@@ -177,7 +169,7 @@
     <div class="form-card">
       <h4><i class="fas fa-cubes" style="margin-right:6px;color:var(--accent)"></i>Identificação</h4>
       <div class="fields-grid cols-2">
-        <div class="field field-span2">
+        <div class="field">
           <label>O.P.</label>
           <div class="field-inner">
             <input type="text" id="p-op" placeholder="Nº da Ordem de Produção" class="with-btn" inputmode="numeric">
@@ -265,12 +257,12 @@
         </div>
         <div class="field">
           <label>Hora Inicial</label>
-          <input type="text" id="p-hora-ini" placeholder="00:00" maxlength="5" autocomplete="off" autocorrect="off"
+          <input type="tel" id="p-hora-ini" placeholder="00:00" maxlength="5" autocomplete="off" autocorrect="off"
             autocapitalize="off" spellcheck="false">
         </div>
         <div class="field">
           <label>Hora Final</label>
-          <input type="text" id="p-hora-fim" placeholder="00:00" maxlength="5" autocomplete="off" autocorrect="off"
+          <input type="tel" id="p-hora-fim" placeholder="00:00" maxlength="5" autocomplete="off" autocorrect="off"
             autocapitalize="off" spellcheck="false">
         </div>
       </div>
@@ -409,8 +401,6 @@
         <i class="fas fa-question-circle"></i>
       </button>
       <div style="display:flex;gap:.5rem;margin-left:auto;align-items:center;">
-        <div class="header-status-pill online" id="headerStatusParada" title="Online"><span class="mini-dot"></span>
-        </div>
         <button class="btn btn-blue btn-sm" onclick="goTo('screen-prod')"><i class="fas fa-industry"></i>
           Produção</button>
         <button class="btn btn-ghost btn-sm" onclick="goTo('screen-home')"><i class="fas fa-home"></i></button>
@@ -437,7 +427,7 @@
     <div class="form-card">
       <h4><i class="fas fa-tag" style="margin-right:6px;color:var(--accent)"></i>Identificação da Parada</h4>
       <div class="fields-grid cols-2">
-        <div class="field field-span2">
+        <div class="field">
           <label>O.P.</label>
           <div class="field-inner">
             <input type="text" id="s-op" placeholder="Nº da Ordem de Produção" class="with-btn" inputmode="numeric">
