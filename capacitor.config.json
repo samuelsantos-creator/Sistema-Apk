@@ -6,5 +6,9 @@
     "buildOptions": {
       "keystore": null
     }
+  },
+  "server": {
+    "url": "http://interno.progeral.com.br/Apps-testes/",
+    "cleartext": true
   }
 }
