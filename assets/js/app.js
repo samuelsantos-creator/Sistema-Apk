@@ -2212,33 +2212,18 @@ if ('serviceWorker' in navigator) {
     }
   }
 
-  // Monitor Ativo: Pinga o servidor usando uma Imagem (Fura-bloqueios e CORS)
-  function checkNetworkPing() {
-    const img = new Image();
-    
-    // Timeout de 3 segundos
-    const timeoutId = setTimeout(() => {
-      img.src = ''; // Cancela o carregamento da imagem
+    // Monitor Passivo: Escuta Eventos Nativos de Hardware (HTML5)
+  // Revertido a pedido do usuário para teste nativo no tablet.
+  window.addEventListener('offline', showOffline);
+  
+  window.addEventListener('online', () => {
+    showOnline();
+  });
+
+  // Verificação inicial ao carregar a página
+  window.addEventListener('DOMContentLoaded', () => {
+    if (!navigator.onLine) {
       showOffline();
-    }, 3000);
-
-    img.onload = () => {
-      clearTimeout(timeoutId);
-      showOnline();
-    };
-
-    img.onerror = () => {
-      clearTimeout(timeoutId);
-      showOffline();
-    };
-
-    // Tenta carregar o logo do sistema direto do servidor Protheus
-        // URL absoluta fixa para evitar erros de escopo
-    const pingUrl = 'http://interno.progeral.com.br/Apps-testes/icons/app-icon.png?ping=' + new Date().getTime();
-    img.src = pingUrl;
-  }
-
-  // Roda imediatamente ao abrir o app e depois a cada 4 segundos
-  checkNetworkPing();
-  setInterval(checkNetworkPing, 4000);
+    }
+  });
 })();
