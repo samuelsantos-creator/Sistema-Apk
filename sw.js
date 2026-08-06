@@ -1,4 +1,4 @@
-const CACHE_NAME = 'apontamentos-v4-mobile-pwa';
+const CACHE_NAME = 'apontamentos-v5-mobile-pwa';
 const STATIC_ASSETS = [
   './',
   './manifest.json',
@@ -12,7 +12,7 @@ const STATIC_ASSETS = [
   './assets/fonts/fa-brands-400.woff2',
   './assets/fonts/fa-v4compatibility.woff2',
   './icons/logo progeral azul.png',
-  './icons/app-icon.jpg',
+  './icons/app-icon.png',
   './icons/icon-192.png',
   './icons/icon-512.png'
 ];

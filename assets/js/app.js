@@ -170,7 +170,8 @@
     console.log(`PAYLOAD:`, dataToPost);
     console.groupEnd();
 
-    let retries = 3;
+    // Sistema tenta enviar +1 vez automaticamente em caso de falha (total = 2 tentativas)
+    let retries = 2;
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         // Aumentamos o timeout para 15 segundos para dar mais margem em conexões lentas
