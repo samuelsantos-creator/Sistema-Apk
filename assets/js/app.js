@@ -2233,8 +2233,9 @@ if ('serviceWorker' in navigator) {
     };
 
     // Tenta carregar o logo do sistema direto do servidor Protheus
-    const pingUrl = API_CONFIG.URL_PARADA ? API_CONFIG.URL_PARADA.split('api/')[0] : 'http://interno.progeral.com.br/Apps-testes/';
-    img.src = pingUrl + 'icons/app-icon.png?ping=' + new Date().getTime();
+        // URL absoluta fixa para evitar erros de escopo
+    const pingUrl = 'http://interno.progeral.com.br/Apps-testes/icons/app-icon.png?ping=' + new Date().getTime();
+    img.src = pingUrl;
   }
 
   // Roda imediatamente ao abrir o app e depois a cada 4 segundos
