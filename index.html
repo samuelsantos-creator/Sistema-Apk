@@ -1481,6 +1481,12 @@
             if (response.ok) {
               const text = await response.text();
               localStorage.setItem('offline_script_' + fileName, text);
+              // Executa imediatamente para atualizar window.COLABORADORES e listas em memória em tempo real
+              try {
+                const scriptEl = document.createElement('script');
+                scriptEl.textContent = text;
+                document.head.appendChild(scriptEl);
+              } catch(errScript) {}
             }
           } catch(e) {}
         }
