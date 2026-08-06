@@ -1,4 +1,4 @@
-const CACHE_NAME = 'apontamentos-v5-mobile-pwa';
+const CACHE_NAME = 'apontamentos-v6-mobile-pwa';
 const STATIC_ASSETS = [
   './',
   './manifest.json',
@@ -18,6 +18,7 @@ const STATIC_ASSETS = [
 ];
 
 self.addEventListener('install', function (event) {
+  self.skipWaiting(); // Força a instalação imediata do novo Service Worker
   event.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
       return cache.addAll(STATIC_ASSETS);
@@ -31,6 +32,8 @@ self.addEventListener('activate', function (event) {
       return Promise.all(
         keys.filter(function (key) { return key !== CACHE_NAME; }).map(function (key) { return caches.delete(key); })
       );
+    }).then(function () {
+      return self.clients.claim(); // Assume o controle de todas as páginas abertas imediatamente
     })
   );
 });
