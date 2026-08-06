@@ -17,7 +17,8 @@ $pass = 'd)n.?jV4)afli?{nV%&Q';
 
 try {
     // Tenta conectar usando o driver pdo_sqlsrv (padrão Windows/Microsoft)
-    $dsn = "sqlsrv:Server=$host;Database=$dbName";
+    // ODBC Driver 18 exige TrustServerCertificate=true para certificados auto-assinados
+    $dsn = "sqlsrv:Server=$host;Database=$dbName;TrustServerCertificate=true";
     $pdo = new PDO($dsn, $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
