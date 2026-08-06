@@ -422,6 +422,48 @@
     if (window.APP_DB.ops) Object.assign(db.ops, window.APP_DB.ops);
   }
 
+  // ──────────────────────────────────────────────────────────────────
+  // CARGA DINÂMICA DE OPs (SQL Server)
+  // ──────────────────────────────────────────────────────────────────
+  async function loadDynamicOps() {
+    try {
+      console.log('[OPs] Buscando novas OPs no Protheus...');
+      // Usando URL absoluta agora para o Capacitor webview
+      const url = API_CONFIG.URL_OPS || 'http://interno.progeral.com.br/Apps-testes/api/get_ops.php';
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        const opsData = await response.json();
+        let opsCount = 0;
+        
+        // Remove as OPs antigas e carrega as novas dinamicamente
+        db.ops = {}; 
+        
+        for (const opKey in opsData) {
+           db.ops[opKey] = opsData[opKey];
+           opsCount++;
+        }
+        
+        console.log(`[OPs] ${opsCount} OPs carregadas dinamicamente com sucesso.`);
+        return true;
+      } else {
+        console.warn('[OPs] Falha ao carregar OPs (Status ' + response.status + ')');
+        return false;
+      }
+    } catch (e) {
+      console.warn('[OPs] Erro de rede ou timeout ao buscar OPs. O sistema continuará com OPs em cache se houver.', e.message);
+      return false;
+    }
+  }
+
+  // Chama no carregamento inicial da página (assíncrono)
+  loadDynamicOps();
+
   // ══════════════════════════════════════════════════════════════════
   // SEÇÃO 3.5 — BUSCA (SEARCH)
   // Implementação dos botões de lupa (magnifying glass)
