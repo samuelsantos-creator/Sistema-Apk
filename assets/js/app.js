@@ -14,10 +14,7 @@
     URL_PRODUCAO: 'http://interno.progeral.com.br/Apps-testes/api/proxy.php?tipo=producao',
     URL_PARADA: 'http://interno.progeral.com.br/Apps-testes/api/proxy.php?tipo=parada',
     HEADERS: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
+      'Content-Type': 'application/json'
     }
   };
 
