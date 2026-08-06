@@ -26,3 +26,28 @@ Nenhum apontamento com o mesmo Hash de payload Ã© permitido ser processado em pa
 ---
 **Nota para Desenvolvedores e Agentes de IA:**
 Consulte o arquivo `.agents/AGENTS.md` para visualizar as diretivas e comportamentos automÃ¡ticos bloqueados neste projeto.
+
+## Guia de Deploy e Atualização (Passo a Passo)
+
+Sempre que realizar uma alteração visual (CSS) ou de lógica (JS/PHP) na aplicação, siga estritamente os passos abaixo para garantir que os tablets recebam a atualização:
+
+1. **Testes Locais / Commit**: 
+   - Teste as alterações no ambiente de desenvolvimento local.
+   - Faça o commit das alterações no Git (ex: git add . e git commit -m "feat: nova funcionalidade").
+   - Envie para o GitHub: git push origin main.
+
+2. **Atualizar o Servidor Apache (Back-end e PWA)**:
+   - Copie os novos arquivos (ou faça um git pull) na pasta /var/www/Apps-testes/ do servidor interno.progeral.com.br. 
+   - Isso garante que os arquivos PHP (proxy.php, get_ops.php) e as regras de fallback estáticas sejam atualizadas na origem.
+
+3. **Gerar APK no Appflow (Front-end)**:
+   - Acesse o painel do Ionic Appflow.
+   - Vá na seção de Builds e inicie um novo Build selecionando o último commit que você acabou de enviar para a branch main.
+   - Escolha a stack do Android, e configure o Build Type como **Debug** ou Release conforme a necessidade da fábrica.
+   - Aguarde o processo de empacotamento finalizar e baixe o arquivo .apk resultante.
+
+4. **Atualizar os Tablets**:
+   - Transfira o arquivo .apk baixado para os tablets operacionais.
+   - **MUITO IMPORTANTE:** Para garantir que não haja conflitos com caches antigos, é recomendado **Desinstalar** o aplicativo antigo no tablet antes de instalar o novo APK gerado.
+   - Após a instalação, o aplicativo já estará com todos os arquivos atualizados embutidos nativamente, pronto para uso offline e operante.
+
