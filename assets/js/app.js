@@ -2216,15 +2216,16 @@ if ('serviceWorker' in navigator) {
   async function checkNetworkPing() {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 segundos de limite
+      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 segundos de limite
       
-      // Usa uma das rotas estáticas absolutas do servidor interno para testar a comunicação
-      const testUrl = API_CONFIG.URL_PARADA || 'http://interno.progeral.com.br/Apps-testes/api/proxy.php?tipo=parada';
+      // Ping em um arquivo ESTÁTICO (manifest.json) para não sobrecarregar o PHP
+      // Adicionamos um timestamp para forçar o navegador a não usar cache interno
+      const pingUrl = 'http://interno.progeral.com.br/Apps-testes/manifest.json?ping=' + new Date().getTime();
       
-      const res = await fetch(testUrl, {
-        method: 'HEAD', // HEAD não baixa o corpo, é ultra leve e não afeta banco de dados
-        mode: 'no-cors', // Evita problemas de CORS no teste de ping
-        cache: 'no-cache',
+      const res = await fetch(pingUrl, {
+        method: 'GET', // Alguns servidores bloqueiam HEAD, então usamos GET em um arquivo pequeno
+        mode: 'no-cors', // Evita bloqueios de CORS no navegador
+        cache: 'no-store', // Força não usar cache
         signal: controller.signal
       });
       clearTimeout(timeoutId);
@@ -2232,6 +2233,7 @@ if ('serviceWorker' in navigator) {
       // Se não der throw, o servidor está acessível
       showOnline();
     } catch (e) {
+      console.warn('[Offline Ping] Falha ao contatar o servidor:', e.message);
       // Se der timeout ou erro de rede (incluindo o Wi-Fi estar fisicamente desligado)
       showOffline();
     }
