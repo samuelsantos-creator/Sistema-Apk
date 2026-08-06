@@ -2178,44 +2178,66 @@ if ('serviceWorker' in navigator) {
 // O app não ficará pingando o servidor constantemente.
 
 // ==========================================================================
-// OFFLINE BANNER LOGIC (Real-time Network Monitor)
+// OFFLINE BANNER LOGIC (Real-time Network Monitor via Ping)
 // ==========================================================================
 (function() {
   const banner = document.getElementById('offline-banner');
   if (!banner) return;
   
+  let isOffline = false;
   let onlineTimeout;
 
   function showOffline() {
+    if (isOffline) return; // Prevent DOM thrashing
+    isOffline = true;
     clearTimeout(onlineTimeout);
     banner.className = 'offline-banner active offline';
-    banner.innerHTML = '<i class="fas fa-wifi-slash"></i><span id="offline-banner-text">Sem conexão com a internet. O envio de dados falhará.</span>';
+    banner.innerHTML = '<i class="fas fa-wifi-slash"></i><span id="offline-banner-text">Sem conexão com o servidor. O envio está bloqueado.</span>';
   }
 
   function showOnline() {
+    if (!isOffline) return; // Se já estava online, não faz a animação verde de novo
+    isOffline = false;
+    
     banner.className = 'offline-banner active online';
     banner.innerHTML = '<i class="fas fa-wifi"></i><span id="offline-banner-text">Conexão Restabelecida!</span>';
     
-    // Hide the banner after 3 seconds
     clearTimeout(onlineTimeout);
     onlineTimeout = setTimeout(() => {
       banner.classList.remove('active');
     }, 3000);
     
-    // Attempt to sync lists if online
     if (typeof syncLists === 'function') {
       setTimeout(syncLists, 1000);
     }
   }
 
-  // Monitor network status globally
-  window.addEventListener('offline', showOffline);
-  window.addEventListener('online', showOnline);
-
-  // Initial check on load
-  window.addEventListener('DOMContentLoaded', () => {
-    if (!navigator.onLine) {
+  // Monitor Ativo: Pinga o servidor interno a cada 3 segundos
+  async function checkNetworkPing() {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 segundos de limite
+      
+      // Usa uma das rotas estáticas absolutas do servidor interno para testar a comunicação
+      const testUrl = API_CONFIG.URL_PARADA || 'http://interno.progeral.com.br/Apps-testes/api/proxy.php?tipo=parada';
+      
+      const res = await fetch(testUrl, {
+        method: 'HEAD', // HEAD não baixa o corpo, é ultra leve e não afeta banco de dados
+        mode: 'no-cors', // Evita problemas de CORS no teste de ping
+        cache: 'no-cache',
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      
+      // Se não der throw, o servidor está acessível
+      showOnline();
+    } catch (e) {
+      // Se der timeout ou erro de rede (incluindo o Wi-Fi estar fisicamente desligado)
       showOffline();
     }
-  });
+  }
+
+  // Roda imediatamente ao abrir o app e depois a cada 3 segundos
+  checkNetworkPing();
+  setInterval(checkNetworkPing, 3000);
 })();
