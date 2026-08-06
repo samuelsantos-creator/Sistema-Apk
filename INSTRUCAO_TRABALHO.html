@@ -507,11 +507,23 @@ $img.Dispose()</code></pre>
   </ol>
 </div>
 
+</div>
+
 <h3>O APK funciona fora da empresa?</h3>
 <p><strong>Não.</strong> O APK aponta para uma URL interna (<code>http://interno.progeral.com.br/Apps-testes/</code> ou <code>http://interno.progeral.com.br/Apps-testes/</code>), que só é acessível dentro da rede da Progeral.</p>
 
 <!-- ============================================================ -->
 <hr>
+  <div class="box">
+    <h2>4. Regras de Segurança: HTTPS e CORS</h2>
+    <p>O aplicativo possui proteções rigorosas exigidas pelos navegadores modernos que afetam diretamente as requisições para a API (<code>proxy.php</code>). Ao realizar manutenção, atente-se às seguintes regras que foram implementadas para evitar falsos erros de "Sem Conexão":</p>
+    <ul>
+      <li><strong>Mixed Content (Conteúdo Misto):</strong> Como o servidor da Progeral (<code>interno.progeral.com.br</code>) utiliza certificado de segurança <strong>HTTPS</strong>, todas as chamadas de API feitas pelo aplicativo <strong>devem obrigatoriamente</strong> utilizar o prefixo <code>https://</code>. Injetar links <code>http://</code> fará o navegador bloquear silenciosamente o envio de dados.</li>
+      <li><strong>CORS Preflight (Requisições Cruzadas):</strong> Quando o aplicativo roda dentro do APK (sob domínio <code>localhost</code>), o envio para a API é considerado "Cross-Origin" (CORS). Não adicione cabeçalhos customizados (como <code>Cache-Control</code> ou <code>Expires</code>) na função <code>fetch</code> do <code>app.js</code> sem configurar o <code>proxy.php</code> para aceitá-los. Caso contrário, o servidor rejeitará a requisição preventiva (Preflight OPTIONS) e o envio será bloqueado.</li>
+    </ul>
+    <p><strong>Dica para desenvolvedores:</strong> Nunca altere o objeto <code>API_CONFIG</code> do <code>app.js</code> se você estiver trabalhando exclusivamente em regras de frontend (como monitor de rede ou interface). Mexa na API apenas se for expressamente necessário.</p>
+  </div>
+
 <div class="box" style="text-align:center;color:#64748b;font-size:.85rem;">
   Documento gerado em Junho/2026 — Progeral<br>
   Em caso de dúvidas, contatar o TI.

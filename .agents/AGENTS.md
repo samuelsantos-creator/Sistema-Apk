@@ -11,7 +11,9 @@
 - **Cache de Requisições**: O Service Worker *nunca* deve fazer cache de requisições POST. Se falhar, o Service Worker deve deixar a requisição falhar nativamente no navegador para que a aplicação (app.js) trate o erro. NUNCA crie mocks de sucesso no SW para chamadas POST.
 
 ## 3. APIs e Comunicação com ERP (Protheus)
-- **URLs Absolutas**: Como o app via Capacitor roda localmente (ex: `http://localhost`), as chamadas no `app.js` (como `URL_PRODUCAO`) devem apontar para a **URL Absoluta** (ex: `http://interno.progeral.com.br/Apps-testes/api/proxy.php`). Nunca utilize URLs relativas para APIs se não for estritamente garantido que estarão sob o mesmo host local.
+- **URLs Absolutas**: Como o app via Capacitor roda localmente (ex: `http://localhost`), as chamadas no `app.js` (como `URL_PRODUCAO`) devem apontar para a **URL Absoluta** do servidor da Progeral. 
+- **CORS e Protocolo**: Se o servidor utilizar HTTPS, os links absolutos no `app.js` devem OBRIGATORIAMENTE utilizar `https://` para evitar bloqueios de "Mixed Content" pelo navegador. Além disso, não injete cabeçalhos customizados (como `Cache-Control`) nas chamadas `fetch` sem configurar o `proxy.php` antes, pois isso gera bloqueio de preflight CORS.
+- **ATENÇÃO MÁXIMA**: Nunca altere, modifique ou "conserte" o objeto `API_CONFIG` ou qualquer lógica de apontamento do sistema a menos que o usuário solicite EXPLICITAMENTE. Ater-se estritamente à tarefa requisitada.
 - **Validação de JSON em Falsos 200 OK**: A API REST do ERP Protheus retorna frequentemente HTTP Status Code `200 OK` mesmo em caso de falha de regra de negócio (ex: Saldo Insuficiente). O `app.js` deve **obrigatoriamente** inspecionar o conteúdo JSON (ex: flags `erro` ou mensagens como `resultado: "Problema"`) para determinar se a resposta foi realmente bem-sucedida, independentemente do `response.ok` nativo do fetch.
 
 ## 4. Tratamento Offline e Filas
