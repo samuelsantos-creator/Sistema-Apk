@@ -1440,20 +1440,18 @@
 
   <script>
     // Carregador dinâmico sequencial anti-cache
-    (function () {
-      // Previne erro se o usuário clicar antes do app.js estar pronto
+    // Carregador dinâmico sequencial anti-cache e OFFLINE-FIRST
+    (async function () {
       window.goTo = function () {
         console.warn("Aguarde, sistema carregando...");
       };
 
-      // Mostra o overlay de loading imediatamente
       var overlay = document.getElementById('fullLoadingOverlay');
       if (overlay) {
         document.getElementById('loadingText').textContent = "Baixando dados atualizados...";
         overlay.classList.add('active');
       }
 
-      var version = new Date().getTime();
       var scripts = [
         "produtos.js",
         "recursos.js",
@@ -1463,27 +1461,70 @@
         "colaboradores.js",
         "assets/js/app.js"
       ];
+      
+      // Se estiver rodando dentro do Capacitor APK (localhost na porta padrão), 
+      // força a buscar do servidor web de produção. Se for teste local, busca relativo.
+      var isApk = window.location.hostname === 'localhost' && window.location.port === '';
+      var SERVER_URL = isApk ? 'https://interno.progeral.com.br/Apps-testes/' : '';
+      var version = new Date().getTime();
 
-      function loadScript(index) {
-        if (index >= scripts.length) {
-          // Finalizou o carregamento de todos os scripts
-          if (overlay) overlay.classList.remove('active');
-          return;
+      window.forceSyncStaticData = async function() {
+        for (let i = 0; i < scripts.length - 1; i++) { // Não resincroniza o app.js pelo botão para evitar recarregamento
+          const fileName = scripts[i];
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            const response = await fetch(SERVER_URL + fileName + '?v=' + version, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (response.ok) {
+              const text = await response.text();
+              localStorage.setItem('offline_script_' + fileName, text);
+            }
+          } catch(e) {}
         }
-        var scriptEl = document.createElement("script");
-        scriptEl.src = scripts[index] + "?v=" + version;
-        // Carrega o próximo apenas quando o atual terminar (mantém a ordem de dependência)
-        scriptEl.onload = function () {
-          loadScript(index + 1);
-        };
-        scriptEl.onerror = function () {
-          console.error("Erro ao carregar script: " + scripts[index]);
-          loadScript(index + 1); // Tenta continuar mesmo com erro
-        };
-        document.body.appendChild(scriptEl);
+      };
+
+      async function loadDynamicScript(fileName) {
+        let scriptText = '';
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000);
+          const response = await fetch(SERVER_URL + fileName + '?v=' + version, { signal: controller.signal });
+          clearTimeout(timeoutId);
+          
+          if (response.ok) {
+            scriptText = await response.text();
+            localStorage.setItem('offline_script_' + fileName, scriptText);
+          } else {
+            throw new Error('HTTP ' + response.status);
+          }
+        } catch (e) {
+          scriptText = localStorage.getItem('offline_script_' + fileName);
+          if (!scriptText) {
+            try {
+              const localResponse = await fetch(fileName + '?v=' + version);
+              if(localResponse.ok) {
+                 scriptText = await localResponse.text();
+                 localStorage.setItem('offline_script_' + fileName, scriptText);
+              }
+            } catch(err) {
+               console.error('[Carregador] Falha fatal:', fileName);
+            }
+          }
+        }
+
+        if (scriptText) {
+          const scriptEl = document.createElement('script');
+          scriptEl.textContent = scriptText;
+          document.head.appendChild(scriptEl);
+        }
       }
 
-      loadScript(0);
+      for (let i = 0; i < scripts.length; i++) {
+        await loadDynamicScript(scripts[i]);
+      }
+      
+      if (overlay) overlay.classList.remove('active');
     })();
   </script>
 </body>

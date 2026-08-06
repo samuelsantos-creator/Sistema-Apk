@@ -482,6 +482,7 @@
         btn.disabled = true;
       }
       
+      await window.forceSyncStaticData();
       const success = await loadDynamicOps();
       
       if (success) {
