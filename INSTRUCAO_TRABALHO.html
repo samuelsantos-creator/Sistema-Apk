@@ -166,8 +166,8 @@
   📱 Tablet (APK)
        │
        ▼  (abre URL definida no capacitor.config.json)
-  🌐 Teste:  https://interno.progeral.com.br/apontamentodev/
-  🌐 Produção: https://interno.progeral.com.br/apontamento/
+  🌐 Teste:  http://interno.progeral.com.br/Apps-testes/
+  🌐 Produção: http://interno.progeral.com.br/Apps-testes/
        │
        ├── 📄 index.html + assets (CSS/JS)
        ├── 📦 produtos.js, ops.js, recursos.js...
@@ -217,7 +217,7 @@
 </div>
 <div class="step">
   <div class="step-num">3</div>
-  <div><strong>Importante:</strong> Se alterou CSS/JS/HTML, copie os arquivos para o <strong>servidor interno</strong> em <code>https://interno.progeral.com.br/apontamentodev/</code> — as mudanças refletem imediatamente nos tablets, <strong>sem precisar de APK novo</strong>.</div>
+  <div><strong>Importante:</strong> Se alterou CSS/JS/HTML, copie os arquivos para o <strong>servidor interno</strong> em <code>http://interno.progeral.com.br/Apps-testes/</code> — as mudanças refletem imediatamente nos tablets, <strong>sem precisar de APK novo</strong>.</div>
 </div>
 
 <h3>💾 Passo 2 — Commitar e subir para o GitHub</h3>
@@ -332,12 +332,12 @@ versionName "1.4.6"  ← versão semântica do app</code></pre>
   <tr><th>Ambiente</th><th>URL</th><th>Finalidade</th></tr>
   <tr>
     <td><span class="tag yellow">Teste / Dev</span></td>
-    <td><code>https://interno.progeral.com.br/apontamentodev/</code></td>
+    <td><code>http://interno.progeral.com.br/Apps-testes/</code></td>
     <td>Homologação — testar alterações antes de ir para produção</td>
   </tr>
   <tr>
     <td><span class="tag green">Produção</span></td>
-    <td><code>https://interno.progeral.com.br/apontamento/</code></td>
+    <td><code>http://interno.progeral.com.br/Apps-testes/</code></td>
     <td>Ambiente real usado pelos operadores nos tablets</td>
   </tr>
 </table>
@@ -348,7 +348,7 @@ versionName "1.4.6"  ← versão semântica do app</code></pre>
 
 <pre><code>{
   "server": {
-    "url": "https://interno.progeral.com.br/apontamentodev/"
+    "url": "http://interno.progeral.com.br/Apps-testes/"
   }
 }</code></pre>
 
@@ -366,14 +366,14 @@ versionName "1.4.6"  ← versão semântica do app</code></pre>
 
 <p><strong>Alterações de código (CSS/JS/HTML/PHP):</strong></p>
 <ul>
-  <li>Teste: copiar para <code>.../apontamentodev/</code></li>
+  <li>Teste: copiar para <code>.../Apps-testes/</code></li>
   <li>Produção: copiar para <code>.../apontamento/</code></li>
   <li>GitHub: push para versionar o código fonte</li>
 </ul>
 
 <p><strong>Alterações de dados (produtos.js, ops.js, recursos.js, motivos.js, zink-data.js):</strong></p>
 <ul>
-  <li>Teste: copiar para <code>.../apontamentodev/</code> (se quiser testar)</li>
+  <li>Teste: copiar para <code>.../Apps-testes/</code> (se quiser testar)</li>
   <li>Produção: copiar para <code>.../apontamento/</code></li>
   <li><strong>GitHub: não precisa</strong> — esses arquivos são carregados ao vivo do servidor. O GitHub só precisa deles se houver mudança na <strong>estrutura</strong> (ex: mudou o formato que o <code>app.js</code> lê os dados). Para atualizações rotineiras de dados (nova OP, novo produto), só o servidor basta.</li>
 </ul>
@@ -487,7 +487,7 @@ $img.Dispose()</code></pre>
 <p><strong>Sim.</strong> O fluxo correto é:</p>
 <ol>
   <li>Editar os arquivos localmente</li>
-  <li>Copiar para o servidor de <strong>teste</strong> (<code>.../apontamentodev/</code>)</li>
+  <li>Copiar para o servidor de <strong>teste</strong> (<code>.../Apps-testes/</code>)</li>
   <li>Testar nos tablets com APK de teste</li>
   <li>Quando aprovado, copiar para o servidor de <strong>produção</strong> (<code>.../apontamento/</code>)</li>
   <li>Push para o GitHub para versionamento</li>
@@ -495,7 +495,7 @@ $img.Dispose()</code></pre>
 <p>O push para o GitHub é para versionar o código e para o Ionic Appflow poder compilar o APK quando necessário.</p>
 
 <h3>O APK funciona fora da empresa?</h3>
-<p><strong>Não.</strong> O APK aponta para uma URL interna (<code>https://interno.progeral.com.br/apontamentodev/</code> ou <code>https://interno.progeral.com.br/apontamento/</code>), que só é acessível dentro da rede da Progeral.</p>
+<p><strong>Não.</strong> O APK aponta para uma URL interna (<code>http://interno.progeral.com.br/Apps-testes/</code> ou <code>http://interno.progeral.com.br/Apps-testes/</code>), que só é acessível dentro da rede da Progeral.</p>
 
 <!-- ============================================================ -->
 <hr>

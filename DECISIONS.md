@@ -137,7 +137,7 @@ Este arquivo documenta as principais decisões arquiteturais do projeto Apontame
 ## [ADR-009] Escolha do Capacitor + Ionic Appflow para Geração de APK (v1.4.0)
 
 **Data:** 2026-06-02
-**Contexto:** O PWABuilder/Bubblewrap não conseguia gerar APK funcional porque a URL do app (`https://interno.progeral.com.br/apontamentodev/`) é interna (acessível apenas na rede da Progeral). O Bubblewrap precisa acessar a URL publicamente para gerar o Trusted Web Activity (TWA). O Ionic Appflow, por outro lado, compila o APK na nuvem a partir do código fonte e permite configurar uma URL interna no WebView.
+**Contexto:** O PWABuilder/Bubblewrap não conseguia gerar APK funcional porque a URL do app (`http://interno.progeral.com.br/Apps-testes/`) é interna (acessível apenas na rede da Progeral). O Bubblewrap precisa acessar a URL publicamente para gerar o Trusted Web Activity (TWA). O Ionic Appflow, por outro lado, compila o APK na nuvem a partir do código fonte e permite configurar uma URL interna no WebView.
 
 **Decisão:**
 1. Utilizar **Capacitor** como framework de container Android (substitui o Cordova).
@@ -222,7 +222,7 @@ Este arquivo documenta as principais decisões arquiteturais do projeto Apontame
 ## [ADR-014] Font Awesome Local (Offline First) (v1.4.6)
 
 **Data:** 2026-06-03
-**Contexto:** O APK Android (WebView) carrega a URL interna `https://interno.progeral.com.br/apontamentodev/`. O Android WebView bloqueia requisições para domínios CDN públicos (como `cdnjs.cloudflare.com`) quando o APK não tem acesso à internet aberta ou quando a política de segurança do MDM restringe tráfego externo. Os ícones do Font Awesome simplesmente não apareciam no APK.
+**Contexto:** O APK Android (WebView) carrega a URL interna `http://interno.progeral.com.br/Apps-testes/`. O Android WebView bloqueia requisições para domínios CDN públicos (como `cdnjs.cloudflare.com`) quando o APK não tem acesso à internet aberta ou quando a política de segurança do MDM restringe tráfego externo. Os ícones do Font Awesome simplesmente não apareciam no APK.
 
 **Decisão:**
 1. Remover todos os links para `cdnjs.cloudflare.com/ajax/libs/font-awesome/...` do `index.html` e `sw.js`.

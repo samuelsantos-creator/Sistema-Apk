@@ -1,4 +1,4 @@
-# apontamentodev — Índice do Projeto
+# Apps-testes — Índice do Projeto
 
 ## Propósito da Pasta
 
@@ -27,9 +27,10 @@ A aplicação é transformada em **APK Android** via **Capacitor** + **Ionic App
 | `motivos.js` | Dados | `window.APP_DB.motivos` — motivos de parada. |
 | `colaboradores.js` | Dados | `window.COLABORADORES` — mapa matrícula → nome. |
 | `zink-data.js` | Dados | `window.ZINK_DATA` — peso unitário por produto (ZINK). |
-| `capacitor.config.json` | Config Capacitor | URL interna, permissões de navegação e configuração do APK. |
-| `.build/dist/index.html` | Build | Placeholder exigido pelo Ionic Appflow (webDir). |
-| `package.json` | Dependências | Capacitor e dependências Node. |
+| `capacitor.config.json` | Config Capacitor | Configuração do APK e definição da pasta de build (`.build/dist`). |
+| `.build/dist/` | Build | Diretório gerado pelo script `build.js` contendo os arquivos finais para empacotamento pelo Ionic Appflow. |
+| `build.js` | Build | Script Node.js que copia os ativos do PWA para a pasta `.build/dist` para empacotamento. |
+| `package.json` | Dependências | Configurações de scripts (build) e dependências Capacitor. |
 | `android/` | Projeto Android | Gerado pelo Capacitor; compilado na nuvem pelo Ionic Appflow. |
 | `.htaccess` | Config Apache | Políticas agressivas de No-Cache para dados dinâmicos. |
 | `assets/css/fa/all.min.css` | Assets | Folha de estilo do Font Awesome (local, sem CDN). |
@@ -96,7 +97,7 @@ Todos os arquivos de dados (raiz) são carregados de forma **assíncrona e seque
 Código (HTML/CSS/JS)
     │ git push
     ▼
-GitHub (samuelsantos-creator/apontamento-apk)
+GitHub (samuelsantos-creator/Sistema-Apk)
     │ webhook / manual
     ▼
 Ionic Appflow (Cloud Build)
@@ -110,8 +111,7 @@ Headwind MDM
     ▼
 Tablets (chão de fábrica)
 ```
-
-> **Nota:** O APK é uma WebView que carrega a URL interna. Alterações em CSS/JS refletem **imediatamente** sem precisar de novo APK — basta atualizar os arquivos no servidor interno.
+> **Nota:** O APK agora empacota os arquivos web nativamente de forma local (Offline-First). Alterações em CSS/JS e HTML requerem o acionamento do pipeline de build do Ionic Appflow para gerar e distribuir um novo APK.
 
 ---
 
@@ -119,6 +119,7 @@ Tablets (chão de fábrica)
 
 | Versão | Data | Descrição |
 |---|---|---|
+| 1.4.8 | Ago/2026 | Layout ultra compacto para tablets, empacotamento offline nativo e script build.js configurado |
 | 1.4.7 | Jul/2026 | OP obrigatória para produtos E/TT/J, bloqueio de campos, deploy simplificado com backup local |
 | 1.4.6 | Jun/2026 | Font Awesome local, performance (will-change, defer fonts), correção especificidade CSS dúvidas |
 | 1.4.5 | Jun/2026 | Responsividade landscape, .build/, novo ícone, monitor conexão com ping HTTP |

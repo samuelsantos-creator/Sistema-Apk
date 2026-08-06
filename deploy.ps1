@@ -41,7 +41,7 @@ if ($FirstTime) { $args += "--first-time" }
 python deploy.py $args
 
 if ($LASTEXITCODE -eq 0) {
-  Write-Host "`nDeploy concluido! Acesse: https://interno.progeral.com.br/apontamentodev/" -ForegroundColor Green
+  Write-Host "`nDeploy concluido! Acesse: http://interno.progeral.com.br/Apps-testes/" -ForegroundColor Green
 } else {
   Write-Host "`n[ERRO] Deploy falhou. Verifique as mensagens acima." -ForegroundColor Red
 }

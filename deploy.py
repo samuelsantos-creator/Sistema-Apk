@@ -13,7 +13,7 @@ CONFIG = {
     "port": int(os.environ.get("DEPLOY_PORT", "22")),
     "user": os.environ.get("DEPLOY_USER", "root"),
     "password": os.environ.get("DEPLOY_PASSWORD", "timepro"),
-    "remote_dir": "/var/www/apontamentodev",
+    "remote_dir": "/var/www/Apps-testes",
     "first_time": "--first-time" in sys.argv,
 }
 
@@ -116,7 +116,7 @@ def main():
     log("Verificando...")
     out, err, code = run_ssh(client,
         "curl -s -o /dev/null -w '%{http_code}' --connect-timeout 10 "
-        "http://localhost/apontamentodev/ 2>/dev/null || echo '000'")
+        "http://localhost/Apps-testes/ 2>/dev/null || echo '000'")
     http_code = out.strip()
     if http_code in ("200", "302"):
         success(f"Sistema respondendo (HTTP {http_code})")
@@ -126,7 +126,7 @@ def main():
     client.close()
     print("")
     print(f"  {c('green', '  DEPLOY CONCLUIDO')}")
-    print(f"  {c('cyan', '-')} Acessar: https://interno.progeral.com.br/apontamentodev/")
+    print(f"  {c('cyan', '-')} Acessar: http://interno.progeral.com.br/Apps-testes/")
     print(f"  {c('cyan', '-')} Backup local: {BACKUP_DIR}/")
     print("")
 

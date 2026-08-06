@@ -5,6 +5,16 @@ Toda mudança notável neste projeto será documentada neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.4.8] — 2026-08-05
+
+### Adicionado
+- **Build AppFlow Integrado:** Script `build.js` e diretório `.build/dist` adicionados para gerar um build PWA completo com ativos locais, empacotando os dados dinâmicos dentro do app para o Ionic Appflow.
+- **Layout Ultra Compacto:** Otimizações avançadas de responsividade no layout para tablets em modo landscape para evitar barra de rolagem e otimizar uso de tela em chão de fábrica.
+
+### Alterado
+- **Empacotamento Local Capacitor:** A propriedade `server.url` foi removida do arquivo `capacitor.config.json`. O aplicativo agora opera offline-first (carregando os arquivos nativamente de dentro do dispositivo) em vez de funcionar como uma WebView de URL externa. Mudanças requerem compilação de novo APK.
+- **Service Worker / PWA:** Correções para que o service worker permita execução do PWA de modo robusto offline e sem falhas de cache de assets locais.
+
 ## [1.4.7] — 2026-07-07
 
 ### Adicionado
@@ -47,7 +57,7 @@ e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 ### Adicionado
 - **Responsividade Agressiva para Tablet Landscape:** Media query `(orientation: landscape) and (min-width: 900px)` completamente reescrita com valores mais compactos. Timeline oculta, padding de cards reduzido (`0.45rem 0.7rem`), inputs menores (`4px 7px`, fonte `0.72rem`), botões compactos (`5px 12px`), header reduzido (`1rem`), gaps de grid minimizados. Logo do header em `28px`.
 - **Novo Ícone do App:** `icons/app-icon.jpg` (1024×1024) usado como fonte única para gerar todos os ícones do Android (mipmap-mdpi a xxxhdpi, incluindo foreground e round) e do PWA (icon-192.png, icon-512.png). Gerado via script PowerShell com `System.Drawing`.
-- **Seção Ambientes Teste vs Produção:** Documentação em `INSTRUCAO_TRABALHO.html` explicando as duas URLs (`.../apontamentodev/` para teste, `.../apontamento/` para produção) e onde alterar a URL no `capacitor.config.json`.
+- **Seção Ambientes Teste vs Produção:** Documentação em `INSTRUCAO_TRABALHO.html` explicando as duas URLs (`.../Apps-testes/` para teste, `.../apontamento/` para produção) e onde alterar a URL no `capacitor.config.json`.
 
 ### Alterado
 - **Refatoração de diretórios:** `dist/` e `node_modules/` movidos para `.build/`. `capacitor.config.json` atualizado com `"webDir": ".build/dist"`. O `.build/` não precisa ser copiado para o servidor interno, mantendo a raiz limpa.
@@ -61,7 +71,7 @@ e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 
 ### Adicionado
 - **Capacitor + Ionic Appflow:** Projeto transformado em aplicação Android híbrida usando Capacitor. Criados `package.json`, `capacitor.config.json`, e plataforma `android/`. APK compilado via Ionic Appflow Cloud Build.
-- **Configuração `capacitor.config.json`:** App aponta para URL interna `https://interno.progeral.com.br/apontamentodev/` com `cleartext: true` e `allowNavigation` para os domínios internos (`interno.progeral.com.br`, `192.168.8.21`).
+- **Configuração `capacitor.config.json`:** App aponta para URL interna `http://interno.progeral.com.br/Apps-testes/` com `cleartext: true` e `allowNavigation` para os domínios internos (`interno.progeral.com.br`, `192.168.8.21`).
 - **Git Ignore:** Adicionado `.gitignore` ignorando `node_modules/`, `.opencode/`, `*.log`, `.DS_Store`, `Thumbs.db`, `.env`, `INSTRUCAO_TRABALHO.html`.
 - **dist/index.html:** Página de placeholder (redirecionamento) criada para atender exigência do Ionic Appflow de ter um `webDir` existente no repositório.
 
