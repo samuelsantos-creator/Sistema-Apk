@@ -478,21 +478,28 @@ $img.Dispose()</code></pre>
 <p><strong>Sim, recomendado.</strong> Edite <code>android/app/build.gradle</code> e aumente o <code>versionCode</code> em 1 a cada atualização. O <code>versionName</code> segue o padrão semântico (ex: "1.4.6", "1.5.0").</p>
 
 <h3>As alterações no CSS/JS/dados aparecem sem APK novo?</h3>
-<p><strong>Sim.</strong> O APK é uma WebView que carrega o conteúdo do servidor interno. Alterações em <strong>HTML, CSS, JS, PHP e arquivos de dados (*.js)</strong> no servidor interno são aplicadas imediatamente — <strong>sem precisar gerar novo APK</strong>. APK novo só é necessário se alterar algo no Capacitor (config, permissões Android) ou manifesto.</p>
+<p><strong>Não.</strong> A aplicação é empacotada nativamente via Capacitor, ou seja, todos os arquivos (HTML, JS, CSS) ficam <strong>embutidos dentro do APK</strong>. Isso é vital para garantir que o app abra instantaneamente offline sem erros nativos do Android. Portanto, para qualquer alteração no visual (CSS) ou nas regras (JS), <strong>você precisa gerar um novo APK</strong> via Ionic Appflow.</p>
 
-<h3>Preciso atualizar produtos.js / ops.js no GitHub toda vez?</h3>
-<p><strong>Não.</strong> Esses arquivos de dados são carregados ao vivo do servidor. O GitHub só precisa deles se houver mudança na <strong>estrutura</strong> (ex: mudou o formato que o <code>app.js</code> lê os dados). Para atualizações rotineiras (nova OP, novo produto, novo recurso), basta copiar o arquivo atualizado para a pasta do servidor — o GitHub não precisa ser alterado.</p>
+<h3>Onde fica a comunicação com o Banco (Protheus)?</h3>
+<p>O aplicativo (que roda no tablet) se comunica obrigatoriamente usando <strong>URLs absolutas</strong> apontando para os arquivos PHP no seu servidor interno (<code>http://interno.progeral.com.br/Apps-testes/api/...</code>). Os scripts PHP (<code>proxy.php</code>, <code>get_ops.php</code>) servem como a ponte de comunicação que salva/lê no Protheus.</p>
 
-<h3>Preciso copiar os arquivos para o servidor interno?</h3>
-<p><strong>Sim.</strong> O fluxo correto é:</p>
-<ol>
-  <li>Editar os arquivos localmente</li>
-  <li>Copiar para o servidor de <strong>teste</strong> (<code>.../Apps-testes/</code>)</li>
-  <li>Testar nos tablets com APK de teste</li>
-  <li>Quando aprovado, copiar para o servidor de <strong>produção</strong> (<code>.../apontamento/</code>)</li>
-  <li>Push para o GitHub para versionamento</li>
-</ol>
-<p>O push para o GitHub é para versionar o código e para o Ionic Appflow poder compilar o APK quando necessário.</p>
+<h3>Guia Definitivo de Deploy (Colocar o app no ar)</h3>
+<div class="box info">
+  <strong>Passo a passo rigoroso para atualizações:</strong>
+  <ol>
+    <li><strong>Commit no Github:</strong> Após fazer suas alterações e testar localmente, envie (commit e push) tudo para a branch <code>main</code> no Github.</li>
+    <li><strong>Atualizar o Servidor Apache:</strong> Baixe os novos arquivos (HTML/JS/PHP) na pasta do seu servidor (<code>/var/www/Apps-testes/</code>). Isso garante que os scripts de ponte do PHP estejam na versão mais atualizada e prontas para receber conexões.</li>
+    <li><strong>Gerar Novo APK no Ionic Appflow:</strong>
+      <ul>
+        <li>Acesse o Appflow.</li>
+        <li>Inicie um novo <strong>Build</strong> apontando para o último commit na branch <code>main</code>.</li>
+        <li>Escolha o Target Platform como <strong>Android</strong> e Build Type como <strong>Debug</strong> (ou Release).</li>
+        <li>Baixe o <code>.apk</code> gerado.</li>
+      </ul>
+    </li>
+    <li><strong>Atualizar os Tablets:</strong> Desinstale o aplicativo antigo no tablet e instale este novo APK. (Desinstalar evita conflitos de cache do Service Worker).</li>
+  </ol>
+</div>
 
 <h3>O APK funciona fora da empresa?</h3>
 <p><strong>Não.</strong> O APK aponta para uma URL interna (<code>http://interno.progeral.com.br/Apps-testes/</code> ou <code>http://interno.progeral.com.br/Apps-testes/</code>), que só é acessível dentro da rede da Progeral.</p>
