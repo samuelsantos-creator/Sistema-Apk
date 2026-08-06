@@ -359,10 +359,6 @@ window.COLABORADORES = {
     "nome": "MARIA EDUARDA DA SILVA",
     "usuarioProtheus": "MARIA SILVA"
   },
-  "001799": {
-    "nome": "MARIA JOSINERE OLIVEIRA FELIX",
-    "usuarioProtheus": "MARIA O"
-  },
   "001590": {
     "nome": "MARIA LUIZA DA SILVA",
     "usuarioProtheus": "MARIA LUIZA"
@@ -546,6 +542,18 @@ window.COLABORADORES = {
   "001961": {
     "nome": "EMILI DIAS CARDOSO",
     "usuarioProtheus": "EMILI C"
+  },
+  "001849": {
+    "nome": "MARIA EDUARDA DA SILVA",
+    "usuarioProtheus": "MARIA EDUARDA"
+  },
+  "000044": {
+    "nome": "EDSON APARECIDO DE SOUZA",
+    "usuarioProtheus": "EDSON S"
+  },
+  "000041": {
+    "nome": "LUCAS RUFINO DA SILVA",
+    "usuarioProtheus": "LUCAS SILVA"
   },
   "000039": {
     "nome": "KAUA REIS GOMES DE OLIVERIA",
