@@ -475,7 +475,29 @@
     }
   }
 
-  // Chama no carregamento inicial da página (assíncrono)
+  
+    window.forceSyncOPs = async function(btn) {
+      if (btn) {
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Atualizando...';
+        btn.disabled = true;
+      }
+      
+      const success = await loadDynamicOps();
+      
+      if (success) {
+        showModal('sucesso', 'OPs Atualizadas', '<p>As Ordens de Produção foram sincronizadas com o banco de dados.</p>');
+      } else {
+        showModal('erro', 'Falha na Sincronização', '<p>Não foi possível atualizar as OPs. Verifique a conexão com o servidor.</p>');
+      }
+      
+      if (btn) {
+        btn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar';
+        btn.disabled = false;
+      }
+    };
+    
+    // Chama no carregamento inicial da página (assíncrono)
+
   loadDynamicOps();
 
   // ══════════════════════════════════════════════════════════════════
