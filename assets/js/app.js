@@ -192,41 +192,6 @@
           responseText = '(O servidor não permitiu a leitura do corpo da resposta)';
         }
 
-        let parsedJson = null;
-        try {
-          let cleanText = responseText.replace(/^\uFEFF/, '').trim();
-          if (!cleanText.startsWith('{') && cleanText.indexOf('{') !== -1) cleanText = cleanText.substring(cleanText.indexOf('{'));
-          if (cleanText.lastIndexOf('}') !== -1) cleanText = cleanText.substring(0, cleanText.lastIndexOf('}') + 1);
-          
-          if (cleanText.startsWith('{') && !cleanText.endsWith('}')) {
-              cleanText += '"}'; 
-          }
-          parsedJson = JSON.parse(cleanText);
-        } catch (e) {
-          const codMatch = responseText.match(/"codigo"\s*:\s*"([^"]+)"/);
-          const resMatch = responseText.match(/"resultado"\s*:\s*"([^"]+)"/);
-          if (codMatch && resMatch) {
-             parsedJson = { codigo: codMatch[1], resultado: resMatch[1] };
-             console.warn('[API] JSON corrompido resgatado via Regex:', parsedJson);
-          } else if (response.ok) {
-            console.error('[CRITICAL] API retornou 200 mas corpo não é JSON válido:', responseText);
-            return { 
-               success: false, 
-               error: 'Erro no Registro.\n\nO Protheus retornou uma resposta truncada ou invalida.\nResposta: ' + responseText.substring(0,100), 
-               errorType: 'sistema', 
-               status: response.status 
-            };
-          }
-        }
-
-        if (response.ok && parsedJson) {
-           const erroObj = parsedJson.erro ? parsedJson.erro : parsedJson;
-           if (erroObj.codigo === "02" || erroObj.resultado === "Problema" || erroObj.problema) {
-             console.warn('[CRITICAL] Protheus retornou 200 OK, mas o JSON contem erro de negócio:', erroObj);
-             Object.defineProperty(response, 'ok', { value: false });
-           }
-        }
-
         if (!response.ok) {
           if (response.status >= 500 && attempt < retries) {
             console.warn(`[API WARNING] Falha (Status ${response.status}). Tentativa ${attempt} de ${retries}...`);
