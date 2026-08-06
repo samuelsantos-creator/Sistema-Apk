@@ -453,7 +453,13 @@ $img.Dispose()</code></pre>
   </tr>
 </table>
 
-<p><strong>Como funciona:</strong> O sistema combina duas verificações:</p>
+<p><strong>Como funciona o Sensor de Offline agora (V1.5.0):</strong></p>
+<p>O aplicativo (agora embutido como APK) possui permissão nativa para interagir diretamente com o hardware de rede do tablet Android através da API HTML5 (<code>navigator.onLine</code> e listeners de janela).</p>
+<ol>
+  <li><strong>Disparo Instantâneo:</strong> Utilizamos <code>window.addEventListener('offline')</code>. No exato milissegundo em que a antena Wi-Fi do tablet perde o sinal (ou a placa de rede é desativada), o sistema operacional avisa o aplicativo e o banner vermelho cai na tela, sem depender de "tentar fazer uma requisição e falhar".</li>
+  <li><strong>Recuperação Automática:</strong> Usamos <code>window.addEventListener('online')</code>. Assim que o tablet se reconecta, o banner fica verde alertando "Conexão Restabelecida", oculta-se sozinho e a fila interna (se houver) já se prepara para sincronizar.</li>
+</ol>
+<p>Diferente de versões antigas que faziam "ping" no servidor gastando bateria, essa abordagem <strong>escuta passivamente o hardware</strong>, sendo 100% precisa, instantânea e zero custo de processamento.</p>
 <ol>
   <li><code>navigator.onLine</code> — API nativa do navegador/WebView</li>
   <li><strong>Ping HTTP</strong> a cada 5s — faz um HEAD request em <code>manifest.json</code> com timeout de 3s. Se falhar, considera offline.</li>

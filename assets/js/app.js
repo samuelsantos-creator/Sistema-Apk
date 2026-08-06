@@ -2176,3 +2176,46 @@ if ('serviceWorker' in navigator) {
 
 // MONITOR DE CONEXÃO REMOVIDO PARA EVITAR FALSOS POSITIVOS
 // O app não ficará pingando o servidor constantemente.
+
+// ==========================================================================
+// OFFLINE BANNER LOGIC (Real-time Network Monitor)
+// ==========================================================================
+(function() {
+  const banner = document.getElementById('offline-banner');
+  if (!banner) return;
+  
+  let onlineTimeout;
+
+  function showOffline() {
+    clearTimeout(onlineTimeout);
+    banner.className = 'offline-banner active offline';
+    banner.innerHTML = '<i class="fas fa-wifi-slash"></i><span id="offline-banner-text">Sem conexão com a internet. O envio de dados falhará.</span>';
+  }
+
+  function showOnline() {
+    banner.className = 'offline-banner active online';
+    banner.innerHTML = '<i class="fas fa-wifi"></i><span id="offline-banner-text">Conexão Restabelecida!</span>';
+    
+    // Hide the banner after 3 seconds
+    clearTimeout(onlineTimeout);
+    onlineTimeout = setTimeout(() => {
+      banner.classList.remove('active');
+    }, 3000);
+    
+    // Attempt to sync lists if online
+    if (typeof syncLists === 'function') {
+      setTimeout(syncLists, 1000);
+    }
+  }
+
+  // Monitor network status globally
+  window.addEventListener('offline', showOffline);
+  window.addEventListener('online', showOnline);
+
+  // Initial check on load
+  window.addEventListener('DOMContentLoaded', () => {
+    if (!navigator.onLine) {
+      showOffline();
+    }
+  });
+})();
