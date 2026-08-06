@@ -11,8 +11,8 @@
   // Defina aqui as URLs que receberão os dados via POST.
   // ══════════════════════════════════════════════════════════════════
   const API_CONFIG = {
-    URL_PRODUCAO: 'api/proxy.php?tipo=producao',
-    URL_PARADA: 'api/proxy.php?tipo=parada',
+    URL_PRODUCAO: 'http://interno.progeral.com.br/Apps-testes/api/proxy.php?tipo=producao',
+    URL_PARADA: 'http://interno.progeral.com.br/Apps-testes/api/proxy.php?tipo=parada',
     HEADERS: {
       'Content-Type': 'application/json',
       'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -195,8 +195,25 @@
           responseText = '(O servidor não permitiu a leitura do corpo da resposta)';
         }
 
+                let parsedJson = null;
+        try {
+          parsedJson = JSON.parse(responseText);
+        } catch (e) {
+          if (response.ok) {
+            console.error('[CRITICAL] API retornou 200 OK mas o corpo não é JSON válido:', responseText);
+            return { success: false, error: 'O servidor retornou uma resposta inválida ou o sistema está rodando localmente sem PHP. Nenhuma alteração foi salva.', errorType: 'sistema', status: response.status };
+          }
+        }
+
+        if (response.ok && parsedJson) {
+           const erroObj = parsedJson.erro ? parsedJson.erro : parsedJson;
+           if (erroObj.codigo === "02" || erroObj.resultado === "Problema" || erroObj.problema) {
+             console.warn('[CRITICAL] Protheus retornou 200 OK, mas o JSON contem erro de negócio:', erroObj);
+             Object.defineProperty(response, 'ok', { value: false });
+           }
+        }
+
         if (!response.ok) {
-          // Se for erro 500 ou timeout/rede, tenta novamente (exceto último retry)
           if (response.status >= 500 && attempt < retries) {
             console.warn(`[API WARNING] Falha (Status ${response.status}). Tentativa ${attempt} de ${retries}...`);
             await new Promise(r => setTimeout(r, 2000));
