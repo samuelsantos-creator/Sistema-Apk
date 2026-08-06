@@ -192,13 +192,30 @@
           responseText = '(O servidor não permitiu a leitura do corpo da resposta)';
         }
 
-                let parsedJson = null;
+        let parsedJson = null;
         try {
-          parsedJson = JSON.parse(responseText);
+          let cleanText = responseText.replace(/^\uFEFF/, '').trim();
+          if (!cleanText.startsWith('{') && cleanText.indexOf('{') !== -1) cleanText = cleanText.substring(cleanText.indexOf('{'));
+          if (cleanText.lastIndexOf('}') !== -1) cleanText = cleanText.substring(0, cleanText.lastIndexOf('}') + 1);
+          
+          if (cleanText.startsWith('{') && !cleanText.endsWith('}')) {
+              cleanText += '"}'; 
+          }
+          parsedJson = JSON.parse(cleanText);
         } catch (e) {
-          if (response.ok) {
-            console.error('[CRITICAL] API retornou 200 OK mas o corpo não é JSON válido:', responseText);
-            return { success: false, error: 'O servidor retornou uma resposta inválida ou o sistema está rodando localmente sem PHP. Nenhuma alteração foi salva.', errorType: 'sistema', status: response.status };
+          const codMatch = responseText.match(/"codigo"\s*:\s*"([^"]+)"/);
+          const resMatch = responseText.match(/"resultado"\s*:\s*"([^"]+)"/);
+          if (codMatch && resMatch) {
+             parsedJson = { codigo: codMatch[1], resultado: resMatch[1] };
+             console.warn('[API] JSON corrompido resgatado via Regex:', parsedJson);
+          } else if (response.ok) {
+            console.error('[CRITICAL] API retornou 200 mas corpo não é JSON válido:', responseText);
+            return { 
+               success: false, 
+               error: 'Erro no Registro.\n\nO Protheus retornou uma resposta truncada ou invalida.\nResposta: ' + responseText.substring(0,100), 
+               errorType: 'sistema', 
+               status: response.status 
+            };
           }
         }
 
