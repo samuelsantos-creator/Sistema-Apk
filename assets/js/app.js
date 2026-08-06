@@ -2212,34 +2212,32 @@ if ('serviceWorker' in navigator) {
     }
   }
 
-  // Monitor Ativo: Pinga o servidor interno a cada 3 segundos
-  async function checkNetworkPing() {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 segundos de limite
-      
-      // Ping em um arquivo ESTÁTICO (manifest.json) para não sobrecarregar o PHP
-      // Adicionamos um timestamp para forçar o navegador a não usar cache interno
-      const pingUrl = 'http://interno.progeral.com.br/Apps-testes/manifest.json?ping=' + new Date().getTime();
-      
-      const res = await fetch(pingUrl, {
-        method: 'GET', // Alguns servidores bloqueiam HEAD, então usamos GET em um arquivo pequeno
-        mode: 'no-cors', // Evita bloqueios de CORS no navegador
-        cache: 'no-store', // Força não usar cache
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-      
-      // Se não der throw, o servidor está acessível
-      showOnline();
-    } catch (e) {
-      console.warn('[Offline Ping] Falha ao contatar o servidor:', e.message);
-      // Se der timeout ou erro de rede (incluindo o Wi-Fi estar fisicamente desligado)
+  // Monitor Ativo: Pinga o servidor usando uma Imagem (Fura-bloqueios e CORS)
+  function checkNetworkPing() {
+    const img = new Image();
+    
+    // Timeout de 3 segundos
+    const timeoutId = setTimeout(() => {
+      img.src = ''; // Cancela o carregamento da imagem
       showOffline();
-    }
+    }, 3000);
+
+    img.onload = () => {
+      clearTimeout(timeoutId);
+      showOnline();
+    };
+
+    img.onerror = () => {
+      clearTimeout(timeoutId);
+      showOffline();
+    };
+
+    // Tenta carregar o logo do sistema direto do servidor Protheus
+    const pingUrl = API_CONFIG.URL_PARADA ? API_CONFIG.URL_PARADA.split('api/')[0] : 'http://interno.progeral.com.br/Apps-testes/';
+    img.src = pingUrl + 'icons/app-icon.png?ping=' + new Date().getTime();
   }
 
-  // Roda imediatamente ao abrir o app e depois a cada 3 segundos
+  // Roda imediatamente ao abrir o app e depois a cada 4 segundos
   checkNetworkPing();
-  setInterval(checkNetworkPing, 3000);
+  setInterval(checkNetworkPing, 4000);
 })();
