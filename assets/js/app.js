@@ -831,22 +831,6 @@
     });
     const btn = document.getElementById('p-btn-confirmar');
     if (btn) btn.disabled = blocked;
-
-    const msg = document.getElementById('p-op-required-msg');
-    if (blocked) {
-      if (!msg) {
-        const m = document.createElement('div');
-        m.id = 'p-op-required-msg';
-        m.style.cssText = 'padding:12px 16px;margin-bottom:12px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;color:#991b1b;font-weight:600;font-size:14px;text-align:center;';
-        m.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Preencha uma O.P. válida para liberar os demais campos';
-        const card = document.querySelector('#screen-prod .form-card:nth-of-type(2)');
-        if (card && card.parentNode) {
-          card.parentNode.insertBefore(m, card.nextSibling);
-        }
-      }
-    } else {
-      if (msg) msg.remove();
-    }
   }
 
   function validateLive(isProd) {
@@ -897,11 +881,8 @@
       } else if (requerOP) {
         const elOp = document.getElementById('p-op');
         
-        // Exibir popup com auto-close se ainda não avisou sobre este produto especificamente
-        if (elOp.dataset.warnedProd !== prod) {
-          showModal('erro', 'Atenção: O.P. Obrigatória', 'Para o produto <b>' + prod + '</b> (Centro de Custo), é obrigatório informar a O.P. Os outros campos ficarão bloqueados até preencher.', null, false, null, null, 2.5);
-          elOp.dataset.warnedProd = prod;
-        }
+        // Sempre exibir popup com auto-close informando o bloqueio quando tentar validar
+        showModal('erro', 'Atenção: O.P. Obrigatória', 'Para o produto <b>' + prod + '</b> (Centro de Custo), é obrigatório informar a O.P. Os outros campos ficarão bloqueados até preencher.', null, false, null, null, 2.5);
 
         elOp.classList.add('user-interacted');
         elOp.classList.remove('field-empty', 'field-valid');
@@ -918,7 +899,6 @@
       } else {
         // O.P. é opcional para produtos sem restrição
         const elOp = document.getElementById('p-op');
-        elOp.dataset.warnedProd = ''; // Reseta o flag caso tenha mudado para produto sem restrição
         elOp.classList.remove('field-empty', 'field-valid', 'field-invalid');
         const container = elOp.closest('.field') || elOp.parentNode;
         const msgEl = container.querySelector('.field-error-message');
