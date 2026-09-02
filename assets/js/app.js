@@ -11,8 +11,8 @@
   // Defina aqui as URLs que receberão os dados via POST.
   // ══════════════════════════════════════════════════════════════════
   const API_CONFIG = {
-    URL_PRODUCAO: 'https://interno.progeral.com.br/Apps-testes/api/proxy.php?tipo=producao',
-    URL_PARADA: 'https://interno.progeral.com.br/Apps-testes/api/proxy.php?tipo=parada',
+    URL_PRODUCAO: 'https://192.168.50.2/Apps-testes/api/proxy.php?tipo=producao',
+    URL_PARADA: 'https://192.168.50.2/Apps-testes/api/proxy.php?tipo=parada',
     HEADERS: {
       'Content-Type': 'application/json'
     }
@@ -425,7 +425,7 @@
     try {
       console.log('[OPs] Buscando novas OPs no Protheus...');
       // Usando URL absoluta agora para o Capacitor webview
-      const url = API_CONFIG.URL_OPS || 'https://interno.progeral.com.br/Apps-testes/api/get_ops.php';
+      const url = API_CONFIG.URL_OPS || 'https://192.168.50.2/Apps-testes/api/get_ops.php';
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -465,6 +465,15 @@
       }
       
       await window.forceSyncStaticData();
+      
+      // Aplica as atualizações que vieram do servidor na memória local da interface
+      if (window.COLABORADORES) Object.assign(db.colaboradores, window.COLABORADORES);
+      if (window.APP_DB) {
+        if (window.APP_DB.produtos) Object.assign(db.produtos, window.APP_DB.produtos);
+        if (window.APP_DB.recursos) Object.assign(db.recursos, window.APP_DB.recursos);
+        if (window.APP_DB.motivos) Object.assign(db.motivos, window.APP_DB.motivos);
+      }
+
       const success = await loadDynamicOps();
       
       if (success) {

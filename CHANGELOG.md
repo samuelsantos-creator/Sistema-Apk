@@ -15,6 +15,7 @@ e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 - **Lógica de O.P. Obrigatória:** A função `produtoRequerOP()` foi totalmente reescrita. A exigência de OP deixou de ser atrelada ao sufixo do código do produto (E, J, TT) e passou a validar o campo `cc` (Centro de Custo), travando a tela apenas para os setores designados (ex: 10022, 10023, 10025, etc.).
 - **Mensagem de Sincronização:** Alterada a mensagem de retorno na função `forceSyncOPs` para exibir que OPs, Colaboradores, Produtos e Recursos foram sincronizados com sucesso.
 - **Cache PWA:** Versão no HTML foi forçada para 2.2.1 e `CACHE_NAME` do Service Worker elevado para v11 para garantir o update forçado imediato.
+- **Rede / DNS:** Substituição do domínio (`interno.progeral.com.br`) pelo IP interno (`192.168.50.2`) nas chamadas de API e sincronização para mitigar falhas de resolução DNS na fábrica.
 - **Formatação SQL em `produtos.js`:** Ajuste no encerramento de comentários para assegurar o carregamento do JSON.
 
 ## [2.2.0] — 2026-08-06
