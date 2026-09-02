@@ -11,8 +11,8 @@
   // Defina aqui as URLs que receberão os dados via POST.
   // ══════════════════════════════════════════════════════════════════
   const API_CONFIG = {
-    URL_PRODUCAO: 'http://192.168.50.2/Apps-testes/api/proxy.php?tipo=producao',
-    URL_PARADA: 'http://192.168.50.2/Apps-testes/api/proxy.php?tipo=parada',
+    URL_PRODUCAO: 'https://interno.progeral.com.br/Apps-testes/api/proxy.php?tipo=producao',
+    URL_PARADA: 'https://interno.progeral.com.br/Apps-testes/api/proxy.php?tipo=parada',
     HEADERS: {
       'Content-Type': 'application/json'
     }
@@ -360,7 +360,7 @@
     let iconHTML = '';
 
     try {
-      const url = API_CONFIG.URL_OPS || 'http://192.168.50.2/Apps-testes/api/get_ops.php';
+      const url = API_CONFIG.URL_OPS || 'https://interno.progeral.com.br/Apps-testes/api/get_ops.php';
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3500); 
       
@@ -375,7 +375,7 @@
         statusHTML = `
           <div style="background:var(--green2); color:var(--green); padding:12px; border-radius:8px; text-align:left;">
             <p><strong><i class="fas fa-wifi"></i> Status:</strong> Conectado com sucesso</p>
-            <p><strong><i class="fas fa-server"></i> Servidor:</strong> 192.168.50.2</p>
+            <p><strong><i class="fas fa-server"></i> Servidor:</strong> interno.progeral.com.br</p>
             <p><strong><i class="fas fa-tachometer-alt"></i> Tempo de Resposta:</strong> ${ping} ms</p>
           </div>
         `;
@@ -387,7 +387,7 @@
       statusHTML = `
         <div style="background:var(--red2); color:var(--red); padding:12px; border-radius:8px; text-align:left;">
           <p><strong><i class="fas fa-wifi-slash"></i> Status:</strong> Bloqueado ou Inacessível</p>
-          <p><strong><i class="fas fa-server"></i> Servidor:</strong> 192.168.50.2</p>
+          <p><strong><i class="fas fa-server"></i> Servidor:</strong> interno.progeral.com.br</p>
           <p style="margin-top:8px; font-size:0.85rem;"><strong>Motivo comum:</strong> Tablet fora do Wi-Fi da fábrica ou erro de certificado SSL.</p>
         </div>
       `;
@@ -479,7 +479,7 @@
     try {
       console.log('[OPs] Buscando novas OPs no Protheus...');
       // Usando URL absoluta agora para o Capacitor webview
-      const url = API_CONFIG.URL_OPS || 'http://192.168.50.2/Apps-testes/api/get_ops.php';
+      const url = API_CONFIG.URL_OPS || 'https://interno.progeral.com.br/Apps-testes/api/get_ops.php';
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
