@@ -11,8 +11,8 @@
   // Defina aqui as URLs que receberão os dados via POST.
   // ══════════════════════════════════════════════════════════════════
   const API_CONFIG = {
-    URL_PRODUCAO: 'https://192.168.50.2/Apps-testes/api/proxy.php?tipo=producao',
-    URL_PARADA: 'https://192.168.50.2/Apps-testes/api/proxy.php?tipo=parada',
+    URL_PRODUCAO: 'http://192.168.50.2/Apps-testes/api/proxy.php?tipo=producao',
+    URL_PARADA: 'http://192.168.50.2/Apps-testes/api/proxy.php?tipo=parada',
     HEADERS: {
       'Content-Type': 'application/json'
     }
@@ -360,7 +360,7 @@
     let iconHTML = '';
 
     try {
-      const url = API_CONFIG.URL_OPS || 'https://192.168.50.2/Apps-testes/api/get_ops.php';
+      const url = API_CONFIG.URL_OPS || 'http://192.168.50.2/Apps-testes/api/get_ops.php';
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3500); 
       
@@ -479,7 +479,7 @@
     try {
       console.log('[OPs] Buscando novas OPs no Protheus...');
       // Usando URL absoluta agora para o Capacitor webview
-      const url = API_CONFIG.URL_OPS || 'https://192.168.50.2/Apps-testes/api/get_ops.php';
+      const url = API_CONFIG.URL_OPS || 'http://192.168.50.2/Apps-testes/api/get_ops.php';
       
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);

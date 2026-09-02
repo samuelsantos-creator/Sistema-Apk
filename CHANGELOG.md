@@ -14,6 +14,7 @@ e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 
 ### Correções de Segurança e Estabilidade
 - **Invalidador de Cache do APK:** Implementado um "Cache Buster" no `index.html` que verifica a `CURRENT_APK_VERSION` contra a memória do dispositivo (`localStorage`). Se o APK for atualizado, ele deleta agressivamente todos os scripts em cache offline (`offline_script_...`). Isso impede que o app fique preso rodando Javascript velho após a instalação de um novo APK em cenários sem rede.
+- **Protocolo HTTP:** Todas as chamadas diretas para o IP `192.168.50.2` foram revertidas de `https://` para `http://` nas configurações do aplicativo. Isso previne o bloqueio agressivo dos navegadores e da Webview do Android por falha na validação do certificado SSL (erro `ERR_CERT_COMMON_NAME_INVALID`).
 
 ### Alterado
 - **Lógica de O.P. Obrigatória:** A função `produtoRequerOP()` foi totalmente reescrita. A exigência de OP deixou de ser atrelada ao sufixo do código do produto (E, J, TT) e passou a validar o campo `cc` (Centro de Custo), travando a tela apenas para os setores designados (ex: 10022, 10023, 10025, etc.).
