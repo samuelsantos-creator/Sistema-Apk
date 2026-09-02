@@ -1431,6 +1431,23 @@
         overlay.classList.add('active');
       }
 
+      // Sistema de controle de cache do APK
+      var CURRENT_APK_VERSION = '2.2.1';
+      var cachedVersion = localStorage.getItem('apk_version');
+      if (cachedVersion !== CURRENT_APK_VERSION) {
+        // Limpa todos os scripts velhos se o APK foi atualizado
+        console.log('[Sistema] Nova versão do APK detectada. Limpando cache offline antigo...');
+        var keysToRemove = [];
+        for (var i = 0; i < localStorage.length; i++) {
+          var key = localStorage.key(i);
+          if (key && key.startsWith('offline_script_')) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
+        localStorage.setItem('apk_version', CURRENT_APK_VERSION);
+      }
+
       var scripts = [
         "produtos.js",
         "recursos.js",

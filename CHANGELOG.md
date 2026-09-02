@@ -12,6 +12,9 @@ e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 - **Notificação Auto-close:** O sistema agora emite um modal visual automático de alerta (estilo SweetAlert) para o operador durante a digitação caso a O.P. seja exigida.
 - **Ferramenta de Diagnóstico (Ping Test):** Adicionado um ícone discreto de servidor na barra de status e nos cabeçalhos. Ao clicar, o aplicativo dispara um teste de latência e conectividade com o servidor (IP `192.168.50.2`), informando o status, tempo de resposta em ms, e possíveis motivos de bloqueio.
 
+### Correções de Segurança e Estabilidade
+- **Invalidador de Cache do APK:** Implementado um "Cache Buster" no `index.html` que verifica a `CURRENT_APK_VERSION` contra a memória do dispositivo (`localStorage`). Se o APK for atualizado, ele deleta agressivamente todos os scripts em cache offline (`offline_script_...`). Isso impede que o app fique preso rodando Javascript velho após a instalação de um novo APK em cenários sem rede.
+
 ### Alterado
 - **Lógica de O.P. Obrigatória:** A função `produtoRequerOP()` foi totalmente reescrita. A exigência de OP deixou de ser atrelada ao sufixo do código do produto (E, J, TT) e passou a validar o campo `cc` (Centro de Custo), travando a tela apenas para os setores designados (ex: 10022, 10023, 10025, etc.).
 - **Mensagem de Sincronização:** Alterada a mensagem de retorno na função `forceSyncOPs` para exibir que OPs, Colaboradores, Produtos e Recursos foram sincronizados com sucesso.
