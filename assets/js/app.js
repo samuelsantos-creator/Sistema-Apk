@@ -823,7 +823,7 @@
     }
   }
 
-  const PROD_FIELDS_TO_BLOCK = ['p-recurso-cod', 'p-data-ini', 'p-data-fim', 'p-hora-ini', 'p-hora-fim', 'p-qtd', 'p-qtd-ret', 'p-setup', 'p-rnc', 'p-cestos', 'p-peso'];
+  const PROD_FIELDS_TO_BLOCK = ['p-recurso-cod', 'p-turno', 'p-data-ini', 'p-data-fim', 'p-hora-ini', 'p-hora-fim', 'p-qtd', 'p-qtd-ret', 'p-setup', 'p-rnc', 'p-cestos', 'p-peso'];
   function toggleProdFieldsBlocked(blocked) {
     PROD_FIELDS_TO_BLOCK.forEach(function (id) {
       const el = document.getElementById(id);
@@ -1129,6 +1129,19 @@
         if (e.key === 'Enter') {
           el.classList.add('user-interacted'); // Marca que o usuário tentou confirmar
           validateLive(id.startsWith('p-')); // Re-valida para aplicar a cor vermelha ou verde
+
+          // Se for p-produto e a OP for obrigatória mas estiver vazia ou inválida, foca na OP
+          if (id === 'p-produto') {
+            const prodVal = el.value.trim().toUpperCase();
+            if (prodVal && window.produtoRequerOP(prodVal)) {
+              const opVal = document.getElementById('p-op').value.trim();
+              if (!opVal || !db.ops[opVal]) {
+                e.preventDefault();
+                setTimeout(() => document.getElementById('p-op').focus(), 10);
+                return; // Impede o salto para o próximo campo
+              }
+            }
+          }
 
           if (el.classList.contains('field-invalid')) {
             // Mantém na caixa atual (Trava)
