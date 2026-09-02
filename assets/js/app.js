@@ -833,6 +833,13 @@
         updateFieldClass('p-op', !!db.ops[op], opOk ? '' : 'OP não encontrada');
       } else if (requerOP) {
         const elOp = document.getElementById('p-op');
+        
+        // Exibir popup com auto-close se ainda não avisou sobre este produto especificamente
+        if (elOp.dataset.warnedProd !== prod) {
+          showModal('erro', 'Atenção: O.P. Obrigatória', 'Para o produto <b>' + prod + '</b> (Centro de Custo), é obrigatório informar a O.P. Os outros campos ficarão bloqueados até preencher.', null, false, null, null, 2.5);
+          elOp.dataset.warnedProd = prod;
+        }
+
         elOp.classList.add('user-interacted');
         elOp.classList.remove('field-empty', 'field-valid');
         elOp.classList.add('field-invalid');
@@ -848,6 +855,7 @@
       } else {
         // O.P. é opcional para produtos sem restrição
         const elOp = document.getElementById('p-op');
+        elOp.dataset.warnedProd = ''; // Reseta o flag caso tenha mudado para produto sem restrição
         elOp.classList.remove('field-empty', 'field-valid', 'field-invalid');
         const container = elOp.closest('.field') || elOp.parentNode;
         const msgEl = container.querySelector('.field-error-message');
@@ -1117,7 +1125,7 @@
   //   confirmCallback: se passado, exibe botões Cancelar + Confirmar.
   //     Se null, exibe apenas botão Fechar.
   // ══════════════════════════════════════════════════════════════════
-  function showModal(type, title, html, confirmCallback = null, isFinal = false, retryCallback = null, cancelCallback = null) {
+  function showModal(type, title, html, confirmCallback = null, isFinal = false, retryCallback = null, cancelCallback = null, timeoutSeconds = 0) {
     const box = document.getElementById('modalBox');
     box.className = 'modal-box type-' + type;
     const icons = { erro: 'fas fa-times-circle', aviso: 'fas fa-exclamation-triangle', sucesso: 'fas fa-check-circle', confirm: 'fas fa-clipboard-check' };
@@ -1186,6 +1194,11 @@
     }
 
     document.getElementById('modalOverlay').classList.add('open');
+    if (timeoutSeconds > 0) {
+      setTimeout(() => {
+        document.getElementById('modalOverlay').classList.remove('open');
+      }, timeoutSeconds * 1000);
+    }
   }
 
   // Centraliza o fechamento e clique fora
@@ -1348,8 +1361,14 @@
 
   window.produtoRequerOP = function (prodCode) {
     if (!prodCode) return false;
-    const p = prodCode.toUpperCase();
-    return p.endsWith('E') || p.endsWith('TT') || p.endsWith('J');
+    
+    // Puxa o produto do banco de dados em memória
+    const produtoInfo = db.produtos[prodCode.trim()];
+    if (!produtoInfo || !produtoInfo.cc) return false;
+
+    // Setores que exigem OP obrigatoriamente
+    const setoresBloqueados = ["10022", "10023", "10025", "10051", "10052"];
+    return setoresBloqueados.includes(produtoInfo.cc.trim());
   };
 
   // maskTime(id)       : aplica máscara HH:MM ao digitar

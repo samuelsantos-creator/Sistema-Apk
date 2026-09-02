@@ -290,3 +290,66 @@ Este arquivo documenta as principais decisões arquiteturais do projeto Apontame
 **Consequências:**
 - **Positivas:** Espaçamento correto entre cards de dúvidas; ícones aparecem; melhor performance de renderização; service worker não intercepta requisições não-GET.
 - **Negativas:** Nenhuma identificada.
+
+---
+
+## [ADR-018] Implementação do Ping de Imagem Clássico (v2.0.0)
+
+**Data:** 2026-08-06
+**Contexto:** O uso da `Fetch API` para verificar conexão offline em arquivos estáticos ou chamadas HEAD gerava falsos positivos de CORS e bloqueios no servidor Apache, fazendo o aplicativo exibir alertas de "Sem Rede" mesmo quando o dispositivo estava conectado. O Android WebView e requisições OPTIONS/HEAD sofrem restrições rígidas no ambiente atual.
+
+**Decisão:**
+1. Substituir a Fetch API por um ping de imagem clássico (`new Image()`).
+2. Tentar carregar uma imagem minúscula do servidor com timestamp para evitar cache (ex: `favicon.ico?v=123`).
+3. Utilizar os eventos `onload` e `onerror` da imagem para inferir sucesso ou falha de conectividade de maneira assíncrona, robusta e imune a restrições de CORS.
+
+**Consequências:**
+- **Positivas:** Contorna restrições de CORS e do Apache, reduzindo radicalmente falsos alertas de ausência de rede no Android WebView.
+- **Negativas:** Exige a existência de um arquivo de imagem acessível publicamente no servidor.
+
+---
+
+## [ADR-019] Parser Agressivo e Resgate Regex para JSON (v2.2.0)
+
+**Data:** 2026-08-06
+**Contexto:** A comunicação com a API do ERP (Protheus) frequentemente resultava em retornos truncados ou com lixo (caracteres invisíveis, tags residuais) ao redor da string JSON, quebrando o `JSON.parse` nativo do Javascript mesmo quando o payload principal era perfeitamente válido.
+
+**Decisão:**
+1. Criar um parser customizado (defensivo/agressivo).
+2. Em caso de falha do parse padrão, aplicar uma Regex que vasculha a resposta retornada e extrai estritamente o conteúdo contido entre as chaves principais `{ ... }`.
+3. Tentar fazer o parse do conteúdo resgatado antes de falhar definitivamente.
+
+**Consequências:**
+- **Positivas:** Alta resiliência contra instabilidades de retornos do Protheus; salva requisições que antes resultariam em erro fatal para o operador.
+- **Negativas:** Pequeno overhead de Regex quando há falhas estruturais, e risco de mascarar bugs mais graves do ERP se o JSON for mutilado por dentro.
+
+---
+
+## [ADR-020] Carregador Dinâmico de JS Estáticos Offline-First (v2.1.0)
+
+**Data:** 2026-08-06
+**Contexto:** Como a arquitetura depende de arquivos DB injetados (como `colaboradores.js`), a dependência puramente online para carregar esses scripts gerava problemas se o tablet fosse iniciado e aberto diretamente num ponto cego sem Wi-Fi (os dados ficavam em branco).
+
+**Decisão:**
+1. Modificar o mecanismo de injeção e leitura para ser "offline-first".
+2. Garantir que os dados previamente cacheados ou embutidos (bundle) sejam carregados imediatamente, utilizando técnicas de fallback se a requisição dinâmica da rede (com query string timestamp) falhar.
+
+**Consequências:**
+- **Positivas:** O app se torna funcional a partir do primeiro segundo de execução, independentemente da qualidade da rede inicial.
+- **Negativas:** Aumenta a complexidade de debug sobre qual versão do dado o operador está realmente visualizando no momento.
+
+---
+
+## [ADR-021] Validação de O.P. baseada em Centro de Custo (v2.2.1)
+
+**Data:** 2026-09-02
+**Contexto:** A exigência de Ordem de Produção (O.P.) anteriormente dependia do sufixo no código do produto (`E`, `TT`, `J`). Isso se tornou insustentável devido ao cadastro não padronizado de produtos e a inserção de novos processos no ERP. Era preciso validar de forma dinâmica e precisa o setor real de destino.
+**Decisão:**
+1. Alterar a lógica para validar com base no Centro de Custo (`B1_CC`), vinculando um novo arquivo de banco local `centro_custo.js` (carregado via `APP_DB`).
+2. Adicionar o campo `"cc"` a todos os itens na view de `produtos.js`.
+3. Bloquear inputs se o produto destino tiver `cc` pertencente à array estrita de restrição (`10022`, `10023`, `10025`, `10051`, `10052`).
+4. Implementar notificação visual automática em formato pop-up nativo com auto-close para reter a atenção do usuário.
+
+**Consequências:**
+- **Positivas:** Permite travar qualquer apontamento incorreto independentemente da nomenclatura (sufixo) do código do produto. Escalabilidade imediata para travar novos setores alterando o array.
+- **Negativas:** Requer que o script de exportação do ERP (`produtos.js`) traga obrigatoriamente a junção do campo `B1_CC`, tornando a view de banco mais pesada.

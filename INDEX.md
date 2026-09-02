@@ -25,6 +25,7 @@ A aplicação é transformada em **APK Android** via **Capacitor** + **Ionic App
 | `ops.js` | Dados | `window.APP_DB.ops` — ordens de produção abertas. |
 | `recursos.js` | Dados | `window.APP_DB.recursos` — cadastro de máquinas/recursos. |
 | `motivos.js` | Dados | `window.APP_DB.motivos` — motivos de parada. |
+| `centro_custo.js` | Dados | `window.APP_DB.centro_custo` — descrição e mapeamento de setores de destino. |
 | `colaboradores.js` | Dados | `window.COLABORADORES` — mapa matrícula → nome. |
 | `zink-data.js` | Dados | `window.ZINK_DATA` — peso unitário por produto (ZINK). |
 | `capacitor.config.json` | Config Capacitor | Configuração do APK e definição da pasta de build (`.build/dist`). |
@@ -60,6 +61,7 @@ index.html
   ├── produtos.js        → window.APP_DB.produtos
   ├── recursos.js        → window.APP_DB.recursos
   ├── motivos.js         → window.APP_DB.motivos
+  ├── centro_custo.js    → window.APP_DB.centro_custo
   ├── ops.js             → window.APP_DB.ops
   ├── zink-data.js       → window.ZINK_DATA
   ├── colaboradores.js   → window.COLABORADORES

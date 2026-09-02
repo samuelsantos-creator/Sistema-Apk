@@ -5,6 +5,74 @@ Toda mudança notável neste projeto será documentada neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [2.2.1] — 2026-09-02
+
+### Adicionado
+- **Dicionário de Centro de Custo:** Inclusão do arquivo `centro_custo.js` que carrega a tabela de setores no `window.APP_DB["centro_custo"]`.
+- **Notificação Auto-close:** O sistema agora emite um modal visual automático de alerta (estilo SweetAlert) para o operador durante a digitação caso a O.P. seja exigida.
+
+### Alterado
+- **Lógica de O.P. Obrigatória:** A função `produtoRequerOP()` foi totalmente reescrita. A exigência de OP deixou de ser atrelada ao sufixo do código do produto (E, J, TT) e passou a validar o campo `cc` (Centro de Custo), travando a tela apenas para os setores designados (ex: 10022, 10023, 10025, etc.).
+- **Cache PWA:** Versão no HTML foi forçada para 2.2.1 e `CACHE_NAME` do Service Worker elevado para v10 para garantir o update forçado imediato.
+- **Formatação SQL em `produtos.js`:** Ajuste no encerramento de comentários para assegurar o carregamento do JSON.
+
+## [2.2.0] — 2026-08-06
+
+### Adicionado
+- **CORS Preflight:** Suporte a requisições OPTIONS nos scripts PHP `proxy` e `get_ops` para habilitar chamadas customizadas.
+- **Parser JSON Agressivo:** Implementado parser com resgate em regex para strings JSON que possam vir truncadas ou malformadas pelo Protheus.
+
+### Alterado
+- **Retorno de API Padronizado:** Padronização do retorno para ser idêntico ao repositório de referência APONTAMENTO-APK, eliminando falsos alertas de erro em requisições.
+- **Atualização Local:** Atualizados colaboradores, OPs e versão do PWA. Versão do Android (versionCode) aumentada para 10.
+
+## [2.1.0] — 2026-08-06
+
+### Adicionado
+- **Carregador Dinâmico e Offline-first:** Adicionado script avançado para carga estática offline dos arquivos `colaboradores.js`, `recursos.js`, garantindo disponibilidade sem rede inicial.
+- **Botões de Sincronização:** Adicionado botão manual de atualização/sincronização de OPs direto na interface, movido do campo O.P para o header das telas de Apontamento e Parada.
+
+### Alterado
+- **URLs HTTPS:** URLs hardcoded passadas de HTTP para HTTPS para evitar bloqueio de Mixed Content no uso de fetch.
+- **Documentação:** Atualizada a seção de regras de IA e documentação para prevenir erros de CORS/Mixed Content.
+- **Versão:** Android versionCode elevado para 9.
+
+### Corrigido
+- Falha de conexão via TLS/SSL do SQL Server ODBC 18 resolvida no `get_ops.php` com o uso de `TrustServerCertificate=true` no PDO.
+- Remoção de headers customizados problemáticos que geravam erro de preflight e falso aviso de "Sem Rede" ao enviar apontamento.
+
+## [2.0.0] — 2026-08-06
+
+### Adicionado
+- **Banner Global de Rede:** Adicionado banner nativo e real-time de monitoramento da interface de hardware usando API de rede.
+
+### Alterado
+- **Estratégia Offline:** Substituição da Fetch API por um ping clássico de imagem ("Image Ping") para contornar falsos positivos de CORS e Fetch em servidores Apache.
+- Alterado o método de ping offline para requisições GET em arquivos estáticos (evitando bloqueios de métodos HEAD).
+- Substituídos ouvintes passivos por um "ping de batimento cardíaco" no Android WebView para robustez na detecção offline.
+- **Versão Visual:** Atualizada a UI para a versão 2.0.0 e versionCode Android para 8.
+
+### Corrigido
+- Reversão para `window.addEventListener` (html5 nativos) para melhor funcionamento no tablet.
+- Resolvido erro silencioso no ping de imagem removendo uma variável fora do escopo.
+
+## [1.5.0] — 2026-08-06
+
+### Adicionado
+- Nova estratégia de Carga Dinâmica de OPs inserida.
+- Melhoria no ícone do app e nas interfaces (UX) referentes aos erros de conexão.
+
+### Alterado
+- Substituição massiva das splash screens usando o novo logo atualizado em todas as densidades (mdpi a xxxhdpi).
+- Configuração oficial do APK em modo "Web View Wrapper" em relação ao servidor remoto (para os ambientes onde isso é exigido).
+- **Service Worker:** Forçado a atualizar agressivamente via `skipWaiting` para distribuir novos bundles sem depender da permissão do usuário. Versão do SW aumentada para v7 e UI para v1.5.0.
+
+### Corrigido
+- Correção de falsos positivos no servidor local: as chamadas de API foram convertidas para rotas absolutas (suporte a bundle Capacitor) e validação de JSON tornou-se mais rigorosa (mesmo com HTTP 200 OK).
+
+### Documentação
+- Atualizadas as orientações no `INDEX.md`, endpoints de testes, criação de guia de deploy e documentações finais de PWA. Adição de `AGENTS.md` (regras para IAs).
+
 ## [1.4.8] — 2026-08-05
 
 ### Adicionado

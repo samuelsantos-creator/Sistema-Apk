@@ -554,6 +554,11 @@ window.COLABORADORES = {
   "000041": {
     "nome": "LUCAS RUFINO DA SILVA",
     "usuarioProtheus": "LUCAS SILVA"
+
+  },
+  "001983": {
+    "nome": "SAMUEL DE SOUSA",
+    "usuarioProtheus": "SAMUEL SOUSA"
   },
   "000039": {
     "nome": "KAUA REIS GOMES DE OLIVERIA",

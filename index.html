@@ -27,18 +27,6 @@
  *
  * DEPENDENCIES (Dados DB - Carregados dinamicamente no final do body anti-cache):
  *   - produtos.js    : window.APP_DB.produtos — catálogo de produtos do ERP
- *   - recursos.js    : window.APP_DB.recursos — cadastro de máquinas/recursos
- *   - motivos.js     : window.APP_DB.motivos  — tabela de motivos de parada
- *   - ops.js         : window.APP_DB.ops      — ordens de produção abertas
- *   - zink-data.js   : window.ZINK_DATA       — peso unitário por produto (linha ZINK)
- *   - colaboradores.js: window.COLABORADORES  — mapa matrícula → {nome, usuarioProtheus}
- *   - sw.js          : Service Worker para cache offline (PWA)
- *   - manifest.json  : Manifesto PWA para instalação no dispositivo
- *
- * MAIN FLOW:
- *   1. O HTML carrega CSS, Fontes e os dados estáticos embutidos (DB fallback).
- *   2. O arquivo principal `assets/js/app.js` inicializa mesclando os dados (DB Merge).
- *   3. O usuário seleciona uma das três ações na tela Home.
  *   4. Na tela de Produção ou Parada, as validações de input em tempo real garantem:
  *      - Datas não-fictícias, quantidades sempre inteiras >= 0.
  *   5. Ao confirmar, o payload é enviado ao `api/proxy.php` que roteia para a Intranet (192.168.8.21).
@@ -1461,6 +1449,7 @@
         "ops.js",
         "zink-data.js",
         "colaboradores.js",
+        "centro_custo.js",
         "assets/js/app.js"
       ];
       
@@ -1471,16 +1460,23 @@
       var version = new Date().getTime();
 
       window.forceSyncStaticData = async function() {
+        var currentSyncVersion = new Date().getTime();
         for (let i = 0; i < scripts.length - 1; i++) { // Não resincroniza o app.js pelo botão para evitar recarregamento
           const fileName = scripts[i];
           try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 5000);
-            const response = await fetch(SERVER_URL + fileName + '?v=' + version, { signal: controller.signal });
+            const response = await fetch(SERVER_URL + fileName + '?v=' + currentSyncVersion, { signal: controller.signal });
             clearTimeout(timeoutId);
             if (response.ok) {
               const text = await response.text();
               localStorage.setItem('offline_script_' + fileName, text);
+              // Executa imediatamente para atualizar window.COLABORADORES e listas em memória em tempo real
+              try {
+                const scriptEl = document.createElement('script');
+                scriptEl.textContent = text;
+                document.head.appendChild(scriptEl);
+              } catch(errScript) {}
             }
           } catch(e) {}
         }

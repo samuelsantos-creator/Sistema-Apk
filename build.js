@@ -13,6 +13,7 @@ const itemsToCopy = [
   'icons',
   'api',
   'colaboradores.js',
+  'centro_custo.js',
   'motivos.js',
   'ops.js',
   'produtos.js',

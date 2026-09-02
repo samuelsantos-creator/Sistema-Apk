@@ -19,3 +19,10 @@
 ## 4. Tratamento Offline e Filas
 - **Filas de Apontamento Offline**: NUNCA reimplemente filas offline automáticas de submissão ou tente "esconder" falhas de rede dizendo ao operador que a requisição foi um sucesso e jogando-a numa fila de background. Falhas de rede devem ser obrigatoriamente reportadas na tela com o erro "Sem conexão" para que o operador decida quando tentar reenviar, garantindo a integridade dos dados no banco.
 - **Proxy Idempotente**: O `proxy.php` faz um controle de idempotência. Não o remova e garanta que, em caso de timeout de comunicação interna (`proxy.php` -> ERP), o erro 409 seja propagado para bloquear reenvios automáticos.
+
+## 5. Protocolo Obrigatório em Modificações (Cache e Docs)
+- **Documentação Mandatória**: TODOS os agentes e desenvolvedores têm a OBRIGAÇÃO de atualizar o `CHANGELOG.md` e, caso envolva regras de negócio/arquitetura, o `DECISIONS.md` e o `INDEX.md`, relatando claramente as mudanças de estado atual.
+- **Cache Busting Mandatório (PWA)**: Se modificar QUALQUER arquivo local (`.js`, `.css`, `.html`), você DEVE, impreterivelmente:
+  1. Atualizar o `var version = ...` no arquivo `index.html` para uma nova versão (ex: 2.2.1).
+  2. Atualizar o `CACHE_NAME` no arquivo `sw.js` (ex: de v9 para v10). 
+  Se não fizer isso, as alterações nunca serão refletidas nos dispositivos dos operadores devido à política agressiva offline do Service Worker.
