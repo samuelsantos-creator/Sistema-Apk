@@ -12,7 +12,7 @@
  * @company     PROGERAL
  * @created     2025-01-01
  * @updated     2026-05-07
- * @version     2.0.0 (Arquitetura LAMP)
+ * @version     2.2.1 (Arquitetura LAMP)
  * @license     MIT
  *
  * DEPENDENCIES (CDN):
@@ -94,7 +94,7 @@
       <!-- Barra de Status: Versão -->
       <!-- Barra de Status: Versão -->
       <div class="status-bar" style="justify-content: center; gap: 15px;">
-        <span class="version-badge"><i class="fas fa-code-branch"></i> V2.2.0</span>
+        <span class="version-badge"><i class="fas fa-code-branch"></i> V2.2.1</span>
         
         <!-- Botão de Sincronização Offline -->
         <button id="btnSyncCloud" onclick="if(window.syncOfflineQueue) window.syncOfflineQueue()" style="display: none; align-items: center; gap: 6px; background: var(--blue); color: white; border: none; padding: 4px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
@@ -1453,10 +1453,8 @@
         "assets/js/app.js"
       ];
       
-      // Se estiver rodando dentro do Capacitor APK (localhost na porta padrão), 
-      // força a buscar do servidor web de produção. Se for teste local, busca relativo.
-      var isApk = window.location.hostname === 'localhost' && window.location.port === '';
-      var SERVER_URL = isApk ? 'https://interno.progeral.com.br/Apps-testes/' : '';
+      // Força a leitura de atualizações dinâmicas SEMPRE pelo servidor remoto
+      var SERVER_URL = 'https://interno.progeral.com.br/Apps-testes/';
       var version = new Date().getTime();
 
       window.forceSyncStaticData = async function() {

@@ -468,9 +468,9 @@
       const success = await loadDynamicOps();
       
       if (success) {
-        showModal('sucesso', 'OPs Atualizadas', '<p>As Ordens de Produção foram sincronizadas com o banco de dados.</p>');
+        showModal('sucesso', 'Dados Atualizados', '<p>OPs, Colaboradores, Produtos e Recursos foram sincronizados com sucesso.</p>');
       } else {
-        showModal('erro', 'Falha na Sincronização', '<p>Não foi possível atualizar as OPs. Verifique a conexão com o servidor.</p>');
+        showModal('erro', 'Falha na Sincronização', '<p>Não foi possível atualizar os dados. Verifique a conexão com o servidor.</p>');
       }
       
       if (btn) {
