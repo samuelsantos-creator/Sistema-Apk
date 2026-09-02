@@ -1,4 +1,4 @@
-const CACHE_NAME = 'apontamentos-v11-mobile-pwa';
+const CACHE_NAME = 'apontamentos-v12-mobile-pwa';
 const STATIC_ASSETS = [
   './',
   './manifest.json',

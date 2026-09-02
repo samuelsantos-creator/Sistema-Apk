@@ -5,7 +5,7 @@ Toda mudança notável neste projeto será documentada neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
-## [2.2.1] — 2026-09-02
+## [2.2.3] — 2026-09-02
 
 ### Adicionado
 - **Dicionário de Centro de Custo:** Inclusão do arquivo `centro_custo.js` que carrega a tabela de setores no `window.APP_DB["centro_custo"]`.

@@ -1,6 +1,6 @@
 {
   "name": "apontamento-producao",
-  "version": "2.2.1",
+  "version": "2.2.3",
   "private": true,
   "description": "Apontamento de Produção - PWA chão de fábrica",
   "scripts": {
