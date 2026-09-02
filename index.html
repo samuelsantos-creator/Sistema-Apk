@@ -83,10 +83,6 @@
     <div class="home-wrap">
       <div style="display:flex; align-items:center; justify-content:center; gap:15px; margin-bottom: 20px;">
         <img src="icons/logo progeral azul.png" class="logo-img-home" alt="Logo Progeral" style="margin-bottom:0;">
-        <button onclick="testarEnvioAPI()"
-          style="background: var(--yellow); color: #000; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.8rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-          <i class="fas fa-vial"></i> TESTE API
-        </button>
       </div>
       <div class="home-logo">Apontamentos <span>· Produção e Horas paradas.</span></div>
       <div class="home-sub">Sistema de registro de produção e horas paradas</div>
@@ -95,6 +91,9 @@
       <!-- Barra de Status: Versão -->
       <div class="status-bar" style="justify-content: center; gap: 15px;">
         <span class="version-badge"><i class="fas fa-code-branch"></i> V2.2.1</span>
+        <span onclick="window.testarConexaoServidor(this)" class="version-badge" style="cursor: pointer; background: var(--surface2); color: var(--text2);" title="Status do Servidor">
+          <i class="fas fa-server"></i>
+        </span>
         
         <!-- Botão de Sincronização Offline -->
         <button id="btnSyncCloud" onclick="if(window.syncOfflineQueue) window.syncOfflineQueue()" style="display: none; align-items: center; gap: 6px; background: var(--blue); color: white; border: none; padding: 4px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
@@ -127,9 +126,9 @@
   <div class="screen" id="screen-prod">
     <div class="page-header">
       <img src="icons/logo progeral azul.png" class="logo-img-header" alt="Logo Progeral">
-      <button onclick="testarEnvioAPI()"
-        style="background: var(--yellow); color: #000; border: none; padding: 5px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.7rem; margin-right: 15px;">
-        <i class="fas fa-vial"></i> TESTAR API
+      <button onclick="window.testarConexaoServidor(this)" title="Status do Servidor"
+        style="background: transparent; color: var(--text2); border: 1px solid var(--border); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; margin-right: 15px; display:flex; align-items:center; justify-content:center;">
+        <i class="fas fa-server"></i>
       </button>
       <i class="fas fa-industry ph-icon" style="color:var(--blue)"></i>
       <h2>Apontamento</h2>
@@ -386,9 +385,9 @@
   <div class="screen" id="screen-parada">
     <div class="page-header">
       <img src="icons/logo progeral azul.png" class="logo-img-header" alt="Logo Progeral">
-      <button onclick="testarEnvioAPI()"
-        style="background: var(--yellow); color: #000; border: none; padding: 5px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.7rem; margin-right: 15px;">
-        <i class="fas fa-vial"></i> TESTAR API
+      <button onclick="window.testarConexaoServidor(this)" title="Status do Servidor"
+        style="background: transparent; color: var(--text2); border: 1px solid var(--border); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; margin-right: 15px; display:flex; align-items:center; justify-content:center;">
+        <i class="fas fa-server"></i>
       </button>
       <i class="fas fa-pause-circle ph-icon" style="color:var(--red)"></i>
       <h2>Paradas</h2>
@@ -1393,17 +1392,7 @@
         </div>
       </div>
 
-      <!-- SEÇÃO DE DEPURAÇÃO (SEMPRE VISÍVEL) -->
-      <div id="sec-debug"
-        style="margin-top: 30px; padding: 20px; border: 2px dashed var(--accent); border-radius: 12px; background: var(--surface2); text-align: center;">
-        <h3 style="color: var(--accent); margin-bottom: 10px;">🛠️ Ferramenta de Depuração</h3>
-        <p style="margin-bottom: 20px; color: var(--text2);">Use o botão abaixo para enviar um teste rápido para o
-          servidor.</p>
-        <button onclick="testarEnvioAPI()" class="btn-confirm"
-          style="background: var(--accent); width: auto; padding: 15px 30px; font-weight: bold; border-radius: 8px; cursor: pointer;">
-          <i class="fas fa-paper-plane" style="margin-right: 8px;"></i> TESTAR ENVIO (SIMULADO)
-        </button>
-      </div>
+      <!-- SEÇÃO DE DEPURAÇÃO REMOVIDA (Substituída pelo Ping Test) -->
 
     </div><!-- /sections -->
 

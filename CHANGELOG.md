@@ -10,6 +10,7 @@ e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/
 ### Adicionado
 - **Dicionário de Centro de Custo:** Inclusão do arquivo `centro_custo.js` que carrega a tabela de setores no `window.APP_DB["centro_custo"]`.
 - **Notificação Auto-close:** O sistema agora emite um modal visual automático de alerta (estilo SweetAlert) para o operador durante a digitação caso a O.P. seja exigida.
+- **Ferramenta de Diagnóstico (Ping Test):** Adicionado um ícone discreto de servidor na barra de status e nos cabeçalhos. Ao clicar, o aplicativo dispara um teste de latência e conectividade com o servidor (IP `192.168.50.2`), informando o status, tempo de resposta em ms, e possíveis motivos de bloqueio.
 
 ### Alterado
 - **Lógica de O.P. Obrigatória:** A função `produtoRequerOP()` foi totalmente reescrita. A exigência de OP deixou de ser atrelada ao sufixo do código do produto (E, J, TT) e passou a validar o campo `cc` (Centro de Custo), travando a tela apenas para os setores designados (ex: 10022, 10023, 10025, etc.).

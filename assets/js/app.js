@@ -348,10 +348,64 @@
   }
 
   /**
-   * Função de teste rápido para validar o recebimento de dados no servidor
+   * Diagnóstico de Conexão com o Servidor (Ping Test)
    */
-  window.testarEnvioAPI = async function () {
-    showModal('aviso', 'Teste desativado', 'O envio de teste foi desativado em producao.');
+  window.testarConexaoServidor = async function (btnElement) {
+    if (btnElement && btnElement.querySelector('i')) {
+      btnElement.querySelector('i').className = 'fas fa-spinner fa-spin';
+    }
+
+    const t0 = performance.now();
+    let statusHTML = '';
+    let iconHTML = '';
+
+    try {
+      const url = API_CONFIG.URL_OPS || 'https://192.168.50.2/Apps-testes/api/get_ops.php';
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500); 
+      
+      const res = await fetch(url + '?ping=' + t0, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      
+      const t1 = performance.now();
+      const ping = Math.round(t1 - t0);
+
+      if (res.ok) {
+        iconHTML = '<i class="fas fa-check-circle" style="font-size:3rem; color:var(--green); margin-bottom:15px;"></i>';
+        statusHTML = `
+          <div style="background:var(--green2); color:var(--green); padding:12px; border-radius:8px; text-align:left;">
+            <p><strong><i class="fas fa-wifi"></i> Status:</strong> Conectado com sucesso</p>
+            <p><strong><i class="fas fa-server"></i> Servidor:</strong> 192.168.50.2</p>
+            <p><strong><i class="fas fa-tachometer-alt"></i> Tempo de Resposta:</strong> ${ping} ms</p>
+          </div>
+        `;
+      } else {
+        throw new Error('HTTP ' + res.status);
+      }
+    } catch (e) {
+      iconHTML = '<i class="fas fa-times-circle" style="font-size:3rem; color:var(--red); margin-bottom:15px;"></i>';
+      statusHTML = `
+        <div style="background:var(--red2); color:var(--red); padding:12px; border-radius:8px; text-align:left;">
+          <p><strong><i class="fas fa-wifi-slash"></i> Status:</strong> Bloqueado ou Inacessível</p>
+          <p><strong><i class="fas fa-server"></i> Servidor:</strong> 192.168.50.2</p>
+          <p style="margin-top:8px; font-size:0.85rem;"><strong>Motivo comum:</strong> Tablet fora do Wi-Fi da fábrica ou erro de certificado SSL.</p>
+        </div>
+      `;
+    }
+
+    if (btnElement && btnElement.querySelector('i')) {
+      btnElement.querySelector('i').className = 'fas fa-server';
+    }
+
+    const modalHTML = `
+      <div style="text-align:center; padding:10px;">
+        ${iconHTML}
+        <h3 style="color:var(--text); margin-bottom:15px; text-transform:uppercase;">Diagnóstico de Rede</h3>
+        ${statusHTML}
+      </div>
+    `;
+
+    showModal('aviso', 'Diagnóstico de Rede', modalHTML);
   };
 
   // ══════════════════════════════════════════════════════════════════
