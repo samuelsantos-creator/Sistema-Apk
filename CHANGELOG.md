@@ -5,6 +5,11 @@ Toda mudança notável neste projeto será documentada neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [2.2.4] — 2026-09-03
+
+### Alterado
+- **Versão do APK e PWA:** Atualização da versão do sistema para 2.2.4 e incremento no código de versão do APK (12) e CACHE_NAME (v13) do Service Worker para forçar a atualização nos dispositivos, conforme regras de cache.
+
 ## [2.2.3] — 2026-09-02
 
 ### Adicionado
