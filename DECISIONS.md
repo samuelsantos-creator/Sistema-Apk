@@ -374,3 +374,21 @@ Este arquivo documenta as principais decisões arquiteturais do projeto Apontame
 - **Positivas:** Risco zero de parada para os colaboradores legados; novos colaboradores cadastrados no ERP passam a apontar imediatamente após tocar no botão de sincronização; processo de desduplicação robusto no cliente.
 - **Negativas:** Mantém temporariamente duas origens de dados até que 100% dos colaboradores antigos tenham a matrícula vinculada no ERP.
 
+---
+
+## [ADR-023] Automação de Build do APK via GitHub Actions (v2.2.5)
+
+**Data:** 2026-10-23
+**Contexto:** O processo anterior dependia da compilação na nuvem pelo Ionic Appflow (plataforma externa com limites de build) ou exigiria a instalação de um ambiente pesado localmente no Windows (Android Studio, Java JDK, Android SDKs consumindo ~20GB de espaço). Além disso, o ambiente local dentro do OneDrive costuma apresentar falhas de lock durante compilações Gradle.
+
+**Decisão:**
+1. Criar pipeline de CI/CD automatizado em `.github/workflows/build-apk.yml`.
+2. Executar compilação em ambiente limpo `ubuntu-latest` gerenciado pelo GitHub (com Java 17 Temurin, Android SDK, Node 20).
+3. Executar o fluxo: `npm install` -> `node build.js` -> `npx cap sync android` -> `gradlew assembleDebug`.
+4. Armazenar o APK compilado como Artifact do GitHub por 30 dias com download direto (`apontamento-progeral-apk`).
+5. Habilitar disparos automáticos em pushes da branch `main` e disparos manuais sob demanda (`workflow_dispatch`).
+
+**Consequências:**
+- **Positivas:** Elimina necessidade de ferramentas pesadas no computador do desenvolvedor; 100% gratuito (2.000 min/mês); compilações reproduzíveis e imunes a problemas de lock do OneDrive; APK pronto para distribuição via Headwind MDM.
+- **Negativas:** Requer conectividade com o GitHub para acionar o build e baixar o arquivo `.apk`.
+

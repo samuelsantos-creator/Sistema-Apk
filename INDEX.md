@@ -95,27 +95,27 @@ Todos os arquivos de dados (raiz) são carregados de forma **assíncrona e seque
 
 ---
 
-## Pipeline APK (Capacitor + Ionic Appflow)
+## Pipeline APK (Capacitor + GitHub Actions / Ionic Appflow)
 
 ```text
 Código (HTML/CSS/JS)
     │ git push
     ▼
 GitHub (samuelsantos-creator/Sistema-Apk)
-    │ webhook / manual
+    │ GitHub Actions (.github/workflows/build-apk.yml)
     ▼
-Ionic Appflow (Cloud Build)
-    │ compila APK
+Máquina Virtual Ubuntu (Java 17 + Android SDK)
+    │ compila APK automaticamente
     ▼
-APK Android (Debug)
-    │ upload
+APK Android (apontamento-progeral-apk.zip)
+    │ download direto no GitHub
     ▼
 Headwind MDM
     │ distribui
     ▼
 Tablets (chão de fábrica)
 ```
-> **Nota:** O APK agora empacota os arquivos web nativamente de forma local (Offline-First). Alterações em CSS/JS e HTML requerem o acionamento do pipeline de build do Ionic Appflow para gerar e distribuir um novo APK.
+> **Nota:** O APK empacota os arquivos web nativamente de forma local (Offline-First). O pipeline do **GitHub Actions** gera o APK pronto para download a cada `git push` ou acionamento manual na aba *Actions*.
 
 ---
 
