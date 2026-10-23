@@ -33,31 +33,28 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      - name: 4. Configurar Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: 5. Instalar Dependências NPM
+      - name: 4. Instalar Dependências NPM
         run: |
           npm install
 
-      - name: 6. Gerar Pacote Web Local (.build/dist)
+      - name: 5. Gerar Pacote Web Local (.build/dist)
         run: |
           node build.js
 
-      - name: 7. Sincronizar com o Projeto Android (Capacitor Sync)
+      - name: 6. Sincronizar com o Projeto Android (Capacitor Sync)
         run: |
           npx cap sync android
 
-      - name: 8. Dar permissão de execução ao Gradle
+      - name: 7. Dar permissão de execução ao Gradle
         run: |
           chmod +x android/gradlew
 
-      - name: 9. Compilar APK Android
+      - name: 8. Compilar APK Android
         run: |
           cd android
           ./gradlew assembleDebug --no-daemon
 
-      - name: 10. Salvar e Disponibilizar o APK para Download
+      - name: 9. Salvar e Disponibilizar o APK para Download
         uses: actions/upload-artifact@v4
         with:
           name: apontamento-progeral-apk
