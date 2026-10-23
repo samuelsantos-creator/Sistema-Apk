@@ -17,6 +17,8 @@ A aplicação é transformada em **APK Android** via **Capacitor** + **Ionic App
 | `manifest.json` | PWA Manifest | Define nome, ícones, tema, idioma, orientação e escopo para instalação como app nativo. |
 | `sw.js` | Service Worker | Cacheia assets para funcionamento offline (arquivos de layout). |
 | `api/proxy.php` | Backend / Proxy | Recebe requisições POST do front-end e as despacha para o ERP Protheus (192.168.8.21). Resolve Mixed Content e esconde IP da intranet. |
+| `api/get_ops.php` | Backend / API | Consulta OPs abertas em tempo real no SQL Server do Protheus. |
+| `api/get_colaboradores.php` | Backend / API | Consulta colaboradores ativos com matrícula vinculada no SQL Server do Protheus. |
 | `assets/css/main.css` | Estilos | Estilos globais da UI com suporte responsivo para tablets (landscape e portrait). |
 | `assets/css/duvidas.css` | Estilos | Estilos específicos do guia de ajuda. |
 | `assets/js/app.js` | Lógica JS | Motor principal do app, validações, fetch e conexão com o proxy. |
@@ -121,6 +123,7 @@ Tablets (chão de fábrica)
 
 | Versão | Data | Descrição |
 |---|---|---|
+| 2.2.5 | Out/2026 | Carga dinâmica de colaboradores via Protheus SQL Server, mesclagem híbrida e desduplicação |
 | 1.4.8 | Ago/2026 | Layout ultra compacto para tablets, empacotamento offline nativo e script build.js configurado |
 | 1.4.7 | Jul/2026 | OP obrigatória para produtos E/TT/J, bloqueio de campos, deploy simplificado com backup local |
 | 1.4.6 | Jun/2026 | Font Awesome local, performance (will-change, defer fonts), correção especificidade CSS dúvidas |

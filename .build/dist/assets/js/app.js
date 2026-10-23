@@ -11,13 +11,12 @@
   // Defina aqui as URLs que receberão os dados via POST.
   // ══════════════════════════════════════════════════════════════════
   const API_CONFIG = {
-    URL_PRODUCAO: 'api/proxy.php?tipo=producao',
-    URL_PARADA: 'api/proxy.php?tipo=parada',
+    URL_PRODUCAO: 'https://interno.progeral.com.br/Apps-testes/api/proxy.php?tipo=producao',
+    URL_PARADA: 'https://interno.progeral.com.br/Apps-testes/api/proxy.php?tipo=parada',
+    URL_OPS: 'https://interno.progeral.com.br/Apps-testes/api/get_ops.php',
+    URL_COLABORADORES: 'https://interno.progeral.com.br/Apps-testes/api/get_colaboradores.php',
     HEADERS: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
+      'Content-Type': 'application/json'
     }
   };
 
@@ -170,7 +169,8 @@
     console.log(`PAYLOAD:`, dataToPost);
     console.groupEnd();
 
-    let retries = 3;
+    // Sistema tenta enviar +1 vez automaticamente em caso de falha (total = 2 tentativas)
+    let retries = 2;
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         // Aumentamos o timeout para 15 segundos para dar mais margem em conexões lentas
@@ -195,7 +195,6 @@
         }
 
         if (!response.ok) {
-          // Se for erro 500 ou timeout/rede, tenta novamente (exceto último retry)
           if (response.status >= 500 && attempt < retries) {
             console.warn(`[API WARNING] Falha (Status ${response.status}). Tentativa ${attempt} de ${retries}...`);
             await new Promise(r => setTimeout(r, 2000));
@@ -351,10 +350,64 @@
   }
 
   /**
-   * Função de teste rápido para validar o recebimento de dados no servidor
+   * Diagnóstico de Conexão com o Servidor (Ping Test)
    */
-  window.testarEnvioAPI = async function () {
-    showModal('aviso', 'Teste desativado', 'O envio de teste foi desativado em producao.');
+  window.testarConexaoServidor = async function (btnElement) {
+    if (btnElement && btnElement.querySelector('i')) {
+      btnElement.querySelector('i').className = 'fas fa-spinner fa-spin';
+    }
+
+    const t0 = performance.now();
+    let statusHTML = '';
+    let iconHTML = '';
+
+    try {
+      const url = API_CONFIG.URL_OPS || 'https://interno.progeral.com.br/Apps-testes/api/get_ops.php';
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500); 
+      
+      const res = await fetch(url + '?ping=' + t0, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      
+      const t1 = performance.now();
+      const ping = Math.round(t1 - t0);
+
+      if (res.ok) {
+        iconHTML = '<i class="fas fa-check-circle" style="font-size:3rem; color:var(--green); margin-bottom:15px;"></i>';
+        statusHTML = `
+          <div style="background:var(--green2); color:var(--green); padding:12px; border-radius:8px; text-align:left;">
+            <p><strong><i class="fas fa-wifi"></i> Status:</strong> Conectado com sucesso</p>
+            <p><strong><i class="fas fa-server"></i> Servidor:</strong> interno.progeral.com.br</p>
+            <p><strong><i class="fas fa-tachometer-alt"></i> Tempo de Resposta:</strong> ${ping} ms</p>
+          </div>
+        `;
+      } else {
+        throw new Error('HTTP ' + res.status);
+      }
+    } catch (e) {
+      iconHTML = '<i class="fas fa-times-circle" style="font-size:3rem; color:var(--red); margin-bottom:15px;"></i>';
+      statusHTML = `
+        <div style="background:var(--red2); color:var(--red); padding:12px; border-radius:8px; text-align:left;">
+          <p><strong><i class="fas fa-wifi-slash"></i> Status:</strong> Bloqueado ou Inacessível</p>
+          <p><strong><i class="fas fa-server"></i> Servidor:</strong> interno.progeral.com.br</p>
+          <p style="margin-top:8px; font-size:0.85rem;"><strong>Motivo comum:</strong> Tablet fora do Wi-Fi da fábrica ou erro de certificado SSL.</p>
+        </div>
+      `;
+    }
+
+    if (btnElement && btnElement.querySelector('i')) {
+      btnElement.querySelector('i').className = 'fas fa-server';
+    }
+
+    const modalHTML = `
+      <div style="text-align:center; padding:10px;">
+        ${iconHTML}
+        <h3 style="color:var(--text); margin-bottom:15px; text-transform:uppercase;">Diagnóstico de Rede</h3>
+        ${statusHTML}
+      </div>
+    `;
+
+    showModal('aviso', 'Diagnóstico de Rede', modalHTML);
   };
 
   // ══════════════════════════════════════════════════════════════════
@@ -410,7 +463,57 @@
   // Arquivos de dados extraídos de produtos.js, recursos.js, motivos.js, ops.js e colaboradores.js
   // Este bloco mescla os dados desses arquivos sobre os dados de fallback.
   // ══════════════════════════════════════════════════════════════════
+  // ──────────────────────────────────────────────────────────────────
+  // MESCLAGEM SEGURA E DESDUPLICAÇÃO DE COLABORADORES
+  // ──────────────────────────────────────────────────────────────────
+  function applyColaboradoresMerge(novos) {
+    if (!novos || typeof novos !== 'object') return;
+    window.COLABORADORES = window.COLABORADORES || {};
+
+    // Mapeamento inverso por usuarioProtheus para detectar duplicatas
+    const userToMatricula = {};
+    for (const mat in window.COLABORADORES) {
+      const item = window.COLABORADORES[mat];
+      if (item && item.usuarioProtheus) {
+        userToMatricula[item.usuarioProtheus.trim().toUpperCase()] = mat;
+      }
+    }
+
+    for (const rawMat in novos) {
+      const item = novos[rawMat];
+      if (!item || !item.usuarioProtheus) continue;
+
+      // Normalização rigorosa: 6 dígitos numéricos com zeros à esquerda
+      const cleanMat = String(rawMat).trim().padStart(6, '0');
+      const userUpper = item.usuarioProtheus.trim().toUpperCase();
+
+      // Se o mesmo usuário Protheus já existia sob outra matrícula no JS local, remove a antiga para não duplicar
+      if (userToMatricula[userUpper] && userToMatricula[userUpper] !== cleanMat) {
+        delete window.COLABORADORES[userToMatricula[userUpper]];
+        if (db.colaboradores) delete db.colaboradores[userToMatricula[userUpper]];
+      }
+
+      // Adiciona ou atualiza o cadastro com os dados oficiais do Protheus
+      window.COLABORADORES[cleanMat] = {
+        nome: (item.nome || '').trim().toUpperCase(),
+        usuarioProtheus: item.usuarioProtheus.trim()
+      };
+      userToMatricula[userUpper] = cleanMat;
+    }
+
+    if (db.colaboradores) {
+      Object.assign(db.colaboradores, window.COLABORADORES);
+    }
+  }
+
   if (window.COLABORADORES) {
+    // Tenta aplicar dados dinâmicos salvos em cache offline
+    try {
+      const savedColabs = localStorage.getItem('offline_dynamic_colaboradores');
+      if (savedColabs) {
+        applyColaboradoresMerge(JSON.parse(savedColabs));
+      }
+    } catch (e) {}
     Object.assign(db.colaboradores, window.COLABORADORES);
   }
 
@@ -420,6 +523,118 @@
     if (window.APP_DB.motivos) Object.assign(db.motivos, window.APP_DB.motivos);
     if (window.APP_DB.ops) Object.assign(db.ops, window.APP_DB.ops);
   }
+
+  // ──────────────────────────────────────────────────────────────────
+  // CARGA DINÂMICA DE OPs (SQL Server)
+  // ──────────────────────────────────────────────────────────────────
+  async function loadDynamicOps() {
+    try {
+      console.log('[OPs] Buscando novas OPs no Protheus...');
+      // Usando URL absoluta agora para o Capacitor webview
+      const url = API_CONFIG.URL_OPS || 'https://interno.progeral.com.br/Apps-testes/api/get_ops.php';
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        const opsData = await response.json();
+        let opsCount = 0;
+        
+        // Remove as OPs antigas e carrega as novas dinamicamente
+        db.ops = {}; 
+        
+        for (const opKey in opsData) {
+           db.ops[opKey] = opsData[opKey];
+           opsCount++;
+        }
+        
+        console.log(`[OPs] ${opsCount} OPs carregadas dinamicamente com sucesso.`);
+        return true;
+      } else {
+        console.warn('[OPs] Falha ao carregar OPs (Status ' + response.status + ')');
+        return false;
+      }
+    } catch (e) {
+      console.warn('[OPs] Erro de rede ou timeout ao buscar OPs. O sistema continuará com OPs em cache se houver.', e.message);
+      return false;
+    }
+  }
+
+  // ──────────────────────────────────────────────────────────────────
+  // CARGA DINÂMICA DE COLABORADORES (SQL Server Protheus)
+  // ──────────────────────────────────────────────────────────────────
+  async function loadDynamicColaboradores() {
+    try {
+      console.log('[Colaboradores] Buscando novos colaboradores no Protheus...');
+      const url = API_CONFIG.URL_COLABORADORES || 'https://interno.progeral.com.br/Apps-testes/api/get_colaboradores.php';
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const colabData = await response.json();
+        applyColaboradoresMerge(colabData);
+        try {
+          localStorage.setItem('offline_dynamic_colaboradores', JSON.stringify(colabData));
+        } catch (eStorage) {}
+        console.log('[Colaboradores] Colaboradores sincronizados do Protheus com sucesso.');
+        return true;
+      } else {
+        console.warn('[Colaboradores] Falha ao carregar colaboradores (Status ' + response.status + ')');
+        return false;
+      }
+    } catch (e) {
+      console.warn('[Colaboradores] Erro de rede ou timeout ao buscar colaboradores. Aplicando cache offline...', e.message);
+      try {
+        const saved = localStorage.getItem('offline_dynamic_colaboradores');
+        if (saved) {
+          applyColaboradoresMerge(JSON.parse(saved));
+        }
+      } catch (err) {}
+      return false;
+    }
+  }
+
+  window.forceSyncOPs = async function (btn) {
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Atualizando...';
+      btn.disabled = true;
+    }
+
+    await window.forceSyncStaticData();
+
+    // Aplica as atualizações que vieram do servidor na memória local da interface
+    if (window.COLABORADORES) Object.assign(db.colaboradores, window.COLABORADORES);
+    if (window.APP_DB) {
+      if (window.APP_DB.produtos) Object.assign(db.produtos, window.APP_DB.produtos);
+      if (window.APP_DB.recursos) Object.assign(db.recursos, window.APP_DB.recursos);
+      if (window.APP_DB.motivos) Object.assign(db.motivos, window.APP_DB.motivos);
+    }
+
+    const successOps = await loadDynamicOps();
+    const successColabs = await loadDynamicColaboradores();
+
+    if (successOps || successColabs) {
+      showModal('sucesso', 'Dados Atualizados', '<p>OPs, Colaboradores, Produtos e Recursos foram sincronizados com sucesso.</p>');
+    } else {
+      showModal('erro', 'Falha na Sincronização', '<p>Não foi possível atualizar os dados. Verifique a conexão com o servidor.</p>');
+    }
+
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar';
+      btn.disabled = false;
+    }
+  };
+
+  // Chama no carregamento inicial da página (assíncrono)
+  loadDynamicOps();
+  loadDynamicColaboradores();
 
   // ══════════════════════════════════════════════════════════════════
   // SEÇÃO 3.5 — BUSCA (SEARCH)
@@ -698,7 +913,7 @@
     }
   }
 
-  const PROD_FIELDS_TO_BLOCK = ['p-recurso-cod', 'p-data-ini', 'p-data-fim', 'p-hora-ini', 'p-hora-fim', 'p-qtd', 'p-qtd-ret', 'p-setup', 'p-rnc', 'p-cestos', 'p-peso'];
+  const PROD_FIELDS_TO_BLOCK = ['p-recurso-cod', 'p-turno', 'p-data-ini', 'p-data-fim', 'p-hora-ini', 'p-hora-fim', 'p-qtd', 'p-qtd-ret', 'p-setup', 'p-rnc', 'p-cestos', 'p-peso'];
   function toggleProdFieldsBlocked(blocked) {
     PROD_FIELDS_TO_BLOCK.forEach(function (id) {
       const el = document.getElementById(id);
@@ -706,22 +921,6 @@
     });
     const btn = document.getElementById('p-btn-confirmar');
     if (btn) btn.disabled = blocked;
-
-    const msg = document.getElementById('p-op-required-msg');
-    if (blocked) {
-      if (!msg) {
-        const m = document.createElement('div');
-        m.id = 'p-op-required-msg';
-        m.style.cssText = 'padding:12px 16px;margin-bottom:12px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;color:#991b1b;font-weight:600;font-size:14px;text-align:center;';
-        m.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Preencha uma O.P. válida para liberar os demais campos';
-        const card = document.querySelector('#screen-prod .form-card:nth-of-type(2)');
-        if (card && card.parentNode) {
-          card.parentNode.insertBefore(m, card.nextSibling);
-        }
-      }
-    } else {
-      if (msg) msg.remove();
-    }
   }
 
   function validateLive(isProd) {
@@ -771,6 +970,10 @@
         updateFieldClass('p-op', !!db.ops[op], opOk ? '' : 'OP não encontrada');
       } else if (requerOP) {
         const elOp = document.getElementById('p-op');
+        
+        // Sempre exibir popup com auto-close informando o bloqueio quando tentar validar
+        showModal('erro', 'Atenção: O.P. Obrigatória', 'Para o produto <b>' + prod + '</b> (Centro de Custo), é obrigatório informar a O.P. Os outros campos ficarão bloqueados até preencher.', null, false, null, null, 2.5);
+
         elOp.classList.add('user-interacted');
         elOp.classList.remove('field-empty', 'field-valid');
         elOp.classList.add('field-invalid');
@@ -997,6 +1200,19 @@
           el.classList.add('user-interacted'); // Marca que o usuário tentou confirmar
           validateLive(id.startsWith('p-')); // Re-valida para aplicar a cor vermelha ou verde
 
+          // Se for p-produto e a OP for obrigatória mas estiver vazia ou inválida, foca na OP
+          if (id === 'p-produto') {
+            const prodVal = el.value.trim().toUpperCase();
+            if (prodVal && window.produtoRequerOP(prodVal)) {
+              const opVal = document.getElementById('p-op').value.trim();
+              if (!opVal || !db.ops[opVal]) {
+                e.preventDefault();
+                setTimeout(() => document.getElementById('p-op').focus(), 10);
+                return; // Impede o salto para o próximo campo
+              }
+            }
+          }
+
           if (el.classList.contains('field-invalid')) {
             // Mantém na caixa atual (Trava)
             e.preventDefault();
@@ -1055,7 +1271,7 @@
   //   confirmCallback: se passado, exibe botões Cancelar + Confirmar.
   //     Se null, exibe apenas botão Fechar.
   // ══════════════════════════════════════════════════════════════════
-  function showModal(type, title, html, confirmCallback = null, isFinal = false, retryCallback = null, cancelCallback = null) {
+  function showModal(type, title, html, confirmCallback = null, isFinal = false, retryCallback = null, cancelCallback = null, timeoutSeconds = 0) {
     const box = document.getElementById('modalBox');
     box.className = 'modal-box type-' + type;
     const icons = { erro: 'fas fa-times-circle', aviso: 'fas fa-exclamation-triangle', sucesso: 'fas fa-check-circle', confirm: 'fas fa-clipboard-check' };
@@ -1124,6 +1340,11 @@
     }
 
     document.getElementById('modalOverlay').classList.add('open');
+    if (timeoutSeconds > 0) {
+      setTimeout(() => {
+        document.getElementById('modalOverlay').classList.remove('open');
+      }, timeoutSeconds * 1000);
+    }
   }
 
   // Centraliza o fechamento e clique fora
@@ -1286,8 +1507,14 @@
 
   window.produtoRequerOP = function (prodCode) {
     if (!prodCode) return false;
-    const p = prodCode.toUpperCase();
-    return p.endsWith('E') || p.endsWith('TT') || p.endsWith('J');
+    
+    // Puxa o produto do banco de dados em memória
+    const produtoInfo = db.produtos[prodCode.trim()];
+    if (!produtoInfo || !produtoInfo.cc) return false;
+
+    // Setores que exigem OP obrigatoriamente
+    const setoresBloqueados = ["10022", "10023", "10025", "10051", "10052"];
+    return setoresBloqueados.includes(produtoInfo.cc.trim());
   };
 
   // maskTime(id)       : aplica máscara HH:MM ao digitar
@@ -2116,3 +2343,54 @@ if ('serviceWorker' in navigator) {
 
 // MONITOR DE CONEXÃO REMOVIDO PARA EVITAR FALSOS POSITIVOS
 // O app não ficará pingando o servidor constantemente.
+
+// ==========================================================================
+// OFFLINE BANNER LOGIC (Real-time Network Monitor via Ping)
+// ==========================================================================
+(function() {
+  const banner = document.getElementById('offline-banner');
+  if (!banner) return;
+  
+  let isOffline = false;
+  let onlineTimeout;
+
+  function showOffline() {
+    if (isOffline) return; // Prevent DOM thrashing
+    isOffline = true;
+    clearTimeout(onlineTimeout);
+    banner.className = 'offline-banner active offline';
+    banner.innerHTML = '<i class="fas fa-wifi-slash"></i><span id="offline-banner-text">Sem conexão com o servidor. O envio está bloqueado.</span>';
+  }
+
+  function showOnline() {
+    if (!isOffline) return; // Se já estava online, não faz a animação verde de novo
+    isOffline = false;
+    
+    banner.className = 'offline-banner active online';
+    banner.innerHTML = '<i class="fas fa-wifi"></i><span id="offline-banner-text">Conexão Restabelecida!</span>';
+    
+    clearTimeout(onlineTimeout);
+    onlineTimeout = setTimeout(() => {
+      banner.classList.remove('active');
+    }, 3000);
+    
+    if (typeof syncLists === 'function') {
+      setTimeout(syncLists, 1000);
+    }
+  }
+
+    // Monitor Passivo: Escuta Eventos Nativos de Hardware (HTML5)
+  // Revertido a pedido do usuário para teste nativo no tablet.
+  window.addEventListener('offline', showOffline);
+  
+  window.addEventListener('online', () => {
+    showOnline();
+  });
+
+  // Verificação inicial ao carregar a página
+  window.addEventListener('DOMContentLoaded', () => {
+    if (!navigator.onLine) {
+      showOffline();
+    }
+  });
+})();

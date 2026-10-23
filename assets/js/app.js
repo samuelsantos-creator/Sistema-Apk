@@ -13,6 +13,8 @@
   const API_CONFIG = {
     URL_PRODUCAO: 'https://interno.progeral.com.br/Apps-testes/api/proxy.php?tipo=producao',
     URL_PARADA: 'https://interno.progeral.com.br/Apps-testes/api/proxy.php?tipo=parada',
+    URL_OPS: 'https://interno.progeral.com.br/Apps-testes/api/get_ops.php',
+    URL_COLABORADORES: 'https://interno.progeral.com.br/Apps-testes/api/get_colaboradores.php',
     HEADERS: {
       'Content-Type': 'application/json'
     }
@@ -461,7 +463,57 @@
   // Arquivos de dados extraídos de produtos.js, recursos.js, motivos.js, ops.js e colaboradores.js
   // Este bloco mescla os dados desses arquivos sobre os dados de fallback.
   // ══════════════════════════════════════════════════════════════════
+  // ──────────────────────────────────────────────────────────────────
+  // MESCLAGEM SEGURA E DESDUPLICAÇÃO DE COLABORADORES
+  // ──────────────────────────────────────────────────────────────────
+  function applyColaboradoresMerge(novos) {
+    if (!novos || typeof novos !== 'object') return;
+    window.COLABORADORES = window.COLABORADORES || {};
+
+    // Mapeamento inverso por usuarioProtheus para detectar duplicatas
+    const userToMatricula = {};
+    for (const mat in window.COLABORADORES) {
+      const item = window.COLABORADORES[mat];
+      if (item && item.usuarioProtheus) {
+        userToMatricula[item.usuarioProtheus.trim().toUpperCase()] = mat;
+      }
+    }
+
+    for (const rawMat in novos) {
+      const item = novos[rawMat];
+      if (!item || !item.usuarioProtheus) continue;
+
+      // Normalização rigorosa: 6 dígitos numéricos com zeros à esquerda
+      const cleanMat = String(rawMat).trim().padStart(6, '0');
+      const userUpper = item.usuarioProtheus.trim().toUpperCase();
+
+      // Se o mesmo usuário Protheus já existia sob outra matrícula no JS local, remove a antiga para não duplicar
+      if (userToMatricula[userUpper] && userToMatricula[userUpper] !== cleanMat) {
+        delete window.COLABORADORES[userToMatricula[userUpper]];
+        if (db.colaboradores) delete db.colaboradores[userToMatricula[userUpper]];
+      }
+
+      // Adiciona ou atualiza o cadastro com os dados oficiais do Protheus
+      window.COLABORADORES[cleanMat] = {
+        nome: (item.nome || '').trim().toUpperCase(),
+        usuarioProtheus: item.usuarioProtheus.trim()
+      };
+      userToMatricula[userUpper] = cleanMat;
+    }
+
+    if (db.colaboradores) {
+      Object.assign(db.colaboradores, window.COLABORADORES);
+    }
+  }
+
   if (window.COLABORADORES) {
+    // Tenta aplicar dados dinâmicos salvos em cache offline
+    try {
+      const savedColabs = localStorage.getItem('offline_dynamic_colaboradores');
+      if (savedColabs) {
+        applyColaboradoresMerge(JSON.parse(savedColabs));
+      }
+    } catch (e) {}
     Object.assign(db.colaboradores, window.COLABORADORES);
   }
 
@@ -511,40 +563,78 @@
     }
   }
 
-  
-    window.forceSyncOPs = async function(btn) {
-      if (btn) {
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Atualizando...';
-        btn.disabled = true;
-      }
-      
-      await window.forceSyncStaticData();
-      
-      // Aplica as atualizações que vieram do servidor na memória local da interface
-      if (window.COLABORADORES) Object.assign(db.colaboradores, window.COLABORADORES);
-      if (window.APP_DB) {
-        if (window.APP_DB.produtos) Object.assign(db.produtos, window.APP_DB.produtos);
-        if (window.APP_DB.recursos) Object.assign(db.recursos, window.APP_DB.recursos);
-        if (window.APP_DB.motivos) Object.assign(db.motivos, window.APP_DB.motivos);
-      }
+  // ──────────────────────────────────────────────────────────────────
+  // CARGA DINÂMICA DE COLABORADORES (SQL Server Protheus)
+  // ──────────────────────────────────────────────────────────────────
+  async function loadDynamicColaboradores() {
+    try {
+      console.log('[Colaboradores] Buscando novos colaboradores no Protheus...');
+      const url = API_CONFIG.URL_COLABORADORES || 'https://interno.progeral.com.br/Apps-testes/api/get_colaboradores.php';
 
-      const success = await loadDynamicOps();
-      
-      if (success) {
-        showModal('sucesso', 'Dados Atualizados', '<p>OPs, Colaboradores, Produtos e Recursos foram sincronizados com sucesso.</p>');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const colabData = await response.json();
+        applyColaboradoresMerge(colabData);
+        try {
+          localStorage.setItem('offline_dynamic_colaboradores', JSON.stringify(colabData));
+        } catch (eStorage) {}
+        console.log('[Colaboradores] Colaboradores sincronizados do Protheus com sucesso.');
+        return true;
       } else {
-        showModal('erro', 'Falha na Sincronização', '<p>Não foi possível atualizar os dados. Verifique a conexão com o servidor.</p>');
+        console.warn('[Colaboradores] Falha ao carregar colaboradores (Status ' + response.status + ')');
+        return false;
       }
-      
-      if (btn) {
-        btn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar';
-        btn.disabled = false;
-      }
-    };
-    
-    // Chama no carregamento inicial da página (assíncrono)
+    } catch (e) {
+      console.warn('[Colaboradores] Erro de rede ou timeout ao buscar colaboradores. Aplicando cache offline...', e.message);
+      try {
+        const saved = localStorage.getItem('offline_dynamic_colaboradores');
+        if (saved) {
+          applyColaboradoresMerge(JSON.parse(saved));
+        }
+      } catch (err) {}
+      return false;
+    }
+  }
 
+  window.forceSyncOPs = async function (btn) {
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Atualizando...';
+      btn.disabled = true;
+    }
+
+    await window.forceSyncStaticData();
+
+    // Aplica as atualizações que vieram do servidor na memória local da interface
+    if (window.COLABORADORES) Object.assign(db.colaboradores, window.COLABORADORES);
+    if (window.APP_DB) {
+      if (window.APP_DB.produtos) Object.assign(db.produtos, window.APP_DB.produtos);
+      if (window.APP_DB.recursos) Object.assign(db.recursos, window.APP_DB.recursos);
+      if (window.APP_DB.motivos) Object.assign(db.motivos, window.APP_DB.motivos);
+    }
+
+    const successOps = await loadDynamicOps();
+    const successColabs = await loadDynamicColaboradores();
+
+    if (successOps || successColabs) {
+      showModal('sucesso', 'Dados Atualizados', '<p>OPs, Colaboradores, Produtos e Recursos foram sincronizados com sucesso.</p>');
+    } else {
+      showModal('erro', 'Falha na Sincronização', '<p>Não foi possível atualizar os dados. Verifique a conexão com o servidor.</p>');
+    }
+
+    if (btn) {
+      btn.innerHTML = '<i class="fas fa-sync-alt"></i> Atualizar';
+      btn.disabled = false;
+    }
+  };
+
+  // Chama no carregamento inicial da página (assíncrono)
   loadDynamicOps();
+  loadDynamicColaboradores();
 
   // ══════════════════════════════════════════════════════════════════
   // SEÇÃO 3.5 — BUSCA (SEARCH)

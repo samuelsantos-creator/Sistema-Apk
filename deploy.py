@@ -8,6 +8,9 @@ import os, sys, time, hashlib
 from pathlib import Path
 import paramiko
 
+BASE = Path(__file__).parent.resolve()
+BACKUP_DIR = BASE / "backups"
+
 CONFIG = {
     "host": os.environ.get("DEPLOY_HOST", "192.168.50.2"),
     "port": int(os.environ.get("DEPLOY_PORT", "22")),
@@ -17,14 +20,33 @@ CONFIG = {
     "first_time": "--first-time" in sys.argv,
 }
 
+# Carrega credenciais do api/.env se existir (mantendo backup estritamente local em BASE / backups)
+env_file = BASE / "api" / ".env"
+if env_file.exists():
+    for line in env_file.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        k, v = k.strip().upper(), v.strip()
+        if k == "HOST": CONFIG["host"] = v
+        elif k == "PORT": CONFIG["port"] = int(v)
+        elif k == "USER": CONFIG["user"] = v
+        elif k == "PASSWORD": CONFIG["password"] = v
+        elif k == "REMOTE_DIR": CONFIG["remote_dir"] = v
+
+REMOTE_BASE = CONFIG["remote_dir"]
+
+# Arquivos atualizados que serao enviados e sofrerao backup local prévio
 FILES = [
     "assets/js/app.js",
     "assets/css/main.css",
+    "index.html",
+    "sw.js",
+    "api/get_colaboradores.php",
+    "api/get_ops.php",
+    "centro_custo.js"
 ]
-
-BASE = Path(__file__).parent.resolve()
-BACKUP_DIR = BASE / "backups"
-REMOTE_BASE = CONFIG["remote_dir"]
 
 COLORS = True
 def c(code, text):
@@ -96,7 +118,14 @@ def main():
             if not local_path.exists():
                 error(f"Arquivo local nao encontrado: {local_path}")
                 continue
-            data = local_path.read_bytes()
+            remote_dir = "/".join(remote_path.split("/")[:-1])
+            try:
+                sftp.stat(remote_dir)
+            except (IOError, OSError):
+                try:
+                    sftp.mkdir(remote_dir)
+                except Exception:
+                    pass
             sftp.put(local_path.as_posix(), remote_path)
             size = len(data)
             md5 = hashlib.md5(data).hexdigest()

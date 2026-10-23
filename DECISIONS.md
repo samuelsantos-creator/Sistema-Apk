@@ -353,3 +353,24 @@ Este arquivo documenta as principais decisões arquiteturais do projeto Apontame
 **Consequências:**
 - **Positivas:** Permite travar qualquer apontamento incorreto independentemente da nomenclatura (sufixo) do código do produto. Escalabilidade imediata para travar novos setores alterando o array.
 - **Negativas:** Requer que o script de exportação do ERP (`produtos.js`) traga obrigatoriamente a junção do campo `B1_CC`, tornando a view de banco mais pesada.
+
+---
+
+## [ADR-022] Mesclagem Híbrida e Desduplicação de Colaboradores (v2.2.5)
+
+**Data:** 2026-10-23
+**Contexto:** No Protheus, parte dos colaboradores da fábrica ainda não possui a matrícula vinculada na tabela `SYS_USR_VINCFUNC` (filtrada pela query de automação). Se substituíssemos o arquivo estático `colaboradores.js` exclusivamente pela query da API, dezenas de operadores ficariam bloqueados no chão de fábrica. Por outro lado, novos colaboradores precisavam ser integrados com urgência sem depender de edição manual de scripts estáticos.
+
+**Decisão:**
+1. Manter o arquivo `colaboradores.js` como base segura/offline inicial contendo todos os operadores legados.
+2. Criar o endpoint `/api/get_colaboradores.php` que consulta diretamente o SQL Server (`SYS_USR` + `SYS_USR_VINCFUNC`) para novos operadores já cadastrados com matrícula no ERP.
+3. Implementar a rotina `applyColaboradoresMerge()` no front-end (`app.js`):
+   - Normaliza todas as matrículas para 6 dígitos com zeros à esquerda (`padStart(6, '0')`).
+   - Constrói mapeamento inverso por `usuarioProtheus`.
+   - Se o mesmo `usuarioProtheus` já existia no arquivo local sob outra chave ou formato, substitui e remove a chave antiga, prevenindo duplicações.
+   - Salva uma cópia dos registros dinâmicos no `localStorage` (`offline_dynamic_colaboradores`) para garantir disponibilidade offline imediata em inicializações sem rede.
+
+**Consequências:**
+- **Positivas:** Risco zero de parada para os colaboradores legados; novos colaboradores cadastrados no ERP passam a apontar imediatamente após tocar no botão de sincronização; processo de desduplicação robusto no cliente.
+- **Negativas:** Mantém temporariamente duas origens de dados até que 100% dos colaboradores antigos tenham a matrícula vinculada no ERP.
+

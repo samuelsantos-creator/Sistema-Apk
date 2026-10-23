@@ -5,6 +5,17 @@ Toda mudança notável neste projeto será documentada neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adota o [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [2.2.5] — 2026-10-23
+
+### Adicionado
+- **Endpoint Dinâmico de Colaboradores (`api/get_colaboradores.php`):** Consulta direta ao SQL Server do Protheus (`SYS_USR` + `SYS_USR_VINCFUNC`), retornando colaboradores ativos com matrícula em JSON normalizado.
+- **Carga Híbrida e Desduplicação Inteligente:** Função `loadDynamicColaboradores()` e `applyColaboradoresMerge()` no `app.js`. Mantém intacta a base local (`colaboradores.js`) e mescla novos colaboradores vindos do Protheus com proteção estrita contra duplicações (mesma matrícula ou mesmo usuário Protheus).
+- **Cache Offline para Novos Colaboradores:** Os novos colaboradores puxados do Protheus são persistidos em `offline_dynamic_colaboradores` no `localStorage`, garantindo funcionamento offline mesmo sem reabrir a rede.
+- **Sincronização no Botão do Header:** O botão manual de sincronizar no header agora atualiza OPs e novos Colaboradores simultaneamente.
+
+### Alterado
+- **Versão do Sistema:** Atualizado para v2.2.5 (PWA), versionCode 13 (Android), e CACHE_NAME v14 no Service Worker.
+
 ## [2.2.4] — 2026-09-03
 
 ### Alterado

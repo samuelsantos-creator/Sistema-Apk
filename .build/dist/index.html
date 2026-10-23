@@ -12,7 +12,7 @@
  * @company     PROGERAL
  * @created     2025-01-01
  * @updated     2026-05-07
- * @version     2.0.0 (Arquitetura LAMP)
+ * @version     2.2.5 (Arquitetura LAMP)
  * @license     MIT
  *
  * DEPENDENCIES (CDN):
@@ -27,18 +27,6 @@
  *
  * DEPENDENCIES (Dados DB - Carregados dinamicamente no final do body anti-cache):
  *   - produtos.js    : window.APP_DB.produtos — catálogo de produtos do ERP
- *   - recursos.js    : window.APP_DB.recursos — cadastro de máquinas/recursos
- *   - motivos.js     : window.APP_DB.motivos  — tabela de motivos de parada
- *   - ops.js         : window.APP_DB.ops      — ordens de produção abertas
- *   - zink-data.js   : window.ZINK_DATA       — peso unitário por produto (linha ZINK)
- *   - colaboradores.js: window.COLABORADORES  — mapa matrícula → {nome, usuarioProtheus}
- *   - sw.js          : Service Worker para cache offline (PWA)
- *   - manifest.json  : Manifesto PWA para instalação no dispositivo
- *
- * MAIN FLOW:
- *   1. O HTML carrega CSS, Fontes e os dados estáticos embutidos (DB fallback).
- *   2. O arquivo principal `assets/js/app.js` inicializa mesclando os dados (DB Merge).
- *   3. O usuário seleciona uma das três ações na tela Home.
  *   4. Na tela de Produção ou Parada, as validações de input em tempo real garantem:
  *      - Datas não-fictícias, quantidades sempre inteiras >= 0.
  *   5. Ao confirmar, o payload é enviado ao `api/proxy.php` que roteia para a Intranet (192.168.8.21).
@@ -56,7 +44,7 @@
     href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Sora:wght@300;400;600;700;800&family=DM+Mono:wght@400;500&display=swap"
     rel="stylesheet" media="print" onload="this.media='all';this.onload=null">
   <link rel="stylesheet" href="assets/css/fa/all.min.css">
-  <link rel="icon" type="image/jpeg" href="icons/app-icon.jpg">
+  <link rel="icon" type="image/png" href="icons/app-icon.png">
 
   <!-- PWA Settings -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -70,12 +58,18 @@
   <meta http-equiv="Expires" content="0">
 
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/app-icon.jpg">
-  <link rel="stylesheet" href="assets/css/main.css?v=3">
+  <link rel="apple-touch-icon" href="icons/app-icon.png">
+  <link rel="stylesheet" href="assets/css/main.css?v=4">
   <link rel="stylesheet" href="assets/css/duvidas.css">
 </head>
 
 <body>
+  <!-- Offline Banner -->
+  <div id="offline-banner" class="offline-banner hidden">
+    <i class="fas fa-wifi-slash"></i>
+    <span id="offline-banner-text">Sem conexão com a internet. O envio de dados falhará.</span>
+  </div>
+
   <!-- Banners removidos para evitar falsos positivos -->
 
   <!-- Overlay Loading -->
@@ -89,10 +83,6 @@
     <div class="home-wrap">
       <div style="display:flex; align-items:center; justify-content:center; gap:15px; margin-bottom: 20px;">
         <img src="icons/logo progeral azul.png" class="logo-img-home" alt="Logo Progeral" style="margin-bottom:0;">
-        <button onclick="testarEnvioAPI()"
-          style="background: var(--yellow); color: #000; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.8rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-          <i class="fas fa-vial"></i> TESTE API
-        </button>
       </div>
       <div class="home-logo">Apontamentos <span>· Produção e Horas paradas.</span></div>
       <div class="home-sub">Sistema de registro de produção e horas paradas</div>
@@ -100,7 +90,10 @@
       <!-- Barra de Status: Versão -->
       <!-- Barra de Status: Versão -->
       <div class="status-bar" style="justify-content: center; gap: 15px;">
-        <span class="version-badge"><i class="fas fa-code-branch"></i> V1.4.7</span>
+        <span class="version-badge"><i class="fas fa-code-branch"></i> V2.2.5</span>
+        <span onclick="window.testarConexaoServidor(this)" class="version-badge" style="cursor: pointer; background: var(--surface2); color: var(--text2);" title="Status do Servidor">
+          <i class="fas fa-server"></i>
+        </span>
         
         <!-- Botão de Sincronização Offline -->
         <button id="btnSyncCloud" onclick="if(window.syncOfflineQueue) window.syncOfflineQueue()" style="display: none; align-items: center; gap: 6px; background: var(--blue); color: white; border: none; padding: 4px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
@@ -133,12 +126,13 @@
   <div class="screen" id="screen-prod">
     <div class="page-header">
       <img src="icons/logo progeral azul.png" class="logo-img-header" alt="Logo Progeral">
-      <button onclick="testarEnvioAPI()"
-        style="background: var(--yellow); color: #000; border: none; padding: 5px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.7rem; margin-right: 15px;">
-        <i class="fas fa-vial"></i> TESTAR API
+      <button onclick="window.testarConexaoServidor(this)" title="Status do Servidor"
+        style="background: transparent; color: var(--text2); border: 1px solid var(--border); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; margin-right: 15px; display:flex; align-items:center; justify-content:center;">
+        <i class="fas fa-server"></i>
       </button>
       <i class="fas fa-industry ph-icon" style="color:var(--blue)"></i>
       <h2>Apontamento</h2>
+      <button class="btn btn-ghost btn-sm" onclick="window.forceSyncStaticData().then(() => window.forceSyncOPs(this))" title="Sincronizar Dados e OPs"><i class="fas fa-sync-alt"></i></button>
       <button class="btn btn-ghost btn-sm" onclick="goTo('screen-duvidas')" title="Dúvidas">
         <i class="fas fa-question-circle"></i>
       </button>
@@ -391,12 +385,13 @@
   <div class="screen" id="screen-parada">
     <div class="page-header">
       <img src="icons/logo progeral azul.png" class="logo-img-header" alt="Logo Progeral">
-      <button onclick="testarEnvioAPI()"
-        style="background: var(--yellow); color: #000; border: none; padding: 5px 10px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.7rem; margin-right: 15px;">
-        <i class="fas fa-vial"></i> TESTAR API
+      <button onclick="window.testarConexaoServidor(this)" title="Status do Servidor"
+        style="background: transparent; color: var(--text2); border: 1px solid var(--border); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; margin-right: 15px; display:flex; align-items:center; justify-content:center;">
+        <i class="fas fa-server"></i>
       </button>
       <i class="fas fa-pause-circle ph-icon" style="color:var(--red)"></i>
       <h2>Paradas</h2>
+      <button class="btn btn-ghost btn-sm" onclick="window.forceSyncStaticData().then(() => window.forceSyncOPs(this))" title="Sincronizar Dados e OPs"><i class="fas fa-sync-alt"></i></button>
       <button class="btn btn-ghost btn-sm" onclick="goTo('screen-duvidas')" title="Dúvidas">
         <i class="fas fa-question-circle"></i>
       </button>
@@ -1397,17 +1392,7 @@
         </div>
       </div>
 
-      <!-- SEÇÃO DE DEPURAÇÃO (SEMPRE VISÍVEL) -->
-      <div id="sec-debug"
-        style="margin-top: 30px; padding: 20px; border: 2px dashed var(--accent); border-radius: 12px; background: var(--surface2); text-align: center;">
-        <h3 style="color: var(--accent); margin-bottom: 10px;">🛠️ Ferramenta de Depuração</h3>
-        <p style="margin-bottom: 20px; color: var(--text2);">Use o botão abaixo para enviar um teste rápido para o
-          servidor.</p>
-        <button onclick="testarEnvioAPI()" class="btn-confirm"
-          style="background: var(--accent); width: auto; padding: 15px 30px; font-weight: bold; border-radius: 8px; cursor: pointer;">
-          <i class="fas fa-paper-plane" style="margin-right: 8px;"></i> TESTAR ENVIO (SIMULADO)
-        </button>
-      </div>
+      <!-- SEÇÃO DE DEPURAÇÃO REMOVIDA (Substituída pelo Ping Test) -->
 
     </div><!-- /sections -->
 
@@ -1434,20 +1419,35 @@
 
   <script>
     // Carregador dinâmico sequencial anti-cache
-    (function () {
-      // Previne erro se o usuário clicar antes do app.js estar pronto
+    // Carregador dinâmico sequencial anti-cache e OFFLINE-FIRST
+    (async function () {
       window.goTo = function () {
         console.warn("Aguarde, sistema carregando...");
       };
 
-      // Mostra o overlay de loading imediatamente
       var overlay = document.getElementById('fullLoadingOverlay');
       if (overlay) {
         document.getElementById('loadingText').textContent = "Baixando dados atualizados...";
         overlay.classList.add('active');
       }
 
-      var version = new Date().getTime();
+      // Sistema de controle de cache do APK
+      var CURRENT_APK_VERSION = '2.2.5';
+      var cachedVersion = localStorage.getItem('apk_version');
+      if (cachedVersion !== CURRENT_APK_VERSION) {
+        // Limpa todos os scripts velhos se o APK foi atualizado
+        console.log('[Sistema] Nova versão do APK detectada. Limpando cache offline antigo...');
+        var keysToRemove = [];
+        for (var i = 0; i < localStorage.length; i++) {
+          var key = localStorage.key(i);
+          if (key && key.startsWith('offline_script_')) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(k => localStorage.removeItem(k));
+        localStorage.setItem('apk_version', CURRENT_APK_VERSION);
+      }
+
       var scripts = [
         "produtos.js",
         "recursos.js",
@@ -1455,29 +1455,78 @@
         "ops.js",
         "zink-data.js",
         "colaboradores.js",
+        "centro_custo.js",
         "assets/js/app.js"
       ];
+      
+      // Força a leitura de atualizações dinâmicas SEMPRE pelo servidor remoto
+      var SERVER_URL = 'https://interno.progeral.com.br/Apps-testes/';
+      var version = new Date().getTime();
 
-      function loadScript(index) {
-        if (index >= scripts.length) {
-          // Finalizou o carregamento de todos os scripts
-          if (overlay) overlay.classList.remove('active');
-          return;
+      window.forceSyncStaticData = async function() {
+        var currentSyncVersion = new Date().getTime();
+        for (let i = 0; i < scripts.length - 1; i++) { // Não resincroniza o app.js pelo botão para evitar recarregamento
+          const fileName = scripts[i];
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
+            const response = await fetch(SERVER_URL + fileName + '?v=' + currentSyncVersion, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (response.ok) {
+              const text = await response.text();
+              localStorage.setItem('offline_script_' + fileName, text);
+              // Executa imediatamente para atualizar window.COLABORADORES e listas em memória em tempo real
+              try {
+                const scriptEl = document.createElement('script');
+                scriptEl.textContent = text;
+                document.head.appendChild(scriptEl);
+              } catch(errScript) {}
+            }
+          } catch(e) {}
         }
-        var scriptEl = document.createElement("script");
-        scriptEl.src = scripts[index] + "?v=" + version;
-        // Carrega o próximo apenas quando o atual terminar (mantém a ordem de dependência)
-        scriptEl.onload = function () {
-          loadScript(index + 1);
-        };
-        scriptEl.onerror = function () {
-          console.error("Erro ao carregar script: " + scripts[index]);
-          loadScript(index + 1); // Tenta continuar mesmo com erro
-        };
-        document.body.appendChild(scriptEl);
+      };
+
+      async function loadDynamicScript(fileName) {
+        let scriptText = '';
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000);
+          const response = await fetch(SERVER_URL + fileName + '?v=' + version, { signal: controller.signal });
+          clearTimeout(timeoutId);
+          
+          if (response.ok) {
+            scriptText = await response.text();
+            localStorage.setItem('offline_script_' + fileName, scriptText);
+          } else {
+            throw new Error('HTTP ' + response.status);
+          }
+        } catch (e) {
+          scriptText = localStorage.getItem('offline_script_' + fileName);
+          if (!scriptText) {
+            try {
+              const localResponse = await fetch(fileName + '?v=' + version);
+              if(localResponse.ok) {
+                 scriptText = await localResponse.text();
+                 localStorage.setItem('offline_script_' + fileName, scriptText);
+              }
+            } catch(err) {
+               console.error('[Carregador] Falha fatal:', fileName);
+            }
+          }
+        }
+
+        if (scriptText) {
+          const scriptEl = document.createElement('script');
+          scriptEl.textContent = scriptText;
+          document.head.appendChild(scriptEl);
+        }
       }
 
-      loadScript(0);
+      for (let i = 0; i < scripts.length; i++) {
+        await loadDynamicScript(scripts[i]);
+      }
+      
+      if (overlay) overlay.classList.remove('active');
     })();
   </script>
 </body>

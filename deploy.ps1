@@ -10,8 +10,8 @@ Uso: .\deploy.ps1 [--first-time]
   --first-time   Primeira implantacao (log diferenciado)
   --help         Mostra esta ajuda
 
-Sobe apenas assets/js/app.js e assets/css/main.css.
-Faz backup local dos arquivos remotos antes de sobrescrever.
+Sobe os arquivos atualizados (app.js, main.css, index.html, sw.js, APIs).
+Faz backup estritamente local dos arquivos remotos antes de sobrescrever (pasta ./backups).
 
 Requer Python 3 com paramiko instalado.
 "@ -ForegroundColor Cyan
